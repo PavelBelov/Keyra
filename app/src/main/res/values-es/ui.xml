@@ -1,0 +1,7 @@
+<resources>
+    <string name="welcome_caption">Tus contraseñas. Siempre a mano.</string>
+    <string name="vault_empty">Espacio para tu primera entrada</string>
+    <string name="vault_empty_hint">Toca + para añadir una entrada o carpeta.</string>
+    <string name="search_empty">No hay entradas coincidentes</string>
+    <string name="search_empty_hint">Prueba otro nombre, usuario o sitio web.</string>
+</resources>

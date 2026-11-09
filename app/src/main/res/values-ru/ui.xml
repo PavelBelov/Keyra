@@ -1,0 +1,7 @@
+<resources>
+    <string name="welcome_caption">Ваши пароли — всегда под рукой.</string>
+    <string name="vault_empty">Место для вашей первой записи</string>
+    <string name="vault_empty_hint">Нажмите +, чтобы добавить запись или папку.</string>
+    <string name="search_empty">Записи не найдены</string>
+    <string name="search_empty_hint">Попробуйте другое имя, логин или сайт.</string>
+</resources>

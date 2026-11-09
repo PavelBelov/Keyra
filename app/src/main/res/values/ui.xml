@@ -1,0 +1,7 @@
+<resources>
+    <string name="welcome_caption">Your passwords. Within reach.</string>
+    <string name="vault_empty">Room for your first entry</string>
+    <string name="vault_empty_hint">Tap + to add an entry or folder.</string>
+    <string name="search_empty">No matching entries</string>
+    <string name="search_empty_hint">Try another name, login or website.</string>
+</resources>

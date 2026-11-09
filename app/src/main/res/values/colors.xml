@@ -1,0 +1,19 @@
+<resources>
+    <color name="settings_background">#F3F6F5</color>
+    <color name="settings_surface">#FFFFFF</color>
+    <color name="settings_text">#182C28</color>
+    <color name="settings_secondary">#536760</color>
+    <color name="settings_error">#B3261E</color>
+    <color name="settings_divider">#DEE7E2</color>
+    <color name="settings_control">#216957</color>
+    <color name="entry_tag_background">#DCEEE6</color>
+    <color name="entry_tag_text">#205C4A</color>
+    <color name="accent">#216957</color>
+    <color name="accent_soft">#DCEEE6</color>
+    <color name="on_accent">#FFFFFF</color>
+    <color name="outline">#BDCFC5</color>
+    <color name="secret_letters">#315CB3</color>
+    <color name="secret_digits">#187451</color>
+    <color name="secret_other">#9C520C</color>
+    <bool name="light_system_bars">true</bool>
+</resources>

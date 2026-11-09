@@ -1,0 +1,7 @@
+<resources>
+    <string name="welcome_caption">Le tue password. Sempre a portata di mano.</string>
+    <string name="vault_empty">Spazio per la tua prima voce</string>
+    <string name="vault_empty_hint">Tocca + per aggiungere una voce o una cartella.</string>
+    <string name="search_empty">Nessuna voce corrispondente</string>
+    <string name="search_empty_hint">Prova un altro nome, nome utente o sito web.</string>
+</resources>

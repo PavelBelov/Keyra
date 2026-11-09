@@ -1,0 +1,16 @@
+<resources>
+    <string-array name="app_theme_options">
+        <item>@string/ui_follow_system_294</item>
+        <item>@string/ui_light_295</item>
+        <item>@string/ui_dark_296</item>
+    </string-array>
+    <string-array name="app_language_options">
+        <item>@string/ui_follow_system_294</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Deutsch</item>
+        <item>Français</item>
+        <item>Español</item>
+        <item>Italiano</item>
+    </string-array>
+</resources>

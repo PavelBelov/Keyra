@@ -1,0 +1,7 @@
+<resources>
+    <string name="welcome_caption">Deine Passwörter. Immer griffbereit.</string>
+    <string name="vault_empty">Platz für deinen ersten Eintrag</string>
+    <string name="vault_empty_hint">Tippe auf +, um einen Eintrag oder Ordner hinzuzufügen.</string>
+    <string name="search_empty">Keine passenden Einträge</string>
+    <string name="search_empty_hint">Versuche einen anderen Namen, Benutzernamen oder eine Website.</string>
+</resources>

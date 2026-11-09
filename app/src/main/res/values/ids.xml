@@ -1,0 +1,3 @@
+<resources>
+    <item name="password_input_mask" type="id" />
+</resources>
