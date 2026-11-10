@@ -18,6 +18,7 @@ const recipe = document.toJS();
 const build = recipe.Builds.at(-1);
 requireCondition(build.versionName === properties['application.version.name'], 'Recipe versionName differs from app-info.properties');
 requireCondition(build.versionCode === Number(properties['application.version.code']), 'Recipe versionCode differs from app-info.properties');
+requireCondition(recipe.CurrentVersion === build.versionName && recipe.CurrentVersionCode === build.versionCode, 'Recipe current version differs from its latest build');
 requireCondition(build.commit === `v${build.versionName}`, 'Release tag and versionName differ');
 requireCondition(build.subdir === 'app' && build.gradle.includes('yes'), 'Expected the unflavoured app release build');
 requireCondition(recipe.License === properties['license.spdx'], 'Recipe license differs from the project');

@@ -4,6 +4,12 @@ This directory contains a **submission draft**, not a published F-Droid package.
 The metadata, licenses, and recipe are prepared locally; no release tag, GitHub
 Release, or GitLab merge request is created by this preparation.
 
+The GitHub Actions release workflow can build, sign, and publish the reference APK
+after a version tag is pushed. See [RELEASING.md](../RELEASING.md) for one-time
+secret setup and `node scripts/release.cjs prepare VERSION`, which updates the
+committed version, appends a recipe build entry, and creates localized changelogs.
+It does not submit changes to fdroiddata or verify buildserver reproducibility.
+
 ## Files
 
 - `metadata/xnet13.keyra.yml`: copy into `metadata/` of a fork of fdroiddata.

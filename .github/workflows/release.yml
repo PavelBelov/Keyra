@@ -1,0 +1,160 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing stable tag, for example v0.1.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      apk: ${{ steps.version.outputs.apk }}
+      certificate: ${{ steps.version.outputs.certificateSha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate tag, committed version, and changelogs
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          node --test scripts/release.test.cjs
+          node scripts/release.cjs check --tag "$RELEASE_TAG" --history --output-dir dist/release
+          npm install --prefix .tools/fdroid-validation --no-audit --no-fund --ignore-scripts yaml@2.8.1
+          node scripts/validate-fdroid.cjs
+          node scripts/check-vault-icons.cjs
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - name: Install Android toolchain
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Test, lint, and build from tagged sources
+        run: |
+          bash ./gradlew --no-daemon --console=plain :core:test :app:testDebugUnitTest :app:lintDebug :app:assembleRelease
+          cp app/build/outputs/apk/release/app-release-unsigned.apk dist/release/unsigned.apk
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-unsigned
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: release-build-reports
+          path: |
+            app/build/reports/
+            core/build/reports/
+            app/build/outputs/mapping/release/mapping.txt
+          retention-days: 90
+
+  sign:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - run: sdkmanager 'build-tools;35.0.0'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-unsigned
+          path: dist/release
+      # Secrets are available only in this step, after all Gradle execution.
+      - name: Sign APK with the permanent developer key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          APK_NAME: ${{ needs.build.outputs.apk }}
+          EXPECTED_CERTIFICATE: ${{ needs.build.outputs.certificate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then echo "::error::Missing Android signing secret: $name"; exit 1; fi
+          done
+          keyfile="$RUNNER_TEMP/keyra-release.keystore"
+          trap 'rm -f "$keyfile"' EXIT
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keyfile"
+          tools="$ANDROID_HOME/build-tools/35.0.0"
+          "$tools/zipalign" -c -P 16 4 dist/release/unsigned.apk
+          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --v1-signing-enabled false --v2-signing-enabled true \
+            --v3-signing-enabled false --v4-signing-enabled false \
+            --out "dist/release/$APK_NAME" dist/release/unsigned.apk
+          "$tools/apksigner" verify --verbose --print-certs "dist/release/$APK_NAME" > "$RUNNER_TEMP/keyra-certificate.txt"
+          actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/keyra-certificate.txt")
+          if [ "$actual" != "$EXPECTED_CERTIFICATE" ]; then
+            echo '::error::Signing certificate differs from the F-Droid recipe'; exit 1
+          fi
+          rm dist/release/unsigned.apk
+          (cd dist/release && sha256sum "$APK_NAME" > SHA256SUMS)
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-signed
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    needs: [build, sign]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-signed
+          path: dist/release
+      - name: Publish complete release with localized changelogs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          APK_NAME: ${{ needs.build.outputs.apk }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist/release
+          sha256sum --check SHA256SUMS
+          if draft=$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft 2> "$RUNNER_TEMP/release-view.err"); then
+            if [ "$draft" != true ]; then
+              echo '::error::Release is already published; existing public assets will not be replaced'; exit 1
+            fi
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft \
+              --title "Keyra $RELEASE_VERSION" --notes-file release-notes.md
+          fi
+          gh release upload "$RELEASE_TAG" "$APK_NAME" SHA256SUMS release.json --clobber
+          gh release edit "$RELEASE_TAG" --title "Keyra $RELEASE_VERSION" \
+            --notes-file release-notes.md --draft=false --latest
