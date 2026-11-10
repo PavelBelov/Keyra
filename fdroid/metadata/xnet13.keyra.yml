@@ -1,0 +1,34 @@
+Categories:
+  - Security
+License: GPL-3.0-or-later
+AuthorName: xNet13
+SourceCode: https://github.com/PavelBelov/Keyra
+IssueTracker: https://github.com/PavelBelov/Keyra/issues
+Changelog: https://github.com/PavelBelov/Keyra/releases
+
+AutoName: Keyra
+MaintainerNotes: |-
+    Versions are loaded from app-info.properties through Gradle functions.
+    Automatic version detection is disabled until verified for this layout.
+
+RepoType: git
+Repo: https://github.com/PavelBelov/Keyra.git
+Binaries: https://github.com/PavelBelov/Keyra/releases/download/v%v/keyra-%v.apk
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: v0.1.0
+    subdir: app
+    sudo:
+      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+    gradle:
+      - yes
+
+AllowedAPKSigningKeys:
+  - c534c1fa0403986e4a61c24fef8ebdfc0625ca0b991ec765ae6354ec4fed8cea
+
+AutoUpdateMode: None
+UpdateCheckMode: None
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1

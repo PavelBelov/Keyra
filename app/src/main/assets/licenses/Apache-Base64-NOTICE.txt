@@ -1,0 +1,9 @@
+Kotpass includes an Apache-licensed Base64 implementation. Its upstream source
+credits Alexander Y. Kleymenov and preserves the ASF license header:
+https://github.com/keemobile/kotpass/blob/4e0bd6b6b13e59d48ebe0bd9c06de3f918de6945/kotpass/src/main/kotlin/app/keemobile/kotpass/io/Base64.kt
+
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+
+This code is licensed under the Apache License, Version 2.0.
+The complete text is included in Apache-2.0.txt in this directory.

@@ -15,6 +15,8 @@ require(appInfoValue("application.name").isNotBlank()) { "application.name must 
 android {
     namespace = "app.keyra"
     compileSdk = 36
+    // Pin the resource/packaging toolchain for F-Droid reproducibility.
+    buildToolsVersion = "35.0.0"
     defaultConfig {
         applicationId = publicApplicationId
         minSdk = 30

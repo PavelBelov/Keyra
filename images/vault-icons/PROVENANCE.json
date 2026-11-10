@@ -1,0 +1,699 @@
+{
+  "upstream": "https://github.com/keepassxreboot/keepassxc",
+  "revision": "6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e",
+  "copyingGitBlob": "a00aaf28c357bc0b9319103c02d3fee891d2c673",
+  "normalization": "UTF-8 text normalized to LF before SVG and COPYING hashes",
+  "renderer": "@resvg/resvg-js 2.6.2, width 112",
+  "icons": [
+    {
+      "id": 0,
+      "file": "C00_Password.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "b9b987e9630b88d41d36d6d1d5542dcba39eb8ee",
+      "svgLfSha256": "96531364f4a915ac279cbbaaf6f0ad1a308cea85f60eccf05e229a11be408133",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_0.png",
+      "pngSha256": "c76b864a5d264f0a6f28ca551dc57b55484b09ebf5cd5241a9b994415fb444df",
+      "matchesResvg262": true
+    },
+    {
+      "id": 1,
+      "file": "C01_Package_Network.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "bc6273932413400a9d1c44e2b7b6d4f9e20ecc7a",
+      "svgLfSha256": "fa6315e9470e856ef0ce7e358302896dc9c448cdb7267135216e55ea1e2a9d1c",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_1.png",
+      "pngSha256": "41724f711b22e6fa6d564bc10a9608c55411ccfc12ba438528a5283bbf53a07a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 2,
+      "file": "C02_MessageBox_Warning.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "f982f76eeb16cf64c57c1e659b88e2e19649a304",
+      "svgLfSha256": "996f44ca55fb6f9cca5825c636a4d23381e0fbfcb62e4fc6a2b023881986f6aa",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_2.png",
+      "pngSha256": "ca7ac89c031b6d3c8511aaa9b032d8821aa2ae14b3131679a0a64ac21e3e4fdb",
+      "matchesResvg262": true
+    },
+    {
+      "id": 3,
+      "file": "C03_Server.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "0d572e96d6a6813ca30aa08bf4afe2ae3bb44f63",
+      "svgLfSha256": "daea0d1a85c417be660cb254f75ec9dd3e37dc7c847f72a6cee70915d1882674",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_3.png",
+      "pngSha256": "3d005201d0b6ed62b0e9ce02436f745c17f6c6960dae9576e3330c4180c0ad78",
+      "matchesResvg262": true
+    },
+    {
+      "id": 4,
+      "file": "C04_Klipper.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "88ac1c50c9a1f38fb4612d7bf4b73b59a9f0c438",
+      "svgLfSha256": "1b4d048ca965bfac1a5b9604eced122bda433705f71b89cf967f71d87c250028",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_4.png",
+      "pngSha256": "8127ef956d8a63093cc44f27274979d7163af3e82d681520aa59eb2225fc5c6e",
+      "matchesResvg262": true
+    },
+    {
+      "id": 5,
+      "file": "C05_Edu_Languages.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "bf1ff08269559326bed4a460cecf9b6d4eb13e12",
+      "svgLfSha256": "8975d4cbec22e719d636a9923878eccb708e54a7fdff562ab58ce1c7a7b5a809",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_5.png",
+      "pngSha256": "f7755e42f61acdec4f9a849a540a5703bcd33c32a7af3e66eb470ccb1fca1ecd",
+      "matchesResvg262": true
+    },
+    {
+      "id": 6,
+      "file": "C06_KCMDF.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "0077b792e246aa6df66f8177a9fec08d6a0bd689",
+      "svgLfSha256": "8b3448892628c242848c1e99fed26f59176e335bbd7e4bf39d158e4f11b6d219",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_6.png",
+      "pngSha256": "d6e687466cf299ec03d95f684a9c20af428ba8fe362c40de609aff0a3efd7ede",
+      "matchesResvg262": true
+    },
+    {
+      "id": 7,
+      "file": "C07_Kate.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "694fd7e4d3e32b619bc1f1623c3bcd87b1136d9b",
+      "svgLfSha256": "f8297186e487a7221f341204e92ce4eef7eb4499591fca6647813fa964c30773",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_7.png",
+      "pngSha256": "6ce5f6071c5629175a9b1e82a63daebb773550626e7a10d49c5487700dd2217e",
+      "matchesResvg262": true
+    },
+    {
+      "id": 8,
+      "file": "C08_Socket.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "dc701bdf4c88f50de68c10b698d8910205354767",
+      "svgLfSha256": "3db6e1a8058f6c7a72f57109b1f81b83abd33e492f3970c10841b5b9175c1d4a",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_8.png",
+      "pngSha256": "0480193b7158704f14fafddbc8f98f0ad876934b48200f00305bd435dfa5dd34",
+      "matchesResvg262": true
+    },
+    {
+      "id": 9,
+      "file": "C09_Identity.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "d2154bce8c528b4447039124754a1357a1ab42cd",
+      "svgLfSha256": "bdd8d9a6dbd51918215a995767f7310b7bdc55d4fec78deac5cd0bab45c57c14",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_9.png",
+      "pngSha256": "d2fd64941823f47859d6c1d798b1aedde17ab32b54ce69d2f7504b205157fc01",
+      "matchesResvg262": true
+    },
+    {
+      "id": 10,
+      "file": "C10_Kontact.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "4eea3598840e2846bc489bc406e9477d025f3819",
+      "svgLfSha256": "c587d81024ce6312ce459540080e216217a9adc8958fce47347673c0311aa988",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_10.png",
+      "pngSha256": "30522f48c07f73a39f4cc8b5987dc12cc53874dab44307a93adc19b374ecd80c",
+      "matchesResvg262": true
+    },
+    {
+      "id": 11,
+      "file": "C11_Camera.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "0fc7637cdc40a9ad73dec703501018b6a0ef0aea",
+      "svgLfSha256": "15980e6e9fd66d722a67df5f517ff5e32f8580ab133282d7198e210a0ad54d68",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_11.png",
+      "pngSha256": "3b6f2f9b7ac4eca1ad5a869510761680d254db18d8a88ec62fb7bc783c1158af",
+      "matchesResvg262": true
+    },
+    {
+      "id": 12,
+      "file": "C12_IRKickFlash.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "5a55e2f9c30c9f03b0ce8cd9dff7c57124644f14",
+      "svgLfSha256": "a61ad0c839a8a872dbad46a3faec2f7289e54e9b76e1796c880d1febba114683",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_12.png",
+      "pngSha256": "977b5f98f50f555eeca9f6cbbff8bdd92df1163d5f62b36bd32f3468d10ba187",
+      "matchesResvg262": true
+    },
+    {
+      "id": 13,
+      "file": "C13_KGPG_Key3.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "b7b9da69ae804919c9840306e0ac0188dbf0dea5",
+      "svgLfSha256": "a8b5624cdfea228cbd5bf4a489eea1555ff9249b2c89e3d66d740600bc0d99c1",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_13.png",
+      "pngSha256": "d1670121df393c85f3f38ea360a14530922bb8032ddb407679bfd7f412c47d32",
+      "matchesResvg262": true
+    },
+    {
+      "id": 14,
+      "file": "C14_Laptop_Power.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "a10c99ff3ef97905b2b52f230c2f4336f50eb6f7",
+      "svgLfSha256": "15b0f42b8be9e1da7a16b01a5b479f090458e5101059f17ad63c2a143644aa3b",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_14.png",
+      "pngSha256": "50389496e9135f14ca217c36bbb49df221c2fb74386d84515c1f9ff2703e8a30",
+      "matchesResvg262": true
+    },
+    {
+      "id": 15,
+      "file": "C15_Scanner.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "8d0f7c2f65e2a6b8fc896fea4a33cbae3c4818af",
+      "svgLfSha256": "ba3717c69647da26a997fd21c22ac733d2deccb80e4fa292ba300e641955b549",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_15.png",
+      "pngSha256": "908b8823e0a966e6bf57b82e7d00835a2ed6cfeba8624435f7a5e5fed135c154",
+      "matchesResvg262": true
+    },
+    {
+      "id": 16,
+      "file": "C16_Mozilla_Firebird.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "c05515be8ad8bf283d357d615b722be86195e06f",
+      "svgLfSha256": "5981f82a04e07f93c0c9f9ea5323949585483736a0953343793cc407b76a8e90",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_16.png",
+      "pngSha256": "4af6dd24ec175348fb04f2f645d4091197c82d1e8f13025ec1cd81d10011ebe3",
+      "matchesResvg262": true
+    },
+    {
+      "id": 17,
+      "file": "C17_CDROM_Unmount.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "6ccadf9e997f2d3c9a4678ee3c9277260e525b7f",
+      "svgLfSha256": "72802e33be11b57cef3567f988babaef0d373965c90cab515f9eb7f378296817",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_17.png",
+      "pngSha256": "e57ae47482c66f7fa4ad665adf30850955997bacc2747f9567365c9188c46916",
+      "matchesResvg262": true
+    },
+    {
+      "id": 18,
+      "file": "C18_Display.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "5feb6a1798771953810c0ff03c7d65a59ac614ef",
+      "svgLfSha256": "7962fddef448d934893ddc7dde1b79118281f12f5a49d3e57f0e89fb184304c3",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_18.png",
+      "pngSha256": "03ade9562630b338fc242c840cd7820b099c65dabaca1d1d01d4d693fe236bf3",
+      "matchesResvg262": true
+    },
+    {
+      "id": 19,
+      "file": "C19_Mail_Generic.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "e0f27b12c55cc5d131d760e85fc47f3aaf7f43f8",
+      "svgLfSha256": "4587e84e518aced1ad578da151eb6b24f0da67c9dcc42afeaf4f70e86a253c1f",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_19.png",
+      "pngSha256": "bb294147e390917eb28715f4b0b947d1e41b5a4217f2b894e48deb18b5dd1a9c",
+      "matchesResvg262": true
+    },
+    {
+      "id": 20,
+      "file": "C20_Misc.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "bf4a4219a377b025654c3eea918ff33b3852605e",
+      "svgLfSha256": "ae6688fd7791fcaaba3ea9828d819d6e608a754e73079cab3af59f248d774ec2",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_20.png",
+      "pngSha256": "91ab816c70579f6159bb5eeb110e0ca0d34336380366195d5ac046e9b4ff3791",
+      "matchesResvg262": true
+    },
+    {
+      "id": 21,
+      "file": "C21_KOrganizer.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "a090bb540b01c927f4cd61b3ba962d8a85f406e1",
+      "svgLfSha256": "e1726313260a1e5c1e440a5a4c41a3e988ab07ab093dfc38f34bd5bb655a86d1",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_21.png",
+      "pngSha256": "f68653daf7e1c6da0f559a28d10848513c333151db17d9815309f21af17dc829",
+      "matchesResvg262": true
+    },
+    {
+      "id": 22,
+      "file": "C22_ASCII.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "2c4e5a49b34efc1127d9fb90c6e52e4aa9dcc6e0",
+      "svgLfSha256": "21004c68da702ff4c92505aec87abe3bf95c760bf5a33c23fd2e6d088d4982f8",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_22.png",
+      "pngSha256": "7bc0cd269096125d3e0d4919e6f91ef91bb505f77ef0ddf831a666ee953bd8ea",
+      "matchesResvg262": true
+    },
+    {
+      "id": 23,
+      "file": "C23_Icons.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "796246379201a38808dd1893725177c6e785f338",
+      "svgLfSha256": "a174f181aa92b7a97c3b3fa8c3999959b801cc45e37bf62bb42b2ff641d2a8a6",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_23.png",
+      "pngSha256": "a6a244bb01370b5c0447129f1f1964277b149141958d463f375797221f9d7fe8",
+      "matchesResvg262": true
+    },
+    {
+      "id": 24,
+      "file": "C24_Connect_Established.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "6b25c5e3fbbc0753b883e01e71b58f2e670c93c4",
+      "svgLfSha256": "cac373bba39f39994e281d6997e4ea91ef0cf3b5dfe3ae85c51df9170be68a6b",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_24.png",
+      "pngSha256": "662508b2cb6954e1be403f27b0747e08b615fcc7f9d445eff5dc2bdb00589cd1",
+      "matchesResvg262": true
+    },
+    {
+      "id": 25,
+      "file": "C25_Folder_Mail.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "f8e28f7fb24408a4aa960c4fd4d76a4098fa3cd2",
+      "svgLfSha256": "009783a14551774285916e6554bf541f094105261ba23a48dfa28e5aab364c8e",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_25.png",
+      "pngSha256": "e14c78af00be96121d6165d16dfd54c30216d67c59541f4d8a512cf1e474be56",
+      "matchesResvg262": true
+    },
+    {
+      "id": 26,
+      "file": "C26_FileSave.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "404c75b806f78bb49d30739f0fa943c42ca863cf",
+      "svgLfSha256": "922df5957d54779ebceed3c53d3a74b9d80d89279b8ddc7e254f4e8e0e471a91",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_26.png",
+      "pngSha256": "5eee96007ab7bc0a7a1768a1b5d99ffbaeca5012015805674e662135ecee09d1",
+      "matchesResvg262": true
+    },
+    {
+      "id": 27,
+      "file": "C27_NFS_Unmount.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "0bb535f18ce6033af437ef4b3f580c0db73e6210",
+      "svgLfSha256": "1b0672fe9581fbb8e709cbe3918d8e30ea98508ed470c9bb853457f49577f8e0",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_27.png",
+      "pngSha256": "6fe857f700494331e60a0d0482baa2933d13669cbf6d20dd8eea220c7b251f9c",
+      "matchesResvg262": true
+    },
+    {
+      "id": 28,
+      "file": "C28_QuickTime.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "bf2ad5acf2c43ef6a825c03c44d0a9f20a4aab35",
+      "svgLfSha256": "de9d0188572273476b7e7548e55a8f4cf2a6b29d08de664bc54da5e15bd1c53d",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_28.png",
+      "pngSha256": "d497295417979c52ae297b99b7a5b857508c0c836aa22bd677b4dd9e2bbf2a7c",
+      "matchesResvg262": true
+    },
+    {
+      "id": 29,
+      "file": "C29_KGPG_Term.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "0c44991cf3a07fd9749505fa3989bb2861d49f32",
+      "svgLfSha256": "c3e70b0c2c850dd5a45b08fa00cc32fce32001f82b99742d3c639c6affa167c0",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_29.png",
+      "pngSha256": "02a83a8c0f7bfd72001abb1f245873fda95fc71b72bf081405d34eae8059d5d2",
+      "matchesResvg262": true
+    },
+    {
+      "id": 30,
+      "file": "C30_Konsole.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "fdeb75b6585ffae85f92ee9862c27f0e027da1d6",
+      "svgLfSha256": "33a8c0b3a81c35c5ff74cbffbfd09391ec484471f3d226b916d3a20604dd207e",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_30.png",
+      "pngSha256": "30347bf1e146eda8d11e8cc55102b30835364915633b60abc33fc93754f07476",
+      "matchesResvg262": true
+    },
+    {
+      "id": 31,
+      "file": "C31_FilePrint.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "53234c85c9d8196b57090ec2b5ee9dbe2c483dca",
+      "svgLfSha256": "35c3fd6c8b9fb10f6819d4bf2833335c20af9a5e928fd7d36af9f651b607561d",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_31.png",
+      "pngSha256": "fabbe21580e3fbc4a87f627c6d71f88d5b8e57cfd659093b20aa402bcea4472a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 32,
+      "file": "C32_FSView.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "c0d42f28a2ec19ce0cde1856f67605fc58821d98",
+      "svgLfSha256": "e44e5f9218d7c5db018129832065a07039da78f1ef6cb632d6612728198b5d30",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_32.png",
+      "pngSha256": "ab732d16f12de79869f682f9cd51d471c2629b7cb50df69bc76daa0c0ff7f787",
+      "matchesResvg262": true
+    },
+    {
+      "id": 33,
+      "file": "C33_Run.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "d8375ceffa63acbf76074254a66b647ce5b28d7e",
+      "svgLfSha256": "b37e24f03dd9b63e16495fc5f34715c43b6b3fc9135552b234d8cf22f5ec6aea",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_33.png",
+      "pngSha256": "e76c554e3667d9dbea5fa041e0e62b8c150e96ff1318137feca9e5c4b64971d5",
+      "matchesResvg262": true
+    },
+    {
+      "id": 34,
+      "file": "C34_Configure.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "8a3da3fb1413f6ce64e51bff13ed7240d1f34839",
+      "svgLfSha256": "5d0bc4e548ef7fc6a1947dcd95620fa45d8cb89710b22bbf56a07d853d33c355",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_34.png",
+      "pngSha256": "ab8ccfce19dfdf2f513e5d65e2d124f19608ded317c809c66658febd2d533d3b",
+      "matchesResvg262": true
+    },
+    {
+      "id": 35,
+      "file": "C35_KRFB.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "3fa748d67986d78bdee4440ac5c8068f5e387976",
+      "svgLfSha256": "be3be02100c8ddc20d82c83e4cc6e594ea31d55eb8093550bb3685a9912831fe",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_35.png",
+      "pngSha256": "d76974c6cdd018ba7d11f1f7e17b6f4c474c0c2d99d2012357554c0da061adac",
+      "matchesResvg262": true
+    },
+    {
+      "id": 36,
+      "file": "C36_Ark.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "e593d65c7bcda88b25c4d791918a83e394d26fc7",
+      "svgLfSha256": "7bdce00f5295344815e76d29c11fd1ff66b741e9bd7f3f84501d931bb17fa0b9",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_36.png",
+      "pngSha256": "e2af45263d9661dc4c57e7da66bd19ed7ecd473ac3ac4933765c8820fbf80a43",
+      "matchesResvg262": true
+    },
+    {
+      "id": 37,
+      "file": "C37_KPercentage.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "3db85351e6eacfe78043ba956aa198fa39c6ad8d",
+      "svgLfSha256": "4ad55b21c61b60792e38bce3271236123ac108a80bcfaf8563b9614f75e01c7b",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_37.png",
+      "pngSha256": "58e9b0e9ba01e58ae91bc9902a86b2f1b9964523a7e442146b59fb043d3e11a0",
+      "matchesResvg262": true
+    },
+    {
+      "id": 38,
+      "file": "C38_Samba_Unmount.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "220ef6d98ee6f35dc8b553c929d94009046ab05e",
+      "svgLfSha256": "1f038c0d67ee3d0e0a235377faa90427026d2859c8d2cea67f63b824f18c30ba",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_38.png",
+      "pngSha256": "740d6d50d0d1db4502a91f57a61c40fdc5d99e0fa87f6490a619918719ba7560",
+      "matchesResvg262": true
+    },
+    {
+      "id": 39,
+      "file": "C39_History.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "a50a0f92a2428774294ed691c2c9c029f605536c",
+      "svgLfSha256": "a3f8fa731c38b0411ede6058bc1db2f7ddd350a316e1e35effc327c0da6d868c",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_39.png",
+      "pngSha256": "fd34681f45e944bea5dfb0c02d3fa800e88aada661fc32da30e76954cd2cad01",
+      "matchesResvg262": true
+    },
+    {
+      "id": 40,
+      "file": "C40_Mail_Find.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "f049a7f2d1a88946a7b1325b7924016da1244386",
+      "svgLfSha256": "d60b6c1312786d3bb27768195ca6e8e4f5c5c71716f16c7359ae9fdeebdebb47",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_40.png",
+      "pngSha256": "c96de6803ce7b84b31ea5d4a83afc994ffa1c1022ec732a72e0a9fead9c49d08",
+      "matchesResvg262": true
+    },
+    {
+      "id": 41,
+      "file": "C41_VectorGfx.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "4433860559671fe32574f32b6963b59ab050e1e6",
+      "svgLfSha256": "c3db49ab92e0bb1b8dd0d33a56838c986a5353414a367e74ad8f6924fcdb7221",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_41.png",
+      "pngSha256": "aee6bd6a69891cf71e4f159e2c839e2ff8f06efb92d1144064424e7bcf8dbabc",
+      "matchesResvg262": true
+    },
+    {
+      "id": 42,
+      "file": "C42_KCMMemory.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "6a58fbdaa51e881e25eddf57082deb40656b8095",
+      "svgLfSha256": "3538430da3492a77c13086b544860d7e0e632b5209eac19d9aa3fa9afbb08ba4",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_42.png",
+      "pngSha256": "d8194469ebb282fe0a8a18f09e243aec0c7fb2cc458250433c826a82351bbeed",
+      "matchesResvg262": true
+    },
+    {
+      "id": 43,
+      "file": "C43_EditTrash.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "7c4d19e08e502af58649df1d4804c1e286a8745d",
+      "svgLfSha256": "f60dfa8fa142b6edcd71268b8edda6720876ab143c0cd04325c22400f24e41fc",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_43.png",
+      "pngSha256": "96662329b120016639a7544b9328c5fe2e2354b3b0177e89891733a829e884a7",
+      "matchesResvg262": true
+    },
+    {
+      "id": 44,
+      "file": "C44_KNotes.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "0852fdd1dfdf20af4fc940b98da2362c2d582a2a",
+      "svgLfSha256": "805cd1ee34287909e881c628c7287163d42272a396bbc4b598674bc215cf9c63",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_44.png",
+      "pngSha256": "8c6813c6fb5996ea047abc1321e82a00ee9a8372ce20436dd48e262bc5053c3a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 45,
+      "file": "C45_Cancel.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "df1efdc0ed786cefa3733fb18884cc96791e3218",
+      "svgLfSha256": "e45c962aff38c0ba10da477b5b7c1b1fe347dad8cca45b7783382c0aadc9a6c2",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_45.png",
+      "pngSha256": "585cdc2e947e6f37303a156bee83371a25e7b27fe0af2e412934e66f63cdbb50",
+      "matchesResvg262": true
+    },
+    {
+      "id": 46,
+      "file": "C46_Help.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "6a7bf8193390a1c0b9aed38ba31e4d79a86d215e",
+      "svgLfSha256": "671e7a2eaabf52414e6c2fb528550bb3aad427dc49fafcfbb3c70bffcafe3647",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_46.png",
+      "pngSha256": "3c158f37f0ef8a32b396668915ba9a287d298093fc4167cb3bef7e319b04747a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 47,
+      "file": "C47_KPackage.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "79b06f96c45678525161bed35cc3438d9639cb02",
+      "svgLfSha256": "fa4f983ac65fe6b72c5c1f02281fdc2e0da2b19f1ee695f9e9b7b947add6a16c",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_47.png",
+      "pngSha256": "77643e662a89a9a746ecc4aaaeb6aaff5c4f7289c2bda20dc21f0a2e1da22b07",
+      "matchesResvg262": true
+    },
+    {
+      "id": 48,
+      "file": "C48_Folder.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "5bf47b6e27e43292f673b055244e51a0a9038f2d",
+      "svgLfSha256": "b0c9a4506b89e75f1d5a431d9f60c88b1a96750af2b9a05d6133d1dc99459d9f",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_48.png",
+      "pngSha256": "cb8dcec15d329824a3aff0524c2c2c48213167e7138904527716bea8b670f9aa",
+      "matchesResvg262": true
+    },
+    {
+      "id": 49,
+      "file": "C49_Folder_Blue_Open.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "917c61f1f43cc6812a720f59668a8e999da37b92",
+      "svgLfSha256": "3b2934fee2807bd54f8f8c5ccbbcbd6632c3a7a225b3b67463691cfc214a74e3",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_49.png",
+      "pngSha256": "56fa91f2f3fc01fdf7df80f32af601f6ac6ed5b9ef5b4c2bbc083e63e91a2f7a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 50,
+      "file": "C50_Folder_Tar.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "68ee554ee0523c048d503dd1652956973cfdb566",
+      "svgLfSha256": "ce1cb107c54833e7fa0479a85872ed1cb7d689d138db43af727cf46e6c1bd10e",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_50.png",
+      "pngSha256": "1f3e30b2a1bd50965fcfd8552b1c9f1a4fe14f41f6dd147007d205ae7a2b3c48",
+      "matchesResvg262": true
+    },
+    {
+      "id": 51,
+      "file": "C51_Decrypted.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "d10c64d23e4687b97ed6988b9599f52e70a24987",
+      "svgLfSha256": "91d9016b7040de8eec656cd6cfaa02040c672c040859451c9698882d5df67e86",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_51.png",
+      "pngSha256": "c7a346aac38716c4addfae2a72339bf8c04d95b4c93f805a2f3b692a4704de51",
+      "matchesResvg262": true
+    },
+    {
+      "id": 52,
+      "file": "C52_Encrypted.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "113e11a07a6bb2731b520ec751012ee347c06ff1",
+      "svgLfSha256": "d454430ac62a6416443372b87cca1a9e98ad404d2aa66b203f6a05cacd3e284f",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_52.png",
+      "pngSha256": "c3e36c14c02a0457098a4caf06dd2b761900b42a8301569994ca07b6b501b9b3",
+      "matchesResvg262": true
+    },
+    {
+      "id": 53,
+      "file": "C53_Apply.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "7ebd41c06e9d55723dc48ce83cc2131703866a3f",
+      "svgLfSha256": "894ce83bfa8524311d48f3f5be3f5b4ecd5954ccc736404254803fc777cff504",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_53.png",
+      "pngSha256": "4f7da8c625a60efaed6cbd51a16aff51cbb4694545dfd47a2b10dd9927e060fe",
+      "matchesResvg262": true
+    },
+    {
+      "id": 54,
+      "file": "C54_Signature.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "a6adc424aef331067ff71a12b646151660c5ab47",
+      "svgLfSha256": "021b3afcd77389d422e755d837128f8df7e3e5afbceea08d49ae6624275d2f06",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_54.png",
+      "pngSha256": "8d714b93c7a3673cf89238fd51ab58d1f1c3c9162220c0fa012f589634e3f64f",
+      "matchesResvg262": true
+    },
+    {
+      "id": 55,
+      "file": "C55_Thumbnail.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "64f174db02172ccabd32cd2bee3539b8f5df43fb",
+      "svgLfSha256": "e9f7a0f6af2e70d910e0a416c9963cb4c2675993e4d965190638a97487a5e004",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_55.png",
+      "pngSha256": "0fee18194959817d005a658b30454ea50d9466a769f0065ca36e278a7610fa9e",
+      "matchesResvg262": true
+    },
+    {
+      "id": 56,
+      "file": "C56_KAddressBook.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "cceebf11d863f49a24a08352fc11ce840313b1cc",
+      "svgLfSha256": "5f855f91f979a3cfa75bad51482ccb91e283c6c43bb21ecfb3fd9b5194188ea3",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_56.png",
+      "pngSha256": "5d297f3bc3d74421707e2a14f7e009d8f789dc6ae331d0ba12e6c9cd6b43152a",
+      "matchesResvg262": true
+    },
+    {
+      "id": 57,
+      "file": "C57_View_Text.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "aba208d943252088af32145fb2cbc9bcc5a6cf0d",
+      "svgLfSha256": "dea8b691d58f6d8a3082237ec156f975ad4ba6df602b4de239a6669d251cdca7",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_57.png",
+      "pngSha256": "578910e147073a60947692dc0a186d3cb365cfeddd3e14eff471ba0276c5b034",
+      "matchesResvg262": true
+    },
+    {
+      "id": 58,
+      "file": "C58_KGPG.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "aaa0fef8f31bd894aa0a1663ce68a973549bad4c",
+      "svgLfSha256": "ee3a55f9a1c40dbb7efde90a55e3880b5fcb1217b7f457abe3e04a60dc20474b",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_58.png",
+      "pngSha256": "a9ca1a0cf3b63b6385da94c9846856b072496073775c3db75d79f5e32d1dba52",
+      "matchesResvg262": true
+    },
+    {
+      "id": 59,
+      "file": "C59_Package_Development.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "f989becc3667b7c1ca652b696b7e3248595af124",
+      "svgLfSha256": "3f6a967833e80092569f885c4d37530be6700bf2ac2949cd2491d5a731400229",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_59.png",
+      "pngSha256": "862dde36717a2c2d864877fb538184ba944b8964a0ca80b532d5fcdb707448af",
+      "matchesResvg262": true
+    },
+    {
+      "id": 60,
+      "file": "C60_KFM_Home.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "7a7bb80c510ec8ddec16f7145fd426936e75d68a",
+      "svgLfSha256": "2e85ea69d35eb75a38c3ea8e357eb33e1f8c471258981db35251237fa536b846",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_60.png",
+      "pngSha256": "65bd6091e15992bad365a8444396a17f67b5547103a50bc1f5945089585a6bac",
+      "matchesResvg262": true
+    },
+    {
+      "id": 61,
+      "file": "C61_Services.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "3681a83ebacc2fdf8fac493cd195716c28ae2b8c",
+      "svgLfSha256": "b1544cbe3445ca15bcd7394d28b13f422ad09a4e08f6a6654e7073fd35c7e3cb",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_61.png",
+      "pngSha256": "9dfd7744f8013093e74b5b7c4d77ac747a4538c44710f99d8650df1c584a3d89",
+      "matchesResvg262": true
+    },
+    {
+      "id": 62,
+      "file": "C62_Tux.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "f2e641f31edd9381b975caf98f61fc51c8587055",
+      "svgLfSha256": "ac0feea279dfc70e9d40a83446f89bc5eb57b03dfcd1406468158691506e76d5",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_62.png",
+      "pngSha256": "6c7572b4f20bbd33e5a7c61560416f3d17bf89f8af319f2183f14e14e0966a4e",
+      "matchesResvg262": true
+    },
+    {
+      "id": 63,
+      "file": "C63_Feather.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "c612ffb147b2923bc568770afcca9e08c9be8085",
+      "svgLfSha256": "e75029237124238dfd6d32769c560ce77a54edb0c6e3080d114005fd82f4738a",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_63.png",
+      "pngSha256": "737e12b4c15eea4a5243dff82715c18d00f3c4605cfdaef85268cfc6947fa9cc",
+      "matchesResvg262": true
+    },
+    {
+      "id": 64,
+      "file": "C64_Apple.svg",
+      "license": "GPL-2.0-or-later",
+      "upstreamGitBlob": "efca9f4fd48bc09eebe4f31246fc76b70836a859",
+      "svgLfSha256": "f3710dafd92add3e30dac2c1ad15b54aa887648e2d6f547e9c680ebbf969e00f",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_64.png",
+      "pngSha256": "22d61c46c21488a1126a312a63f42446beb4f7e67ca48e2788ffae2db0650f75",
+      "matchesResvg262": true
+    },
+    {
+      "id": 65,
+      "file": "C65_W.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "4f598e9ea0da8e6fada227ad2dd0ddc42fc75233",
+      "svgLfSha256": "dcf73a0f163da9e0e6cb675f364a94b60bfc502cb7c8ca8cbee0d55e85c63abd",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_65.png",
+      "pngSha256": "e31a82de492ac478e4a9005fea41ac2c2a5ddb537a70143284ce0216eb6e46ee",
+      "matchesResvg262": true
+    },
+    {
+      "id": 66,
+      "file": "C66_Money.svg",
+      "license": "CC0-1.0",
+      "upstreamGitBlob": "3fa77413b8019eedc115a69118d410e9d65bda28",
+      "svgLfSha256": "3a4bd88e0c3e4f7d2d7ce252bf94b30e75451f700c338d08fe19e2ba28a13637",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_66.png",
+      "pngSha256": "338f856cf089e831be5050d8ea6d3e8b252d74c4957773ad76c9127885ca90cf",
+      "matchesResvg262": true
+    },
+    {
+      "id": 67,
+      "file": "C67_Certificate.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "51087b4d52419a110fa4499e375f8b7ba126da85",
+      "svgLfSha256": "ff180ef1ae148ca130fd4a673ed8a0c1b3f4744f44f607a23131450259d9833b",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_67.png",
+      "pngSha256": "ef3577ad6d63520ab92ec4ca1fab4ed3b2f2f70fb466390ca295dc13225fec74",
+      "matchesResvg262": true
+    },
+    {
+      "id": 68,
+      "file": "C68_BlackBerry.svg",
+      "license": "MIT",
+      "upstreamGitBlob": "6c0b2b43f41f173d44bb39621319b767a662d429",
+      "svgLfSha256": "39bab83f0508e6067c019702de2f12d3d32d8674555866e3dc54e5b5fcc91709",
+      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_68.png",
+      "pngSha256": "1867ef12d1aacc9151db796f6de5e82bba28cfa1b7163d578d3702054c4e8c13",
+      "matchesResvg262": true
+    }
+  ]
+}

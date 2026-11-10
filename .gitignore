@@ -12,3 +12,4 @@ captures/
 dist/
 .root/
 docs/
+.release/

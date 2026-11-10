@@ -1,0 +1,16 @@
+Keyra is a lightweight password manager for Android 11 and later. It works with one KeePass KDBX database at a time and keeps your passwords in a format that other KeePass-compatible applications can open.
+
+Features:
+• Create a database or open an existing KDBX file, with an optional keyfile.
+• Organize entries in groups, search your vault, and view entry history.
+• Generate passwords and copy or temporarily reveal protected fields.
+• Unlock using your master password, or enable quick unlock with Android biometrics or your device screen lock.
+• Synchronize through WebDAV or a storage provider available in Android's system file picker.
+• Fill credentials in Android apps and supported browsers after explicitly approving the relevant app or browser.
+• Choose a light or dark appearance and switch the interface language offline.
+
+The F-Droid edition includes all features without payment, advertising, or a subscription. Keyra has no developer-operated account service or cloud server. You choose where to keep and synchronize your encrypted database.
+
+Keep an independent backup of your database and keyfile: Keyra does not create automatic backup copies before synchronization. Background synchronization is subject to Android scheduling. Some KeePass data, such as attachments and advanced entry properties, is preserved but has no dedicated editing interface. Website autofill depends on the browser and the form used by the website.
+
+Source code and issue tracker: https://github.com/PavelBelov/Keyra

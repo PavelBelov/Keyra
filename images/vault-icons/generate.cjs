@@ -2,8 +2,8 @@
 // node images/vault-icons/generate.cjs
 const fs = require('node:fs');
 const path = require('node:path');
-const { Resvg } = require('../.tools/icon-converter/node_modules/@resvg/resvg-js');
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '../..');
+const { Resvg } = require(path.join(root, '.tools/icon-converter/node_modules/@resvg/resvg-js'));
 const source = path.join(root, 'images/vault-icons/icons');
 const target = path.join(root, 'app/src/main/res/drawable-xxxhdpi');
 fs.mkdirSync(target, { recursive: true });

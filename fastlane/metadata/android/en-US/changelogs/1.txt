@@ -1,0 +1,1 @@
+First public release: KeePass KDBX databases, password generation, biometric quick unlock, WebDAV and system file-provider synchronization, and autofill for Android apps and supported browsers. All features included, with no advertising or subscription. Requires Android 11 or later.
