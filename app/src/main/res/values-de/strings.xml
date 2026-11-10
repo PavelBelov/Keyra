@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">App-Sprache</string>
     <string name="ui_recycle_bin_298">Papierkorb</string>
     <string name="ui_passwords_299">Passwörter</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Öffne Chrome → Einstellungen → Automatisches Ausfüllen und Passwörter → Einstellungen für automatisches Ausfüllen → Mit einem anderen Dienst automatisch ausfüllen.</string>
     <string name="chrome_autofill_help">Wähle Keyra in Android und aktiviere in Chrome das automatische Ausfüllen mit einem anderen Dienst. Starte Chrome bei Aufforderung neu. Einträge müssen genau zur Domain passen; E-Mail-Felder verwenden den Benutzernamen des Eintrags.</string>
     <string name="autofill_more_entries">Weitere Einträge…</string>
+    <string name="about_title">Über die App</string>
+    <string name="about_version">Version</string>
+    <string name="about_application_id">Anwendungs-ID</string>
+    <string name="about_developer">Entwickler</string>
+    <string name="about_license">Lizenz</string>
+    <string name="about_project">Projekt und Quellcode</string>
+    <string name="about_source">Quellcode</string>
+    <string name="about_report_issue">Fehler melden</string>
+    <string name="about_support">Support</string>
+    <string name="about_privacy">Datenschutzerklärung</string>
+    <string name="about_licenses">Lizenzen und Hinweise</string>
+    <string name="about_link_unavailable">Keine App zum Öffnen dieses Links verfügbar.</string>
+    <string name="about_warranty">Ohne Gewährleistung bereitgestellt. Bedingungen siehe Lizenzen.</string>
 </resources>

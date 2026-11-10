@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">Idioma de la aplicación</string>
     <string name="ui_recycle_bin_298">Papelera</string>
     <string name="ui_passwords_299">Contraseñas</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Abre Chrome → Configuración → Autorrelleno y contraseñas → Ajustes de autorrelleno → Autorrelleno con otro servicio.</string>
     <string name="chrome_autofill_help">Selecciona Keyra en Android y activa el autorrelleno con otro servicio en Chrome. Reinicia Chrome si se solicita. Las entradas coinciden con el dominio exacto; los campos de correo usan el nombre de usuario de la entrada.</string>
     <string name="autofill_more_entries">Más entradas…</string>
+    <string name="about_title">Acerca de</string>
+    <string name="about_version">Versión</string>
+    <string name="about_application_id">ID de la aplicación</string>
+    <string name="about_developer">Desarrollador</string>
+    <string name="about_license">Licencia</string>
+    <string name="about_project">Proyecto y código fuente</string>
+    <string name="about_source">Código fuente</string>
+    <string name="about_report_issue">Informar de un error</string>
+    <string name="about_support">Soporte</string>
+    <string name="about_privacy">Política de privacidad</string>
+    <string name="about_licenses">Licencias y avisos</string>
+    <string name="about_link_unavailable">No hay ninguna aplicación para abrir este enlace.</string>
+    <string name="about_warranty">Se proporciona sin garantías. Consulte las condiciones en las licencias.</string>
 </resources>

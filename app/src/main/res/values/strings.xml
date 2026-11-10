@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">App language</string>
     <string name="ui_recycle_bin_298">Recycle Bin</string>
     <string name="ui_passwords_299">Passwords</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Open Chrome → Settings → Autofill and passwords → Autofill settings → Autofill using another service.</string>
     <string name="chrome_autofill_help">Select Keyra in Android and enable autofill using another service in Chrome. Restart Chrome if prompted. Entries match the exact website domain; email fields use the entry’s Username value.</string>
     <string name="autofill_more_entries">More entries…</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_application_id">Application ID</string>
+    <string name="about_developer">Developer</string>
+    <string name="about_license">License</string>
+    <string name="about_project">Project and source code</string>
+    <string name="about_source">Source code</string>
+    <string name="about_report_issue">Report an issue</string>
+    <string name="about_support">Support</string>
+    <string name="about_privacy">Privacy policy</string>
+    <string name="about_licenses">Licenses and notices</string>
+    <string name="about_link_unavailable">No application is available to open this link.</string>
+    <string name="about_warranty">Provided without warranty. See the licenses for terms.</string>
 </resources>

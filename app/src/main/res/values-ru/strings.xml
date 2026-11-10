@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">Язык приложения</string>
     <string name="ui_recycle_bin_298">Корзина</string>
     <string name="ui_passwords_299">Пароли</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Откройте Chrome → Настройки → Автозаполнение и пароли → Настройки автозаполнения → Автозаполнение с помощью другого сервиса.</string>
     <string name="chrome_autofill_help">Выберите Keyra в Android и включите автозаполнение с помощью другого сервиса в Chrome. Если потребуется, перезапустите Chrome. Записи подбираются по точному домену сайта; в поле email подставляется значение поля «Логин» записи.</string>
     <string name="autofill_more_entries">Другие записи…</string>
+    <string name="about_title">О приложении</string>
+    <string name="about_version">Версия</string>
+    <string name="about_application_id">Идентификатор приложения</string>
+    <string name="about_developer">Разработчик</string>
+    <string name="about_license">Лицензия</string>
+    <string name="about_project">Проект и исходный код</string>
+    <string name="about_source">Исходный код</string>
+    <string name="about_report_issue">Сообщить об ошибке</string>
+    <string name="about_support">Поддержка</string>
+    <string name="about_privacy">Политика конфиденциальности</string>
+    <string name="about_licenses">Лицензии и уведомления</string>
+    <string name="about_link_unavailable">Нет приложения для открытия этой ссылки.</string>
+    <string name="about_warranty">Приложение предоставляется без гарантий. Условия приведены в лицензиях.</string>
 </resources>

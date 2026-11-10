@@ -15,6 +15,7 @@ import android.view.KeyEvent
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ToggleButton
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
@@ -44,7 +45,7 @@ import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
-/** Actual Android views, synthetic vault and separate app.keyra.qa package. */
+/** Actual Android views, synthetic vault and a separate .qa application package. */
 @RunWith(AndroidJUnit4::class)
 class EntryUiTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
@@ -138,6 +139,26 @@ class EntryUiTest {
         }
         clickPopupText(activity.getString(R.string.entry_history))
         clickPopupText(activity.getString(R.string.ui_cancel_82), optional = true)
+    }
+
+    @Test fun aboutShowsInstalledIdentityAndOfflineLicense() {
+        click(R.id.menuButton)
+        clickPopupText(activity.getString(R.string.ui_settings_71))
+        onUi {
+            descendants(activity.findViewById(R.id.content)).filterIsInstance<Button>()
+                .first { it.text.toString().startsWith(activity.getString(R.string.about_title)) }.performClick()
+        }
+        instrumentation.waitForIdleSync()
+        val root = requireNotNull(instrumentation.uiAutomation.rootInActiveWindow)
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        for (value in listOf(context.packageName, "${info.versionName} (${info.longVersionCode})",
+            context.getString(R.string.app_developer_name), context.getString(R.string.app_license_spdx))) {
+            assertTrue("Missing public app information: $value", root.findAccessibilityNodeInfosByText(value).isNotEmpty())
+        }
+        clickPopupText(activity.getString(R.string.about_licenses))
+        clickPopupText("GPL-3.0.txt")
+        assertTrue("GPL must be readable offline", requireNotNull(instrumentation.uiAutomation.rootInActiveWindow)
+            .findAccessibilityNodeInfosByText("GNU GENERAL PUBLIC LICENSE").isNotEmpty())
     }
 
     @Test fun editorAndGeneratorApplyNumericPasswordAndSaveToKdbx() {

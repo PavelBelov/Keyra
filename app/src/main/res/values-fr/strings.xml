@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">Langue de l\'application</string>
     <string name="ui_recycle_bin_298">Corbeille</string>
     <string name="ui_passwords_299">Mots de passe</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Ouvrez Chrome → Paramètres → Saisie automatique et mots de passe → Paramètres de saisie automatique → Saisie automatique avec un autre service.</string>
     <string name="chrome_autofill_help">Sélectionnez Keyra dans Android et activez la saisie automatique avec un autre service dans Chrome. Redémarrez Chrome si demandé. Les entrées correspondent au domaine exact ; les champs e-mail utilisent le nom d’utilisateur de l’entrée.</string>
     <string name="autofill_more_entries">Autres entrées…</string>
+    <string name="about_title">À propos</string>
+    <string name="about_version">Version</string>
+    <string name="about_application_id">Identifiant du logiciel</string>
+    <string name="about_developer">Développeur</string>
+    <string name="about_license">Licence</string>
+    <string name="about_project">Projet et code source</string>
+    <string name="about_source">Code source</string>
+    <string name="about_report_issue">Signaler un problème</string>
+    <string name="about_support">Assistance</string>
+    <string name="about_privacy">Politique de confidentialité</string>
+    <string name="about_licenses">Licences et mentions</string>
+    <string name="about_link_unavailable">Aucune application ne peut ouvrir ce lien.</string>
+    <string name="about_warranty">Fourni sans garantie. Consultez les licences pour connaître les conditions.</string>
 </resources>

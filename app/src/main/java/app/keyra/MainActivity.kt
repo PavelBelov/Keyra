@@ -1286,6 +1286,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 })
             }
+            group(getString(R.string.about_title)).addView(settingsAction(getString(R.string.about_title), getString(R.string.app_developer_name)) {
+                showAppInfo(::dialog)
+            })
         } else {
             group(L10n.text(this@MainActivity, R.string.ui_data_72)).apply {
                 addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_import_73), L10n.text(this@MainActivity, R.string.ui_merge_entries_from_a_kdbx_file_159)) { importing = true; sourceSelection = false; filePicker.launch(arrayOf("*/*")) })

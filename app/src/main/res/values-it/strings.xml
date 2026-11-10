@@ -278,7 +278,6 @@
     <string name="ui_app_language_297">Lingua dell\'app</string>
     <string name="ui_recycle_bin_298">Cestino</string>
     <string name="ui_passwords_299">Password</string>
-    <string name="app_name">Keyra</string>
     <string name="hidden_value">********</string>
     <string name="empty_value">—</string>
     <string name="characters_lowercase">a–z</string>
@@ -299,4 +298,17 @@
     <string name="chrome_autofill_manual">Apri Chrome → Impostazioni → Compilazione automatica e password → Impostazioni di compilazione automatica → Compilazione automatica con un altro servizio.</string>
     <string name="chrome_autofill_help">Seleziona Keyra in Android e attiva la compilazione automatica con un altro servizio in Chrome. Riavvia Chrome se richiesto. Le voci corrispondono al dominio esatto; i campi e-mail usano il nome utente della voce.</string>
     <string name="autofill_more_entries">Altre voci…</string>
+    <string name="about_title">Informazioni</string>
+    <string name="about_version">Versione</string>
+    <string name="about_application_id">ID applicazione</string>
+    <string name="about_developer">Sviluppatore</string>
+    <string name="about_license">Licenza</string>
+    <string name="about_project">Progetto e codice sorgente</string>
+    <string name="about_source">Codice sorgente</string>
+    <string name="about_report_issue">Segnala un problema</string>
+    <string name="about_support">Assistenza</string>
+    <string name="about_privacy">Informativa sulla privacy</string>
+    <string name="about_licenses">Licenze e avvisi</string>
+    <string name="about_link_unavailable">Nessuna applicazione disponibile per aprire questo collegamento.</string>
+    <string name="about_warranty">Fornita senza garanzie. Consultare le licenze per le condizioni.</string>
 </resources>

@@ -1,13 +1,36 @@
+import java.util.Properties
+
 plugins { id("com.android.application"); kotlin("android") }
+
+val appInfo = Properties().apply {
+    rootProject.file("app-info.properties").reader(Charsets.UTF_8).use { load(it) }
+}
+fun appInfoValue(key: String): String = appInfo.getProperty(key)?.trim().orEmpty()
+val publicApplicationId = appInfoValue("application.id")
+require(publicApplicationId.matches(Regex("[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)+"))) {
+    "Invalid application.id in app-info.properties"
+}
+require(appInfoValue("application.name").isNotBlank()) { "application.name must not be empty" }
+
 android {
     namespace = "app.keyra"
     compileSdk = 36
     defaultConfig {
-        applicationId = "app.keyra"
+        applicationId = publicApplicationId
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appInfoValue("application.version.code").toInt().also { require(it > 0) }
+        versionName = appInfoValue("application.version.name").also { require(it.isNotBlank()) }
+        mapOf(
+            "app_name" to "application.name",
+            "app_developer_name" to "developer.name",
+            "app_project_website" to "project.website",
+            "app_source_url" to "project.source",
+            "app_issues_url" to "project.issues",
+            "app_license_spdx" to "license.spdx",
+            "app_support_email" to "support.email",
+            "app_privacy_url" to "privacy.url"
+        ).forEach { (resource, key) -> resValue("string", resource, appInfoValue(key)) }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { viewBinding = true }
