@@ -11,6 +11,7 @@ import android.os.Build
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.View
+import android.view.KeyEvent
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ToggleButton
@@ -18,6 +19,9 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.KeePassDatabase
@@ -200,7 +204,10 @@ class EntryUiTest {
             await { descendants(activity.findViewById(R.id.content)).filterIsInstance<EditableEntryFieldView>().isNotEmpty() }
             onUi { assertEquals("draft-only-user", editor(activity.getString(R.string.field_login)).findViewById<EditText>(R.id.fieldInput).text.toString()) }
         } finally { instrumentation.removeMonitor(monitor) }
-        click(R.id.navigateBack)
+        // Exercise system Back (including the API 36 dispatcher path), not just the toolbar.
+        onUi { WindowCompat.getInsetsController(activity.window, activity.window.decorView).hide(WindowInsetsCompat.Type.ime()) }
+        await { ViewCompat.getRootWindowInsets(activity.window.decorView)?.isVisible(WindowInsetsCompat.Type.ime()) == false }
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         clickPopupText(activity.getString(R.string.discard))
         await { activity.findViewById<ImageButton>(R.id.saveButton).visibility == View.GONE }
         assertEquals("qa-user", repository.database.value!!.getEntryBy { uuid == entryId }!!.fields.userName!!.content)
