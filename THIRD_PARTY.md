@@ -12,13 +12,13 @@ The release runtime dependency audit is in [fdroid/dependency-audit.json](fdroid
 | Kotpass 0.13.0 | MIT; includes Apache Commons / kotlin-xml-builder code (Apache-2.0) and Bouncy Castle cryptographic components under their permissive license |
 | Guava ListenableFuture 1.0 | Apache-2.0, inherited from guava-parent 26.0-android |
 | JetBrains annotations 23.0.0; JSpecify 1.0.0 | Apache-2.0 |
-| 69 database icons from KeePassXC | 56 MIT, 12 CC0-1.0, and 1 GPL-2.0-or-later annotation; see [provenance and notices](images/vault-icons/README.md) |
+| 68 database icons from KeePassXC | 56 MIT and 12 CC0-1.0; see [provenance](fdroid/vault-icon-provenance.json) and [notices](app/src/main/assets/licenses/KeePassXC-Icons-NOTICE.txt) |
 | JUnit, MockWebServer | Test dependencies only; not included in the app |
 
 Kotpass source and license: [keemobile/kotpass](https://github.com/keemobile/kotpass).
 The local `.tools/` directory contains development tools and is excluded from both the app and Git.
 
-The APK includes Kotpass, Apache, Bouncy Castle, and database-icon license texts and notices in `assets/licenses/`. The original database SVGs and their upstream notice are included in the source repository. Keyra's own application logo is covered by the project's licensing declaration.
+The APK includes Kotpass, Apache, Bouncy Castle, and database-icon license texts and notices in `assets/licenses/`. The database SVG originals are available at the pinned upstream revision linked in the icon notice; they are not stored in this repository. Keyra's own application logo and independently redrawn database icon 64 (vault_icon_64.png) are covered by the project's GPL-3.0-or-later licensing declaration.
 
 To refresh the runtime audit with the prepared local toolchain:
 
@@ -27,4 +27,4 @@ To refresh the runtime audit with the prepared local toolchain:
 .\scripts\export-dependency-licenses.ps1
 ```
 
-For a different Gradle cache, pass `-GradleCachePath` pointing to its `caches/modules-2/files-2.1` directory. A new or unresolved license fails the export and must be reviewed explicitly. The resvg 2.6.2 SVG converter (MPL-2.0), JUnit, and MockWebServer are development/test tooling and are not runtime dependencies of the app.
+For a different Gradle cache, pass `-GradleCachePath` pointing to its `caches/modules-2/files-2.1` directory. A new or unresolved license fails the export and must be reviewed explicitly. JUnit and MockWebServer are test tooling and are not runtime dependencies of the app.

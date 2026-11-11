@@ -4,7 +4,7 @@ Source: https://github.com/keepassxreboot/keepassxc/tree/6bcb901aefdd6c7a525466d
 Upstream COPYING: https://github.com/keepassxreboot/keepassxc/blob/6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e/COPYING
 
 These are database icons, not the Keyra application logo. The original SVG files
-are provided in images/vault-icons/icons in the Keyra source repository.
+are available at the pinned upstream Source URL above.
 They were rasterized to 112px PNG resources; their original terms are retained.
 
 Included files: C00_Password.svg, C01_Package_Network.svg, C02_MessageBox_Warning.svg, C03_Server.svg, C04_Klipper.svg, C05_Edu_Languages.svg, C06_KCMDF.svg, C08_Socket.svg, C09_Identity.svg, C10_Kontact.svg, C11_Camera.svg, C12_IRKickFlash.svg, C13_KGPG_Key3.svg, C14_Laptop_Power.svg, C15_Scanner.svg, C16_Mozilla_Firebird.svg, C19_Mail_Generic.svg, C20_Misc.svg, C21_KOrganizer.svg, C22_ASCII.svg, C23_Icons.svg, C24_Connect_Established.svg, C25_Folder_Mail.svg, C28_QuickTime.svg, C29_KGPG_Term.svg, C30_Konsole.svg, C31_FilePrint.svg, C32_FSView.svg, C33_Run.svg, C34_Configure.svg, C36_Ark.svg, C39_History.svg, C40_Mail_Find.svg, C41_VectorGfx.svg, C42_KCMMemory.svg, C43_EditTrash.svg, C47_KPackage.svg, C48_Folder.svg, C49_Folder_Blue_Open.svg, C50_Folder_Tar.svg, C55_Thumbnail.svg, C56_KAddressBook.svg, C57_View_Text.svg, C58_KGPG.svg, C59_Package_Development.svg, C60_KFM_Home.svg, C62_Tux.svg, C63_Feather.svg, C65_W.svg, C67_Certificate.svg, C68_BlackBerry.svg
@@ -96,16 +96,5 @@ Files: share/icons/badges/2_Expired.svg
 Copyright: 2022 KeePassXC Team <team@keepassxc.org>
 License: MIT
 
-Included files: C64_Apple.svg
-
-Files: share/icons/application/scalable/actions/hibp.svg
-       share/icons/database/C64_Apple.svg
-Copyright: GPL-2+
-Comment: from the Simple Icons repo (https://github.com/simple-icons/simple-icons/)
-
-The upstream notice for C64_Apple.svg places "GPL-2+" in its Copyright field
-and has no separate License field. This annotation is preserved above and
-conservatively treated as GPL-2.0-or-later, not as a Keyra-owned asset.
-
 Full license texts are supplied as KeePassXC-Icons-MIT.txt,
-KeePassXC-Icons-CC0.txt, and KeePassXC-Icons-GPL-2.0.txt.
+and KeePassXC-Icons-CC0.txt.

@@ -646,16 +646,6 @@
       "matchesResvg262": true
     },
     {
-      "id": 64,
-      "file": "C64_Apple.svg",
-      "license": "GPL-2.0-or-later",
-      "upstreamGitBlob": "efca9f4fd48bc09eebe4f31246fc76b70836a859",
-      "svgLfSha256": "f3710dafd92add3e30dac2c1ad15b54aa887648e2d6f547e9c680ebbf969e00f",
-      "png": "app/src/main/res/drawable-xxxhdpi/vault_icon_64.png",
-      "pngSha256": "22d61c46c21488a1126a312a63f42446beb4f7e67ca48e2788ffae2db0650f75",
-      "matchesResvg262": true
-    },
-    {
       "id": 65,
       "file": "C65_W.svg",
       "license": "MIT",

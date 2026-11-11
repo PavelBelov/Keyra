@@ -28,15 +28,15 @@ The vendored components are covered separately from the MIT declaration in the K
 
 ## Database artwork
 
-All 69 `images/vault-icons/icons/Cxx_*.svg` files match the Git blob hashes from [KeePassXC revision 6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e](https://github.com/keepassxreboot/keepassxc/tree/6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e/share/icons/database), after normalizing text line endings to LF. The upstream COPYING blob is `a00aaf28c357bc0b9319103c02d3fee891d2c673` and also matches.
+The 68 third-party database icons originate from SVG files that, during the original audit, matched the Git blob hashes from [KeePassXC revision 6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e](https://github.com/keepassxreboot/keepassxc/tree/6bcb901aefdd6c7a525466d7dfe099c5ebc13c0e/share/icons/database), after normalizing text line endings to LF. The upstream COPYING blob was `a00aaf28c357bc0b9319103c02d3fee891d2c673` and also matched. The SVG originals and converter have since been removed from this repository; the packaged PNG resources remain.
 
 - 56 icons: MIT, including the Icons8 flat-color collection and five KeePassXC replacements.
 - 12 icons: CC0-1.0, from small-n-flat.
-- C64_Apple.svg: upstream annotates `GPL-2+` in its Copyright field and omits a separate License field. The original annotation is retained verbatim and conservatively handled as GPL-2.0-or-later. It is not presented as Keyra-owned artwork or relicensed as MIT.
+- Database icon 64 (vault_icon_64.png) was independently redrawn by a Keyra contributor and is original project artwork under GPL-3.0-or-later; it is excluded from the third-party inventory.
 
-[PROVENANCE.json](../images/vault-icons/PROVENANCE.json) maps every source SVG, packaged PNG, and license. Rendering all 69 original SVGs using resvg 2.6.2 at width 112 produced **69/69 byte-identical PNG files**. The converter paths were repaired after the source folder had moved; no existing icon PNG was changed.
+[vault-icon-provenance.json](vault-icon-provenance.json) records every upstream SVG filename/hash, packaged PNG, and license. During the original audit, rendering the 68 retained upstream icons using resvg 2.6.2 at width 112 produced **68/68 byte-identical PNG files**. This historical result is not a check run by the current build.
 
-The previous project notice omitted this artwork's attribution. The source now includes the upstream COPYING and per-file inventory; the APK now ships `KeePassXC-Icons-NOTICE.txt` plus the full MIT, CC0, and GPLv2 texts. These notices supplement, rather than replace, the license of Keyra's original code and application logo.
+The repository retains the per-file inventory and relevant upstream notices; the APK ships `KeePassXC-Icons-NOTICE.txt` plus the full MIT and CC0 texts. These notices supplement, rather than replace, the license of Keyra's original code and application logo.
 
 ## Scope and remaining release checks
 

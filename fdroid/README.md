@@ -62,20 +62,18 @@ successfully on Windows. Lint reported no errors and 11 warnings. The unsigned
 release APK contains all 11 license/notice assets and reports package
 `xnet13.keyra`, version `0.1.0` (1), minSdk 30, and targetSdk 36. Local metadata
 validation passed for both languages and all 67 unique runtime artifact records;
-all 69 database icons passed provenance and byte-identical re-render checks.
+the 68 retained third-party database icons passed provenance and byte-identical re-render checks. Database icon 64 has since been independently redrawn as original Keyra artwork.
 
 ```powershell
 .\scripts\build.ps1 -Tasks @('-I', 'scripts/fdroid-audit.init.gradle', ':app:fdroidAudit')
 .\scripts\export-dependency-licenses.ps1
-node scripts/check-vault-icons.cjs --render
 node scripts/validate-fdroid.cjs
 ```
 
-The last two commands use local developer tooling. Install the pinned packages
-if absent; neither is a runtime dependency or part of the F-Droid Android build:
+The last command uses local developer tooling. Install the pinned package
+if absent; it is not a runtime dependency or part of the F-Droid Android build:
 
 ```powershell
-npm install --prefix .tools/icon-converter --no-audit --no-fund @resvg/resvg-js@2.6.2
 npm install --prefix .tools/fdroid-validation --no-audit --no-fund --ignore-scripts yaml@2.8.1
 ```
 

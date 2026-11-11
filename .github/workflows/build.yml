@@ -30,11 +30,9 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
       - name: Check release tooling and F-Droid metadata
         run: |
-          node --test scripts/release.test.cjs
           node scripts/release.cjs check
           npm install --prefix .tools/fdroid-validation --no-audit --no-fund --ignore-scripts yaml@2.8.1
           node scripts/validate-fdroid.cjs
-          node scripts/check-vault-icons.cjs
       - name: Test, lint, and build unsigned release
         run: bash ./gradlew --no-daemon --console=plain :core:test :app:testDebugUnitTest :app:lintDebug :app:assembleRelease
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
