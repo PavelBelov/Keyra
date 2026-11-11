@@ -1,1 +1,1 @@
-KeePass password manager with WebDAV sync and autofill
+A lightweight and fast password manager that works with KeePass KDBX databases.
