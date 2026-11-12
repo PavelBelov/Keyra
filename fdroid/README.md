@@ -4,6 +4,15 @@ This directory contains a **submission draft**, not a published F-Droid package.
 The metadata, licenses, and recipe are prepared locally; no release tag, GitHub
 Release, or GitLab merge request is created by this preparation.
 
+Linux/F-Droid preflight was performed on November 12, 2026. Compilation, native
+lint/scanners, 55 JVM tests, and repeatability of the current HEAD passed.
+The published `v0.1.0` reference fails signature-copy verification because its
+signing step rewrote ZIP alignment. The Release workflow now preserves alignment;
+a disposable-key test passed F-Droid's verifier. A new real signed release and
+its verification are required before submission. See the
+[results](verification/RESULTS-2026-11-12.md) and
+[repeatable environment/instructions](verification/README.md).
+
 The GitHub Actions release workflow can build, sign, and publish the reference APK
 after a version tag is pushed. The command
 `sh ./gradlew prepareRelease -PreleaseVersion=VERSION` updates the
@@ -35,9 +44,13 @@ The standard F-Droid VM is expected to provide its OpenJDK 17 alternative
 must select OpenJDK 17 via JAVA_HOME as well. The VM command remains to be tested
 in the target build environment.
 
-`Binaries` points to the planned immutable asset:
+`Binaries` currently points to the published first-release asset:
 
 `https://github.com/PavelBelov/Keyra/releases/download/v0.1.0/keyra-0.1.0.apk`
+
+This existing APK is not a passing reproducible reference; see the result above.
+Do not replace that asset or move the tag to conceal the failure. The next
+version must include the corrected signing workflow and pass comparison anew.
 
 `AllowedAPKSigningKeys` contains the **certificate** SHA-256 read from the existing
 signed `.release/release/keyra.apk`:
@@ -86,9 +99,10 @@ It requires the normal JDK/Gradle build environment; Node.js and npm are not nee
 Gradle downloads the pinned YAML parser automatically on the first run. This is a
 build-tool dependency only and is not packaged into the app.
 
-The YAML/length/hash checks are local structural validation. Native `fdroid lint`,
-the F-Droid scanner, Linux assembly, and reproducibility comparison are separate
-next-stage checks and have not been represented as completed here.
+The YAML/length/hash checks are local structural validation. Native F-Droid and
+Linux checks are documented separately in [the dated results](verification/RESULTS-2026-11-12.md),
+including the failed comparison of the existing signed `v0.1.0` APK. The official
+buildserver VM/CI and comparison of the next real signed release remain pending.
 
 ## Before submitting the merge request
 
@@ -98,18 +112,19 @@ next-stage checks and have not been represented as completed here.
 2. Commit the preparation and corrected legal notices. Confirm the repository
    can be cloned publicly without authentication and source checkout builds
    without `.tools`, local SDK paths, or signing secrets.
-3. Choose the final release commit and create immutable tag `v0.1.0`. The draft
-   recipe deliberately refers to this future tag. Pinning its exact commit hash
-   in the submitted build entry is also supported.
-4. Rebuild and sign a fresh release APK from that exact source with the permanent
-   key whose fingerprint is listed above. The earlier APK lacks the newly added
-   legal notices and therefore must not be reused as the reference for this tag.
-5. Verify reproducibility in a provisioned Linux/F-Droid build environment and
-   resolve differences in environment/toolchain before publishing. Compare the
-   unsigned build to the signed reference using F-Droid's signature-copying
-   verification; raw signed/unsigned file hashes are expected to differ.
-6. Publish the signed APK as `keyra-0.1.0.apk` in the `v0.1.0` GitHub Release.
-   Record its separate file SHA-256 and retain the R8 mapping for diagnostics.
+3. Prepare the next version (for example `0.1.1`) with
+   `sh ./gradlew prepareRelease -PreleaseVersion=0.1.1`, fill both changelogs,
+   and commit it together with the corrected Release workflow. Use a new immutable
+   tag. `v0.1.0` already exists and must not be moved.
+4. Build/sign that exact tag with the permanent key whose fingerprint is listed
+   above, using `apksigner --alignment-preserved true`. The fixed GitHub Release
+   workflow does this. No replacement signing key is needed.
+5. Publish the next signed reference APK via that workflow, then run the
+   [Linux/F-Droid checks](verification/README.md) against its actual public asset.
+   A disposable-key smoke test does not replace this last comparison.
+6. For the first fdroiddata submission, include the passing new build entry;
+   remove or explicitly disable the old failing `0.1.0` entry before submission.
+   Review MaintainerNotes, record the APK file SHA-256, and retain the R8 mapping.
 7. In a fork of [fdroiddata](https://gitlab.com/fdroid/fdroiddata), copy the recipe,
    run `fdroid rewritemeta xnet13.keyra` and `fdroid lint xnet13.keyra`. In a
    provisioned build-server setup, run

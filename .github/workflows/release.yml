@@ -107,6 +107,7 @@ jobs:
           "$tools/zipalign" -c -P 16 4 dist/release/unsigned.apk
           "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$KEY_ALIAS" \
             --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --alignment-preserved true \
             --v1-signing-enabled false --v2-signing-enabled true \
             --v3-signing-enabled false --v4-signing-enabled false \
             --out "dist/release/$APK_NAME" dist/release/unsigned.apk
