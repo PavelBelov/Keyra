@@ -1,0 +1,103 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import java.security.MessageDigest
+import javax.xml.XMLConstants
+import javax.xml.parsers.DocumentBuilderFactory
+
+// Keep resolution in the app task's project context; no compilation or signing is needed.
+def app = rootProject.project(':app')
+app.tasks.register('exportDependencyLicenses') {
+    group = 'reporting'
+    description = 'Refreshes the release dependency audit and exports reviewed POM license evidence.'
+    doLast {
+        def hash = { File file ->
+            def digest = MessageDigest.getInstance('SHA-256')
+            file.withInputStream { stream ->
+                byte[] buffer = new byte[65536]
+                int size
+                while ((size = stream.read(buffer)) != -1) digest.update(buffer, 0, size)
+            }
+            digest.digest().encodeHex().toString()
+        }
+        def children = { node, String name ->
+            (0..<node.childNodes.length).collect { node.childNodes.item(it) }
+                .findAll { it.nodeType == org.w3c.dom.Node.ELEMENT_NODE && it.localName == name }
+        }
+        def text = { node, String name -> children(node, name).collect { it.textContent.trim() }.find() ?: '' }
+        def factory = DocumentBuilderFactory.newInstance()
+        factory.setNamespaceAware(true)
+        factory.setFeature('http://apache.org/xml/features/disallow-doctype-decl', true)
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, '')
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, '')
+        def poms = [:]
+        def getPom = { String coordinate ->
+            if (!poms.containsKey(coordinate)) {
+                // Explicit POM resolution also downloads missing parent POMs via Gradle repositories.
+                def configuration = app.configurations.detachedConfiguration(app.dependencies.create("${coordinate}@pom"))
+                configuration.transitive = false
+                def file = configuration.singleFile
+                def document = factory.newDocumentBuilder().parse(file)
+                def project = document.documentElement
+                def licenseNames = children(project, 'licenses').collectMany { children(it, 'license') }
+                    .collect { text(it, 'name') }.findAll { !it.isBlank() }
+                def parent = children(project, 'parent').find()
+                def parentCoordinate = parent == null ? null : ['groupId', 'artifactId', 'version'].collect { text(parent, it) }.join(':')
+                poms[coordinate] = [coordinate: coordinate, file: file, licenseNames: licenseNames, parent: parentCoordinate]
+            }
+            poms[coordinate]
+        }
+        def getLicensePom
+        getLicensePom = { pom, Set seen ->
+            if (!seen.add(pom.coordinate)) throw new GradleException("POM parent cycle: ${pom.coordinate}")
+            if (!pom.licenseNames.isEmpty()) return pom
+            if (!pom.parent) throw new GradleException("No declared license for ${pom.coordinate}")
+            getLicensePom(getPom(pom.parent), seen)
+        }
+        def pomUrl = { String coordinate ->
+            def (group, artifact, version) = coordinate.split(':')
+            def repository = group.startsWith('androidx.') ? 'https://dl.google.com/dl/android/maven2' : 'https://repo.maven.apache.org/maven2'
+            "${repository}/${group.replace('.', '/')}/${artifact}/${version}/${artifact}-${version}.pom".toString()
+        }
+        def artifacts = app.configurations.getByName('releaseRuntimeClasspath')
+            .resolvedConfiguration.resolvedArtifacts
+            .findAll { it.id.componentIdentifier instanceof ModuleComponentIdentifier }
+            .collect { artifact ->
+                def id = artifact.moduleVersion.id
+                [coordinate: "${id.group}:${id.name}:${id.version}".toString(),
+                 file: artifact.file.name, type: artifact.type, sha256: hash(artifact.file)]
+            }.unique { artifact -> [artifact.coordinate, artifact.file, artifact.type, artifact.sha256] }
+            .sort { a, b -> a.coordinate <=> b.coordinate }
+        def rows = artifacts.collect { artifact ->
+            def pom = getPom(artifact.coordinate)
+            def licensePom = getLicensePom(pom, new LinkedHashSet())
+            def licenses = licensePom.licenseNames.collect { name ->
+                if (name ==~ /(?i).*Apache.*2\.0.*/) return 'Apache-2.0'
+                if (name.equalsIgnoreCase('MIT')) return 'MIT'
+                throw new GradleException("Review license '${name}' for ${artifact.coordinate} before extending this mapping")
+            }.unique().sort()
+            [coordinate: artifact.coordinate, file: artifact.file, type: artifact.type, sha256: artifact.sha256,
+             licenses: licenses, declaredLicenseNames: licensePom.licenseNames,
+             pomUrl: pomUrl(pom.coordinate), pomSha256: hash(pom.file),
+             licensePomCoordinate: licensePom.coordinate, licensePomUrl: pomUrl(licensePom.coordinate),
+             licensePomSha256: hash(licensePom.file)]
+        }
+        def properties = new Properties()
+        rootProject.file('app-info.properties').withReader('UTF-8') { properties.load(it) }
+        def report = [schemaVersion: 1, applicationId: properties.getProperty('application.id'),
+                      scope: 'Selected external releaseRuntimeClasspath artifacts before R8 shrinking; excludes build/test tooling and vendored source/artwork',
+                      artifactCount: rows.size(), artifacts: rows]
+        def output = rootProject.file('fdroid/dependency-audit.json')
+        // Complete all resolution and license checks before replacing the existing report.
+        def reportText = JsonOutput.prettyPrint(JsonOutput.toJson(report)) + '\n'
+        // Avoid rewriting a checked-in report solely to change JSON whitespace.
+        if (!output.exists() || new JsonSlurper().parse(output, 'UTF-8') != report) {
+            output.parentFile.mkdirs()
+            output.setText(reportText, 'UTF-8')
+        }
+        logger.lifecycle("Exported ${rows.size()} reviewed runtime artifacts to fdroid/dependency-audit.json")
+    }
+}
+
+// Validate the newly generated report when both tasks are requested together.
+tasks.named('validateFdroid') { mustRunAfter ':app:exportDependencyLicenses' }

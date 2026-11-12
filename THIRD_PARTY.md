@@ -20,11 +20,18 @@ The local `.tools/` directory contains development tools and is excluded from bo
 
 The APK includes Kotpass, Apache, Bouncy Castle, and database-icon license texts and notices in `assets/licenses/`. The database SVG originals are available at the pinned upstream revision linked in the icon notice; they are not stored in this repository. Keyra's own application logo and independently redrawn database icon 64 (vault_icon_64.png) are covered by the project's GPL-3.0-or-later licensing declaration.
 
-To refresh the runtime audit with the prepared local toolchain:
+To refresh the runtime audit using the normal Gradle build environment:
 
 ```powershell
-.\scripts\build.ps1 -Tasks @('-I', 'scripts/fdroid-audit.init.gradle', ':app:fdroidAudit')
-.\scripts\export-dependency-licenses.ps1
+.\gradlew.bat exportDependencyLicenses
 ```
 
-For a different Gradle cache, pass `-GradleCachePath` pointing to its `caches/modules-2/files-2.1` directory. A new or unresolved license fails the export and must be reviewed explicitly. JUnit and MockWebServer are test tooling and are not runtime dependencies of the app.
+On Linux/macOS use `sh ./gradlew exportDependencyLicenses`. The single task
+`:app:exportDependencyLicenses` in `scripts/dependency-audit.gradle` resolves the
+release artifacts, calculates their SHA-256 hashes, and resolves POMs (including
+parents) through Gradle using its configured repositories and user home. It writes
+the final report directly, with no intermediate JSON. No PowerShell or manual cache path is required.
+Missing artifacts require network access; a fully cached run can use `--offline`.
+A new or unresolved license fails the export without replacing the existing license
+report and must be reviewed explicitly. JUnit and MockWebServer are test tooling
+and are not runtime dependencies of the app.

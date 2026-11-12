@@ -3,3 +3,7 @@ plugins {
     kotlin("android") version "2.1.20" apply false
     kotlin("jvm") version "2.1.20" apply false
 }
+
+apply(from = "scripts/fdroid-validate.gradle")
+apply(from = "scripts/dependency-audit.gradle")
+apply(from = "scripts/release.gradle")

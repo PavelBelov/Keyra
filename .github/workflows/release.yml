@@ -32,14 +32,6 @@ jobs:
           ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
           persist-credentials: false
-      - name: Validate tag, committed version, and changelogs
-        id: version
-        env:
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-        run: |
-          node scripts/release.cjs check --tag "$RELEASE_TAG" --history --output-dir dist/release
-          npm install --prefix .tools/fdroid-validation --no-audit --no-fund --ignore-scripts yaml@2.8.1
-          node scripts/validate-fdroid.cjs
       - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
@@ -47,6 +39,16 @@ jobs:
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       - name: Install Android toolchain
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Validate tag, committed version, and changelogs
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: >-
+          bash ./gradlew --no-daemon --console=plain checkRelease
+          "-PreleaseTag=$RELEASE_TAG" -PreleaseHistory=true
+          -PreleaseOutputDir=dist/release
+      - name: Validate F-Droid metadata
+        run: bash ./gradlew --no-daemon --console=plain validateFdroid
       - name: Test, lint, and build from tagged sources
         run: |
           bash ./gradlew --no-daemon --console=plain :core:test :app:testDebugUnitTest :app:lintDebug :app:assembleRelease

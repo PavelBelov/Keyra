@@ -1,0 +1,73 @@
+import groovy.json.JsonSlurper
+import org.snakeyaml.engine.v2.api.Load
+import org.snakeyaml.engine.v2.api.LoadSettings
+import javax.imageio.ImageIO
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'org.snakeyaml:snakeyaml-engine:2.9' }
+}
+
+// Project-specific structural checks, not a replacement for fdroid lint/scanner/build.
+// SnakeYAML Engine uses YAML 1.2, so unquoted "yes" remains a string.
+tasks.register('validateFdroid') {
+    group = 'verification'
+    description = 'Validates Keyra F-Droid metadata, listings, images, and dependency audit.'
+    doLast {
+        def requireCondition = { boolean condition, String message ->
+            if (!condition) throw new GradleException(message)
+        }
+        def read = { String name -> rootProject.file(name).getText('UTF-8').trim() }
+        def properties = new Properties()
+        rootProject.file('app-info.properties').withReader('UTF-8') { properties.load(it) }
+        def id = properties.getProperty('application.id')
+        def recipePath = "fdroid/metadata/${id}.yml"
+        def settings = LoadSettings.builder().setAllowDuplicateKeys(false).build()
+        def recipe
+        try {
+            recipe = new Load(settings).loadFromString(read(recipePath))
+        } catch (Exception error) {
+            throw new GradleException("Recipe YAML errors in ${recipePath}: ${error.message}", error)
+        }
+        requireCondition(recipe instanceof Map, 'Expected a YAML mapping for the recipe')
+        requireCondition(recipe.Builds instanceof List && !recipe.Builds.isEmpty(), 'Missing F-Droid build entries')
+        def build = recipe.Builds.last()
+        requireCondition(build.versionName == properties.getProperty('application.version.name'), 'Recipe versionName differs from app-info.properties')
+        requireCondition(build.versionCode == properties.getProperty('application.version.code').toInteger(), 'Recipe versionCode differs from app-info.properties')
+        requireCondition(recipe.CurrentVersion == build.versionName && recipe.CurrentVersionCode == build.versionCode, 'Recipe current version differs from its latest build')
+        requireCondition(build.commit == "v${build.versionName}".toString(), 'Release tag and versionName differ')
+        requireCondition(build.subdir == 'app' && build.gradle instanceof List && build.gradle.contains('yes'), 'Expected the unflavoured app release build')
+        [License: 'license.spdx', AuthorName: 'developer.name', SourceCode: 'project.source', IssueTracker: 'project.issues'].each { field, key ->
+            requireCondition(recipe[field] == properties.getProperty(key), "Recipe ${field} differs from the project")
+        }
+        requireCondition(recipe.Binaries instanceof String && recipe.Binaries.contains('/releases/download/v%v/') && recipe.Binaries.endsWith('keyra-%v.apk'), 'Expected a versioned developer-signed reference APK URL')
+        def validHash = { value -> value instanceof String && value ==~ /[a-f0-9]{64}/ }
+        requireCondition(recipe.AllowedAPKSigningKeys instanceof List && !recipe.AllowedAPKSigningKeys.isEmpty() && recipe.AllowedAPKSigningKeys.every(validHash), 'Invalid signing certificate SHA-256')
+        ['en-US', 'ru-RU'].each { locale ->
+            def base = "fastlane/metadata/android/${locale}"
+            ['title.txt': 50, 'short_description.txt': 80, 'full_description.txt': 4000, ("changelogs/${build.versionCode}.txt".toString()): 500].each { name, limit ->
+                def text = read("${base}/${name}")
+                def length = text.codePointCount(0, text.length())
+                requireCondition(length > 0 && length <= limit, "${locale}/${name}: ${length} characters, limit ${limit}")
+                logger.lifecycle("${locale}/${name}: ${length}/${limit} characters")
+            }
+            def iconFile = rootProject.file("${base}/images/icon.png")
+            def signature = new byte[8]
+            def signatureLength = iconFile.withInputStream { it.read(signature) }
+            requireCondition(signatureLength == 8 && signature.encodeHex().toString() == '89504e470d0a1a0a', "${locale}: expected a PNG icon")
+            def icon = ImageIO.read(iconFile)
+            requireCondition(icon != null && icon.width == 512 && icon.height == 512, "${locale}: expected a 512x512 PNG icon")
+        }
+        def screenshots = rootProject.file('fastlane/metadata/android/en-US/images/phoneScreenshots').listFiles()?.findAll { it.isFile() && it.name.endsWith('.png') } ?: []
+        requireCondition(screenshots.size() >= 2, 'Expected at least two synthetic-data screenshots (content must be reviewed manually)')
+        def audit = new JsonSlurper().parseText(read('fdroid/dependency-audit.json'))
+        requireCondition(audit.applicationId == id && audit.artifacts instanceof List && audit.artifactCount == audit.artifacts.size(), 'Dependency audit identity/count mismatch')
+        def identities = audit.artifacts.collect { [it.coordinate, it.file, it.type, it.sha256] }
+        requireCondition(identities.toSet().size() == audit.artifactCount, 'Duplicate audited artifacts')
+        audit.artifacts.each { artifact ->
+            requireCondition(validHash(artifact.sha256), "Missing artifact hash: ${artifact.coordinate}")
+            requireCondition(artifact.licenses instanceof List && !artifact.licenses.isEmpty() && artifact.licenses.every { it in ['Apache-2.0', 'MIT'] }, "Review license: ${artifact.coordinate}")
+        }
+        logger.lifecycle("Recipe, two localized listings, ${screenshots.size()} screenshots, and ${audit.artifactCount} license records passed local structural checks.")
+    }
+}

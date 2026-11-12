@@ -1,0 +1,179 @@
+import groovy.json.JsonOutput
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+
+// Version changes stay in Git, so CI and F-Droid build the same tagged sources.
+class KeyraRelease {
+    static final Pattern VERSION = ~/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
+    static final List<String> LOCALES = ['en-US', 'ru-RU']
+    final File root
+
+    KeyraRelease(File root) { this.root = root }
+    static void requireCondition(boolean condition, String message) {
+        if (!condition) throw new GradleException(message)
+    }
+    String read(String path) { new File(root, path).getText('UTF-8').replace('\r\n', '\n') }
+    static Map parseProperties(String text) {
+        def result = [:]
+        text.readLines().findAll { !it.trim().isEmpty() && !it.startsWith('#') }.each { line ->
+            int at = line.indexOf('=')
+            requireCondition(at > 0, 'Invalid app-info.properties line')
+            def key = line.substring(0, at).trim()
+            requireCondition(!result.containsKey(key), "Duplicate property: ${key}")
+            result[key] = line.substring(at + 1).trim()
+        }
+        result
+    }
+    static int parseCode(String value) {
+        requireCondition(value != null && value ==~ /[1-9]\d*/, 'versionCode must be a positive decimal integer')
+        def code = new BigInteger(value)
+        requireCondition(code <= 2100000000G, 'Invalid Android versionCode')
+        code.intValue()
+    }
+    Map info() {
+        def data = parseProperties(read('app-info.properties'))
+        def version = data['application.version.name']
+        requireCondition(version != null && VERSION.matcher(version).matches(), 'Use a stable version MAJOR.MINOR.PATCH (for example 0.1.0)')
+        int code = parseCode(data['application.version.code'])
+        def id = data['application.id']
+        requireCondition(id != null && id ==~ /[a-zA-Z][\w]*(\.[a-zA-Z][\w]*)+/, 'Invalid application ID')
+        [version: version, code: code, applicationId: id, tag: "v${version}".toString(), apk: "keyra-${version}.apk".toString()]
+    }
+    static int compareVersions(String a, String b) {
+        def left = a.split(/\./).collect { new BigInteger(it) }
+        def right = b.split(/\./).collect { new BigInteger(it) }
+        for (int i = 0; i < 3; i++) {
+            int comparison = left[i].compareTo(right[i])
+            if (comparison != 0) return comparison
+        }
+        0
+    }
+    static String replaceOne(String text, Pattern pattern, String replacement) {
+        def matcher = pattern.matcher(text)
+        int count = 0
+        while (matcher.find()) count++
+        requireCondition(count == 1, "Expected exactly one match for ${pattern}")
+        pattern.matcher(text).replaceFirst(Matcher.quoteReplacement(replacement))
+    }
+    Map prepare(String version, String requestedCode) {
+        def current = info()
+        requireCondition(version != null && VERSION.matcher(version).matches(), 'Specify -PreleaseVersion=MAJOR.MINOR.PATCH')
+        requireCondition(compareVersions(version, current.version) >= 0, 'Cannot decrease the application version')
+        boolean changed = version != current.version
+        int code = parseCode(requestedCode != null ? requestedCode : (current.code + (changed ? 1L : 0L)).toString())
+        requireCondition(changed ? code > current.code : code == current.code, 'A new version must increase versionCode; an existing version must keep it')
+        def app = replaceOne(read('app-info.properties'), ~/(?m)^application\.version\.name=.+$/, "application.version.name=${version}")
+        app = replaceOne(app, ~/(?m)^application\.version\.code=.+$/, "application.version.code=${code}")
+        def recipePath = "fdroid/metadata/${current.applicationId}.yml".toString()
+        def recipe = read(recipePath)
+        def startMatcher = ~/(?m)^Builds:\n/
+        def startMatch = startMatcher.matcher(recipe)
+        int start = startMatch.find() ? startMatch.start() : -1
+        int end = start < 0 ? -1 : recipe.indexOf('\nAllowedAPKSigningKeys:', start)
+        requireCondition(start >= 0 && end > start, 'Unsupported recipe layout: review Builds/AllowedAPKSigningKeys')
+        def section = recipe.substring(start, end)
+        def entries = []
+        def entryMatcher = ~/(?m)^  - versionName: (.+)$/
+        def matches = entryMatcher.matcher(section)
+        while (matches.find()) entries << [version: matches.group(1), index: matches.start()]
+        requireCondition(!entries.isEmpty(), 'Missing F-Droid build entry')
+        def last = section.substring(entries.last().index).stripTrailing()
+        requireCondition(entries.last().version == current.version && Pattern.compile("(?m)^    versionCode: ${current.code}\$".toString()).matcher(last).find(), 'Current F-Droid recipe does not match app-info.properties')
+        if (changed) {
+            requireCondition(!entries.any { it.version == version }, 'Recipe already contains this version')
+            def next = replaceOne(last, ~/(?m)^  - versionName: .+$/, "  - versionName: ${version}")
+            next = replaceOne(next, ~/(?m)^    versionCode: .+$/, "    versionCode: ${code}")
+            next = replaceOne(next, ~/(?m)^    commit: .+$/, "    commit: v${version}")
+            recipe = recipe.substring(0, end).stripTrailing() + '\n\n' + next + '\n' + recipe.substring(end)
+        }
+        recipe = replaceOne(recipe, ~/(?m)^CurrentVersion: .+$/, "CurrentVersion: ${version}")
+        recipe = replaceOne(recipe, ~/(?m)^CurrentVersionCode: .+$/, "CurrentVersionCode: ${code}")
+        def logs = LOCALES.collect { "fastlane/metadata/android/${it}/changelogs/${code}.txt".toString() }
+        // Check every collision before changing any version file.
+        if (changed) logs.each { requireCondition(!new File(root, it).exists(), "Changelog already exists: ${it}") }
+        new File(root, 'app-info.properties').setText(app, 'UTF-8')
+        new File(root, recipePath).setText(recipe, 'UTF-8')
+        logs.each { path ->
+            def file = new File(root, path)
+            if (!file.exists()) {
+                file.parentFile.mkdirs()
+                file.setText('TODO: Replace with release notes (maximum 500 characters).\n', 'UTF-8')
+            }
+        }
+        info() + [changelogs: logs]
+    }
+    String git(List<String> args) {
+        // Pass arguments directly, without a shell; tag names cannot become shell commands.
+        def process = new ProcessBuilder(['git'] + args).directory(root).redirectErrorStream(true).start()
+        def output = process.inputStream.getText('UTF-8').trim()
+        int status = process.waitFor()
+        requireCondition(status == 0, "git ${args.join(' ')} failed: ${output}")
+        output
+    }
+    Map check(String tag, boolean history, String outputDir) {
+        def result = info()
+        requireCondition(!history || tag != null, '-PreleaseHistory=true requires -PreleaseTag=vMAJOR.MINOR.PATCH')
+        requireCondition(tag == null || tag == result.tag, "Tag ${tag} differs from source version ${result.tag}")
+        if (tag != null) {
+            requireCondition(git(['rev-parse', "refs/tags/${tag}^{commit}".toString()]) == git(['rev-parse', 'HEAD']), 'Checkout must be the exact tagged commit')
+            if (history) {
+                git(['tag', '--list', 'v*']).readLines().findAll { it != tag && it.startsWith('v') && VERSION.matcher(it.substring(1)).matches() }.each { previous ->
+                    requireCondition(compareVersions(result.version, previous.substring(1)) > 0, "Version must be newer than existing ${previous}")
+                    def previousInfo = parseProperties(git(['show', "${previous}:app-info.properties".toString()]))
+                    int previousCode = parseCode(previousInfo['application.version.code'])
+                    requireCondition(result.code > previousCode, "versionCode must be greater than ${previousCode} from ${previous}")
+                }
+            }
+        }
+        def recipe = read("fdroid/metadata/${result.applicationId}.yml")
+        def fingerprint = (recipe =~ /(?m)^AllowedAPKSigningKeys:\n  - ([a-f0-9]{64})$/)
+        requireCondition(fingerprint.find(), 'Missing F-Droid signing certificate fingerprint')
+        result.certificateSha256 = fingerprint.group(1)
+        def notes = LOCALES.collect { locale ->
+            def text = read("fastlane/metadata/android/${locale}/changelogs/${result.code}.txt").trim()
+            int length = text.codePointCount(0, text.length())
+            requireCondition(length > 0 && length <= 500, "${locale}: changelog must contain 1–500 characters")
+            requireCondition(!(text =~ /(?i)\b(TODO|TBD|PLACEHOLDER)\b/).find(), "${locale}: finish the changelog before release")
+            text
+        }
+        if (outputDir != null) {
+            requireCondition(!outputDir.isBlank(), 'releaseOutputDir must not be empty')
+            // Resolve Git before writing any output files.
+            def commit = git(['rev-parse', 'HEAD'])
+            def destination = new File(outputDir)
+            if (!destination.isAbsolute()) destination = new File(root, outputDir)
+            destination.mkdirs()
+            new File(destination, 'release-notes.md').setText("# Keyra ${result.version}\n\n## Русский\n\n${notes[1]}\n\n## English\n\n${notes[0]}\n", 'UTF-8')
+            new File(destination, 'release.json').setText(JsonOutput.prettyPrint(JsonOutput.toJson(result + [commit: commit])) + '\n', 'UTF-8')
+        }
+        result
+    }
+}
+
+def tooling = new KeyraRelease(rootDir)
+def report = { Map value ->
+    def githubOutput = providers.environmentVariable('GITHUB_OUTPUT').orNull
+    if (githubOutput) {
+        new File(githubOutput).append(value.findAll { key, item -> !(item instanceof Collection) }
+            .collect { key, item -> "${key}=${item}\n" }.join(''), 'UTF-8')
+    }
+    logger.lifecycle(JsonOutput.prettyPrint(JsonOutput.toJson(value)))
+}
+tasks.register('prepareRelease') {
+    group = 'release'
+    description = 'Updates committed version, F-Droid recipe, and changelog templates (-PreleaseVersion=...).'
+    doLast {
+        report(tooling.prepare(providers.gradleProperty('releaseVersion').orNull, providers.gradleProperty('releaseCode').orNull))
+        logger.lifecycle('Edit both changelogs, review the diff, commit, then create and push the tag. No commit or tag was created.')
+    }
+}
+tasks.register('checkRelease') {
+    group = 'verification'
+    description = 'Checks release version, changelogs, optional tag/history, and writes optional release files.'
+    mustRunAfter 'prepareRelease'
+    doLast {
+        def history = providers.gradleProperty('releaseHistory').getOrElse('false')
+        KeyraRelease.requireCondition(history in ['true', 'false'], 'releaseHistory must be true or false')
+        report(tooling.check(providers.gradleProperty('releaseTag').orNull, history == 'true', providers.gradleProperty('releaseOutputDir').orNull))
+    }
+}

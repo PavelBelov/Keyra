@@ -5,8 +5,8 @@ The metadata, licenses, and recipe are prepared locally; no release tag, GitHub
 Release, or GitLab merge request is created by this preparation.
 
 The GitHub Actions release workflow can build, sign, and publish the reference APK
-after a version tag is pushed. See [RELEASING.md](../RELEASING.md) for one-time
-secret setup and `node scripts/release.cjs prepare VERSION`, which updates the
+after a version tag is pushed. The command
+`sh ./gradlew prepareRelease -PreleaseVersion=VERSION` updates the
 committed version, appends a recipe build entry, and creates localized changelogs.
 It does not submit changes to fdroiddata or verify buildserver reproducibility.
 
@@ -65,17 +65,26 @@ validation passed for both languages and all 67 unique runtime artifact records;
 the 68 retained third-party database icons passed provenance and byte-identical re-render checks. Database icon 64 has since been independently redrawn as original Keyra artwork.
 
 ```powershell
-.\scripts\build.ps1 -Tasks @('-I', 'scripts/fdroid-audit.init.gradle', ':app:fdroidAudit')
-.\scripts\export-dependency-licenses.ps1
-node scripts/validate-fdroid.cjs
+.\gradlew.bat exportDependencyLicenses
+.\gradlew.bat validateFdroid
 ```
 
-The last command uses local developer tooling. Install the pinned package
-if absent; it is not a runtime dependency or part of the F-Droid Android build:
+The last command runs the project-specific validation task. On Linux/macOS use:
 
-```powershell
-npm install --prefix .tools/fdroid-validation --no-audit --no-fund --ignore-scripts yaml@2.8.1
+```sh
+sh ./gradlew validateFdroid
 ```
+
+To regenerate the license report on Linux/macOS, use
+`sh ./gradlew exportDependencyLicenses`. The single task
+`:app:exportDependencyLicenses` in `scripts/dependency-audit.gradle` resolves release
+artifacts and downloads missing POMs through Gradle without intermediate JSON. It overwrites
+`fdroid/dependency-audit.json` only after all licenses have been resolved and reviewed
+by the script's allowlist. No PowerShell or manual Gradle cache path is needed.
+
+It requires the normal JDK/Gradle build environment; Node.js and npm are not needed.
+Gradle downloads the pinned YAML parser automatically on the first run. This is a
+build-tool dependency only and is not packaged into the app.
 
 The YAML/length/hash checks are local structural validation. Native `fdroid lint`,
 the F-Droid scanner, Linux assembly, and reproducibility comparison are separate
