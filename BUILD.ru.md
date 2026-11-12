@@ -1,5 +1,7 @@
 # Сборка Keyra
 
+[English](BUILD.md) | [Русский](BUILD.ru.md)
+
 ## Необходимые компоненты
 
 - JDK 17.

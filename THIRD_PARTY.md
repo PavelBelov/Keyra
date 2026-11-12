@@ -4,34 +4,17 @@ Keyra's own code is licensed under `GPL-3.0-or-later`; see [LICENSING.md](LICENS
 
 The release runtime dependency audit is in [fdroid/dependency-audit.json](fdroid/dependency-audit.json), with every selected external artifact, version, SHA-256, declared license, POM URL/hash, and inherited-license evidence. The current graph contains **67 unique external artifacts: 66 Apache-2.0 and 1 MIT**, after deduplicating identical artifact selections. This is the classpath before R8 shrinking, not a count of libraries whose code survives in the APK. See [the audit scope and findings](fdroid/LICENSE_AUDIT.md).
 
-| Component | License / terms |
-| --- | --- |
-| Kotlin stdlib 2.1.21 and JDK bridges 1.8.22; coroutines 1.10.2; serialization-core-jvm 1.7.3 | Apache-2.0 |
-| AndroidX | Apache-2.0 |
-| OkHttp, Okio | Apache-2.0 |
-| Kotpass 0.13.0 | MIT; includes Apache Commons / kotlin-xml-builder code (Apache-2.0) and Bouncy Castle cryptographic components under their permissive license |
-| Guava ListenableFuture 1.0 | Apache-2.0, inherited from guava-parent 26.0-android |
-| JetBrains annotations 23.0.0; JSpecify 1.0.0 | Apache-2.0 |
-| 68 database icons from KeePassXC | 56 MIT and 12 CC0-1.0; see [provenance](fdroid/vault-icon-provenance.json) and [notices](app/src/main/assets/licenses/KeePassXC-Icons-NOTICE.txt) |
-| JUnit, MockWebServer | Test dependencies only; not included in the app |
+| Component                                                                                    | License / terms                                                                                                                                   |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kotlin stdlib 2.1.21 and JDK bridges 1.8.22; coroutines 1.10.2; serialization-core-jvm 1.7.3 | Apache-2.0                                                                                                                                        |
+| AndroidX                                                                                     | Apache-2.0                                                                                                                                        |
+| OkHttp, Okio                                                                                 | Apache-2.0                                                                                                                                        |
+| Kotpass 0.13.0                                                                               | MIT; includes Apache Commons / kotlin-xml-builder code (Apache-2.0) and Bouncy Castle cryptographic components under their permissive license     |
+| Guava ListenableFuture 1.0                                                                   | Apache-2.0, inherited from guava-parent 26.0-android                                                                                              |
+| JetBrains annotations 23.0.0; JSpecify 1.0.0                                                 | Apache-2.0                                                                                                                                        |
+| 68 database icons from KeePassXC                                                             | 56 MIT and 12 CC0-1.0; see [provenance](fdroid/vault-icon-provenance.json) and [notices](app/src/main/assets/licenses/KeePassXC-Icons-NOTICE.txt) |
+| JUnit, MockWebServer                                                                         | Test dependencies only; not included in the app                                                                                                   |
 
 Kotpass source and license: [keemobile/kotpass](https://github.com/keemobile/kotpass).
-The local `.tools/` directory contains development tools and is excluded from both the app and Git.
 
-The APK includes Kotpass, Apache, Bouncy Castle, and database-icon license texts and notices in `assets/licenses/`. The database SVG originals are available at the pinned upstream revision linked in the icon notice; they are not stored in this repository. Keyra's own application logo and independently redrawn database icon 64 (vault_icon_64.png) are covered by the project's GPL-3.0-or-later licensing declaration.
-
-To refresh the runtime audit using the normal Gradle build environment:
-
-```powershell
-.\gradlew.bat exportDependencyLicenses
-```
-
-On Linux/macOS use `sh ./gradlew exportDependencyLicenses`. The single task
-`:app:exportDependencyLicenses` in `scripts/dependency-audit.gradle` resolves the
-release artifacts, calculates their SHA-256 hashes, and resolves POMs (including
-parents) through Gradle using its configured repositories and user home. It writes
-the final report directly, with no intermediate JSON. No PowerShell or manual cache path is required.
-Missing artifacts require network access; a fully cached run can use `--offline`.
-A new or unresolved license fails the export without replacing the existing license
-report and must be reviewed explicitly. JUnit and MockWebServer are test tooling
-and are not runtime dependencies of the app.
+The APK includes Kotpass, Apache, Bouncy Castle, and database-icon license texts and notices in `assets/licenses/`. The database SVG originals are available at the pinned upstream revision linked in the icon notice; they are not stored in this repository.
