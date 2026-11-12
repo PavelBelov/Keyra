@@ -136,7 +136,7 @@ jobs:
         with:
           name: release-signed
           path: dist/release
-      - name: Publish complete release with localized changelogs
+      - name: Publish complete release with English changelog
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

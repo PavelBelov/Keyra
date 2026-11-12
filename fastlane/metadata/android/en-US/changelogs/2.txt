@@ -1,0 +1,2 @@
+Improved the app build and signing process.
+Added build validation for F-Droid.

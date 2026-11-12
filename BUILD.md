@@ -206,6 +206,7 @@ and run `checkRelease`.
 Checks the version, versionCode, application ID,
 the presence of the certificate fingerprint in the recipe, and the changelogs.
 Each changelog must contain 1–500 characters without `TODO`, `TBD`, or `PLACEHOLDER` markers.
+GitHub release notes contain only the English changelog from `en-US/changelogs/<versionCode>.txt`.
 Run it together with `validateFdroid` to check the recipe's consistency and the remaining metadata.
 
 Without additional parameters, the task does not modify the project's source files or metadata.
