@@ -4,21 +4,21 @@
 
 ## Необходимые компоненты
 
-- JDK 17.
+- JDK 21.
 - Android SDK Platform — API 36 (`platforms;android-36`).
 - Android SDK Build Tools — 35.0.0 (`build-tools;35.0.0`).
 - Android SDK Platform-Tools — для установки приложения и тестов на устройстве.
 
 ### JDK
 
-Для сборки из терминала укажите в `JAVA_HOME` путь к корневой папке JDK 17,
+Для сборки из терминала укажите в `JAVA_HOME` путь к корневой папке JDK 21,
 а не к её папке `bin`. Если переменная не задана, Wrapper ищет Java в `PATH`.
 
 <details>
 <summary>Windows / PowerShell</summary>
 
 ```powershell
-$env:JAVA_HOME = 'C:\Java\jdk-17'
+$env:JAVA_HOME = 'C:\Java\jdk-21'
 & "$env:JAVA_HOME\bin\java.exe" -version
 ```
 
@@ -28,7 +28,7 @@ $env:JAVA_HOME = 'C:\Java\jdk-17'
 <summary>Linux / macOS</summary>
 
 ```sh
-export JAVA_HOME=/path/to/jdk-17
+export JAVA_HOME=/path/to/jdk-21
 "$JAVA_HOME/bin/java" -version
 ```
 
@@ -36,7 +36,7 @@ export JAVA_HOME=/path/to/jdk-17
 
 В Android Studio JDK для Gradle выбирается отдельно:
 **Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK**.
-Выберите JDK 17. При сборке из IDE этот выбор может отличаться от `JAVA_HOME` в терминале. Подробнее — в [документации Android о JDK](https://developer.android.com/build/jdks).
+Выберите JDK 21. При сборке из IDE этот выбор может отличаться от `JAVA_HOME` в терминале. Подробнее — в [документации Android о JDK](https://developer.android.com/build/jdks).
 
 ### Android SDK
 

@@ -3,11 +3,11 @@ FROM ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl git unzip zip sudo openjdk-17-jdk-headless \
+    ca-certificates curl git unzip zip sudo openjdk-21-jdk-headless \
     python3 python3-venv python3-pip python3-magic apksigner \
     && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
     ANDROID_HOME=/opt/android-sdk \
     ANDROID_SDK_ROOT=/opt/android-sdk \
     LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC
@@ -38,7 +38,7 @@ RUN curl --fail --location --retry 3 \
     echo 'f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6  /tmp/gradle.zip' | sha256sum --check && \
     unzip -q /tmp/gradle.zip -d /opt && rm /tmp/gradle.zip
 
-RUN update-java-alternatives --set java-1.17.0-openjdk-amd64 && \
+RUN update-java-alternatives --set java-1.21.0-openjdk-amd64 && \
     useradd --create-home --uid 10001 builder && \
     echo 'builder ALL=(root) NOPASSWD: /usr/sbin/update-java-alternatives' > /etc/sudoers.d/keyra-builder && \
     mkdir /work && chown builder:builder /work && \

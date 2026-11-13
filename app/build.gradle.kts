@@ -2,6 +2,8 @@ import java.util.Properties
 
 plugins { id("com.android.application"); kotlin("android") }
 
+kotlin { jvmToolchain(21) }
+
 val appInfo = Properties().apply {
     rootProject.file("app-info.properties").reader(Charsets.UTF_8).use { load(it) }
 }
@@ -56,8 +58,8 @@ android {
         }
     }
     testBuildType = providers.gradleProperty("androidTestBuildType").getOrElse("debug")
-    compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
-    kotlinOptions { jvmTarget = "17" }
+    compileOptions { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
+    kotlinOptions { jvmTarget = "21" }
 }
 dependencies {
     testImplementation(kotlin("test-junit"))
