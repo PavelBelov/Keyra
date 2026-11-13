@@ -20,12 +20,14 @@ internal object AutofillResponses {
     fun trustedBrowser(preferences: SharedPreferences, target: FillTarget): Boolean =
         target.domain != null && preferences.getString("browser.${target.packageName}", null) == target.certificate
 
-    fun candidates(database: KeePassDatabase, target: FillTarget): List<Entry> = database.findEntries { entry ->
+    fun candidates(database: KeePassDatabase, target: FillTarget, requireTrusted: Boolean = true): List<Entry> = database.findEntries { entry ->
         if (target.domain != null) runCatching {
-            entry.fields.url?.content.orEmpty().toUri().host?.equals(target.domain, true) == true
+            val uri = entry.fields.url?.content.orEmpty().toUri()
+            uri.scheme?.lowercase(java.util.Locale.ROOT) in setOf("http", "https") &&
+                uri.host?.equals(target.domain, true) == true
         }.getOrDefault(false)
-        else entry.fields["Keyra.Package"]?.content == target.packageName &&
-            entry.fields["Keyra.Signature"]?.content == target.certificate
+        else if (requireTrusted) ApplicationBinding.trusted(entry, target.packageName, target.certificate)
+        else ApplicationBinding.matches(entry, target.packageName)
     }.flatMap { it.second }
 
     private fun presentation(context: Context, title: String) =

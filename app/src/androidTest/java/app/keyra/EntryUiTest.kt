@@ -34,6 +34,9 @@ import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.Group
 import app.keyra.core.Kdbx
+import app.keyra.autofill.FillRequests
+import app.keyra.autofill.FillTarget
+import app.keyra.autofill.packageCertificate
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
@@ -95,7 +98,7 @@ class EntryUiTest {
     }
 
     @After fun tearDown() {
-        if (::activity.isInitialized) onUi { activity.finish() }
+        if (::activity.isInitialized) onUi { if (!activity.isFinishing) activity.finish() }
         instrumentation.waitForIdleSync()
         if (::repository.isInitialized) repository.lock()
         if (::app.isInitialized && ::originalRepository.isInitialized) {
@@ -272,6 +275,45 @@ class EntryUiTest {
         await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.webdav_name) }
         screenshot("webdav")
         emptyRepository.lock()
+    }
+
+    @Test fun autofillPickerBrowsesFoldersSearchesAndSavesBinding() {
+        onUi { activity.finish() }
+        instrumentation.waitForIdleSync()
+        val autofillId = onUiValue { EditText(context).autofillId }
+        val certificate = packageCertificate(context.packageManager, context.packageName)
+        val token = FillRequests.put(FillTarget(autofillId, null, context.packageName, null,
+            certificate, System.currentTimeMillis() + 120_000))
+        try {
+            activity = instrumentation.startActivitySync(Intent(context, MainActivity::class.java)
+                .putExtra("fillToken", token).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
+            await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.autofill_select_entry) }
+            assertEquals(View.GONE, onUiValue { activity.findViewById<View>(R.id.addButton).visibility })
+            assertEquals(View.GONE, onUiValue { activity.findViewById<View>(R.id.menuButton).visibility })
+            await { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>().any { it.text.toString() == "QA Folder" } }
+            clickPopupText("QA Folder")
+            await { activity.findViewById<TextView>(R.id.header).text.toString() == "QA Folder" }
+            click(R.id.navigateBack)
+            await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.autofill_select_entry) }
+            click(R.id.searchButton)
+            onUi { activity.findViewById<EditText>(R.id.headerSearch).setText("no-such-entry") }
+            await { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>().any { it.visibility == View.VISIBLE && it.text.toString() == activity.getString(R.string.search_empty) } }
+            onUi { activity.findViewById<EditText>(R.id.headerSearch).setText("UI Synthetic") }
+            await { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>().any { it.text.toString() == "UI Synthetic Entry" } }
+            screenshot("autofill-picker-search")
+            clickPopupText("UI Synthetic Entry")
+            clickPopupText(activity.getString(R.string.ui_cancel_82))
+            assertNull(repository.database.value!!.getEntryBy { uuid == entryId }!!.fields["AndroidApp"])
+            clickPopupText("UI Synthetic Entry")
+            clickPopupText(activity.getString(R.string.ui_allow_186))
+            await { activity.isFinishing }
+            val saved = repository.database.value!!.getEntryBy { uuid == entryId }!!
+            assertEquals(context.packageName, saved.fields["AndroidApp"]?.content)
+            assertEquals(certificate, saved.fields["AndroidApp Signature"]?.content)
+            assertEquals("https://example.test", saved.fields.url?.content)
+            assertEquals(password, saved.fields.password?.content)
+            assertNull(FillRequests.get(token))
+        } finally { FillRequests.remove(token) }
     }
 
     private fun openEntry() {

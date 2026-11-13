@@ -311,4 +311,6 @@
     <string name="about_licenses">Lizenzen und Hinweise</string>
     <string name="about_link_unavailable">Keine App zum Öffnen dieses Links verfügbar.</string>
     <string name="about_warranty">Ohne Gewährleistung bereitgestellt. Bedingungen siehe Lizenzen.</string>
+    <string name="autofill_select_entry">Eintrag auswählen</string>
+    <string name="autofill_select_for_app">Wählen Sie einen Eintrag zum Anmelden bei %1$s. Öffnen Sie einen Ordner oder durchsuchen Sie Ihre Datenbank.</string>
 </resources>

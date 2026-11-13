@@ -311,4 +311,6 @@
     <string name="about_licenses">Licenze e avvisi</string>
     <string name="about_link_unavailable">Nessuna applicazione disponibile per aprire questo collegamento.</string>
     <string name="about_warranty">Fornita senza garanzie. Consultare le licenze per le condizioni.</string>
+    <string name="autofill_select_entry">Seleziona una voce</string>
+    <string name="autofill_select_for_app">Seleziona una voce per accedere a %1$s. Apri una cartella o cerca nel database.</string>
 </resources>

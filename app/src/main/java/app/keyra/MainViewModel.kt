@@ -22,6 +22,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var entry: UUID? = null
     var query = ""
     var searching = false
+    var autofillInitialized = false
+    var autofillPickerToken: String? = null
+    var linkingAutofill = false
     var panel: Panel? = null
     var syncSourceKind: String? = null
     var editing: EntryDraft? = null
