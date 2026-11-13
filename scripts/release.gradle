@@ -84,6 +84,8 @@ class KeyraRelease {
             def next = replaceOne(last, ~/(?m)^  - versionName: .+$/, "  - versionName: ${version}")
             next = replaceOne(next, ~/(?m)^    versionCode: .+$/, "    versionCode: ${code}")
             next = replaceOne(next, ~/(?m)^    commit: .+$/, "    commit: v${version}")
+            // New release entries use the current build JDK.
+            next = replaceOne(next, ~/(?m)^      - update-java-alternatives --set java-1\.\d+\.0-openjdk-amd64$/, '      - update-java-alternatives --set java-1.21.0-openjdk-amd64')
             recipe = recipe.substring(0, end).stripTrailing() + '\n\n' + next + '\n' + recipe.substring(end)
         }
         recipe = replaceOne(recipe, ~/(?m)^CurrentVersion: .+$/, "CurrentVersion: ${version}")

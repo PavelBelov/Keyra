@@ -36,21 +36,26 @@ F-Droid's `WebSite` field should not duplicate the source-repository URL.
 
 The current app has one full-featured release variant and no proprietary payment,
 advertising, or analytics SDK. It does not need a dedicated F-Droid flavor yet.
-The recipe builds the `app` module using Gradle 8.11.1, AGP 8.10.1, OpenJDK 17,
+Current sources build the `app` module using Gradle 8.11.1, AGP 8.10.1, OpenJDK 21,
 Android SDK Platform 36, and explicitly pinned Build Tools 35.0.0.
 
-The standard F-Droid VM is expected to provide its OpenJDK 17 alternative
-`java-1.17.0-openjdk-amd64`; the recipe selects it with `sudo`. A local Linux build
-must select OpenJDK 17 via JAVA_HOME as well. The VM command remains to be tested
-in the target build environment.
+The draft contains a single build entry for the next release, `v0.1.2` (3),
+using `java-1.21.0-openjdk-amd64`. Earlier entries have been removed because
+Keyra has not been published in F-Droid. Existing GitHub tags are unchanged.
+The target F-Droid VM must provide this Java alternative; its availability and
+the command remain to be tested there. The local preflight container installs
+and selects only OpenJDK 21. Gradle, both module toolchains, and Java/Kotlin
+bytecode targets are set to 21.
 
-`Binaries` currently points to the published first-release asset:
+This entry is preparation for a future tag and public APK, not evidence that
+`v0.1.2` has been published. Publish the reviewed sources and signed reference
+through the Release workflow, then run the Linux/F-Droid checks before submitting.
+`Binaries` derives the reference URL from the build version:
 
-`https://github.com/PavelBelov/Keyra/releases/download/v0.1.0/keyra-0.1.0.apk`
+`https://github.com/PavelBelov/Keyra/releases/download/v%v/keyra-%v.apk`
 
-This existing APK is not a passing reproducible reference; see the result above.
-Do not replace that asset or move the tag to conceal the failure. The next
-version must include the corrected signing workflow and pass comparison anew.
+Do not move existing tags or replace published assets. The new release must pass
+signature-copy verification using the current JDK 21 environment.
 
 `AllowedAPKSigningKeys` contains the **certificate** SHA-256 read from the existing
 signed `.release/release/keyra.apk`:
@@ -112,23 +117,22 @@ buildserver VM/CI and comparison of the next real signed release remain pending.
 2. Commit the preparation and corrected legal notices. Confirm the repository
    can be cloned publicly without authentication and source checkout builds
    without `.tools`, local SDK paths, or signing secrets.
-3. Prepare the next version (for example `0.1.1`) with
-   `sh ./gradlew prepareRelease -PreleaseVersion=0.1.1`, fill both changelogs,
-   and commit it together with the corrected Release workflow. Use a new immutable
-   tag. `v0.1.0` already exists and must not be moved.
+3. Review the prepared version `0.1.2` (3), both changelogs, and the JDK 21
+   configuration, then commit them with the Release workflow. Create a new
+   immutable tag `v0.1.2` for that commit. Existing tags must not be moved.
 4. Build/sign that exact tag with the permanent key whose fingerprint is listed
    above, using `apksigner --alignment-preserved true`. The fixed GitHub Release
    workflow does this. No replacement signing key is needed.
 5. Publish the next signed reference APK via that workflow, then run the
    [Linux/F-Droid checks](verification/README.md) against its actual public asset.
    A disposable-key smoke test does not replace this last comparison.
-6. For the first fdroiddata submission, include the passing new build entry;
-   remove or explicitly disable the old failing `0.1.0` entry before submission.
-   Review MaintainerNotes, record the APK file SHA-256, and retain the R8 mapping.
+6. For the first fdroiddata submission, include only the new build entry after
+   its checks pass. Review MaintainerNotes, record the APK file SHA-256, and
+   retain the R8 mapping.
 7. In a fork of [fdroiddata](https://gitlab.com/fdroid/fdroiddata), copy the recipe,
    run `fdroid rewritemeta xnet13.keyra` and `fdroid lint xnet13.keyra`. In a
    provisioned build-server setup, run
-   `fdroid build --server --test --verbose xnet13.keyra:1` and inspect scanner and
+   `fdroid build --server --test --verbose xnet13.keyra:3` and inspect scanner and
    reproducibility results. Submit the reviewed recipe as a merge request.
 
 References: [submission guide](https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/),

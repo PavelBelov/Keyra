@@ -35,7 +35,7 @@ run_check() {
     fdroid --version
     /opt/gradle-8.11.1/bin/gradle --version
     pip freeze
-    dpkg-query -W openjdk-17-jdk-headless
+    dpkg-query -W openjdk-21-jdk-headless
     cat /opt/android-sdk/build-tools/35.0.0/source.properties
 } > "$output/environment.txt" 2>&1
 

@@ -78,13 +78,6 @@ Synchronization is not a substitute for backups: keep separate copies of your da
 
 The mapping between Android versions and API levels is available in the [Android documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element).
 
-## Plans
-
-- Support for SFTP — file transfer over SSH.
-- More ways to connect to remote storage.
-
-These features have not been implemented yet.
-
 ## License
 
 Keyra's own code is licensed under **GNU GPL version 3 or later** (`GPL-3.0-or-later`). See [LICENSE](LICENSE) for the full text and [LICENSING.md](LICENSING.md) for scope and third-party exceptions.

@@ -4,21 +4,21 @@
 
 ## Required components
 
-- JDK 17.
+- JDK 21.
 - Android SDK Platform — API 36 (`platforms;android-36`).
 - Android SDK Build Tools — 35.0.0 (`build-tools;35.0.0`).
 - Android SDK Platform-Tools — for installing the app and running tests on a device.
 
 ### JDK
 
-To build from the terminal, set `JAVA_HOME` to the root directory of JDK 17,
+To build from the terminal, set `JAVA_HOME` to the root directory of JDK 21,
 not its `bin` directory. If this variable is not set, the Wrapper looks for Java in `PATH`.
 
 <details>
 <summary>Windows / PowerShell</summary>
 
 ```powershell
-$env:JAVA_HOME = 'C:\Java\jdk-17'
+$env:JAVA_HOME = 'C:\Java\jdk-21'
 & "$env:JAVA_HOME\bin\java.exe" -version
 ```
 
@@ -28,7 +28,7 @@ $env:JAVA_HOME = 'C:\Java\jdk-17'
 <summary>Linux / macOS</summary>
 
 ```sh
-export JAVA_HOME=/path/to/jdk-17
+export JAVA_HOME=/path/to/jdk-21
 "$JAVA_HOME/bin/java" -version
 ```
 
@@ -36,7 +36,7 @@ export JAVA_HOME=/path/to/jdk-17
 
 In Android Studio, select the JDK for Gradle separately under:
 **Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK**.
-Choose JDK 17. When building from the IDE, this setting may differ from `JAVA_HOME`
+Choose JDK 21. When building from the IDE, this setting may differ from `JAVA_HOME`
 in the terminal. See the [Android JDK documentation](https://developer.android.com/build/jdks) for details.
 
 ### Android SDK

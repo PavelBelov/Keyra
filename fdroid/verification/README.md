@@ -44,11 +44,12 @@ F-Droid build также самостоятельно выполняет сра�
 минут. Оставьте Docker не менее 6 GiB памяти и несколько GiB свободного диска.
 Команды выполняются из корня Keyra.
 
-Подготовьте публичные входные файлы (пример для первого релиза):
+После публикации релиза на JDK 21 подготовьте его публичные входные файлы
+(пример для версии 0.1.2; тег и APK должны уже существовать):
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$keyraVersion = '0.1.0'
+$keyraVersion = '0.1.2'
 $keyraTag = 'v' + $keyraVersion
 $checkDir = Join-Path $PWD.Path 'dist/fdroid-check'
 New-Item -ItemType Directory -Force $checkDir | Out-Null
@@ -95,7 +96,8 @@ F-Droid build не мешает независимой Linux-сборке: эт�
 ## Версии и ограничения
 
 - База Ubuntu 24.04 закреплена по digest в Dockerfile.
-- JDK 17, Gradle 8.11.1 с SHA-256 из wrapper проекта, Android Platform 36 и
+- Только JDK 21, включая уровень байткода Java/Kotlin;
+  Gradle 8.11.1 с SHA-256 из wrapper проекта, Android Platform 36 и
   Build Tools 35.0.0; Command-line Tools 19.0 проверяется по checksum Google.
 - fdroidserver 2.4.5; фактические версии его зависимостей записываются в отчёт.
 - Каталоги fdroiddata закреплены на коммите
@@ -104,8 +106,15 @@ F-Droid build не мешает независимой Linux-сборке: эт�
   Записывайте ID построенного образа (`docker image inspect IMAGE --format
   '{{.Id}}'`) вместе с результатами. При обновлении Gradle/SDK измените Dockerfile.
 - `sudo` из рецепта пропускается инструментом при локальном `fdroid build`.
-  Нужный JDK уже выбран при создании образа. Проверка команды в официальной VM
+  В образе установлен и выбран JDK 21. Та же версия закреплена через
+  `gradle/gradle-daemon-jvm.properties` и toolchain модулей.
+  JDK 21 должен быть доступен и в официальной VM.
+  Проверка команды в официальной VM
   и проверка CI fdroiddata остаются отдельными шагами.
+
+Отчёт `RESULTS-2026-11-12.md` описывает прежнее окружение сборки. Для JDK 21
+нужно заново выполнить Linux/F-Droid preflight и сравнение APK;
+старые результаты не подтверждают воспроизводимость новой среды сборки.
 
 При подписи Build Tools 35 и новее нужен `apksigner sign
 --alignment-preserved true`. Без него инструмент переписывает выравнивание

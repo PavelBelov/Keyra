@@ -16,21 +16,12 @@ Repo: https://github.com/PavelBelov/Keyra.git
 Binaries: https://github.com/PavelBelov/Keyra/releases/download/v%v/keyra-%v.apk
 
 Builds:
-  - versionName: 0.1.0
-    versionCode: 1
-    commit: v0.1.0
+  - versionName: 0.1.2
+    versionCode: 3
+    commit: v0.1.2
     subdir: app
     sudo:
-      - update-java-alternatives --set java-1.17.0-openjdk-amd64
-    gradle:
-      - yes
-
-  - versionName: 0.1.1
-    versionCode: 2
-    commit: v0.1.1
-    subdir: app
-    sudo:
-      - update-java-alternatives --set java-1.17.0-openjdk-amd64
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
     gradle:
       - yes
 
@@ -39,5 +30,5 @@ AllowedAPKSigningKeys:
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.1.1
-CurrentVersionCode: 2
+CurrentVersion: 0.1.2
+CurrentVersionCode: 3
