@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Keyra: run on phone",
+      "type": "PowerShell",
+      "request": "launch",
+      "preLaunchTask": "Keyra: run on phone",
+      // The task builds, installs, and opens the app; this command only finishes the launch.
+      "script": "Write-Host 'Keyra launched by task: Keyra: run on phone'",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": true,
+      "args": []
+    }
+  ]
+}
