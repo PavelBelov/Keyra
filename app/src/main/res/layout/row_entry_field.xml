@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="64dp"
     android:orientation="horizontal" android:padding="16dp" android:layout_marginTop="8dp" android:background="@drawable/bg_settings_card" android:importantForAutofill="noExcludeDescendants">
+    <ImageView android:id="@+id/applicationIcon" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center_vertical" android:layout_marginEnd="12dp" android:visibility="gone" android:importantForAccessibility="no" />
     <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="0dp" android:paddingEnd="8dp">
         <TextView android:id="@+id/fieldLabel" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="?android:attr/textColorSecondary" android:saveEnabled="false" />
         <TextView android:id="@+id/fieldValue" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textSize="17sp" android:textColor="?android:attr/textColorPrimary" android:saveEnabled="false" android:textIsSelectable="false" />

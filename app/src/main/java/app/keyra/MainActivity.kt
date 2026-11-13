@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     private var autoQuickAttempted = false
     private var startupPermissionPending = false
     private var loginPassword: EditText? = null
-    private var fillShown = false
+    private val autofillPicking get() = model.autofillPickerToken != null
     private var welcomeView: WelcomeView? = null
     private var welcomeFileCallback: ((Uri, String) -> Unit)? = null
     private var keyExportBytes: ByteArray? = null
@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                     model.group != null && model.group != db.content.group.uuid -> {
                         model.group = db.getGroup { it.uuid == model.group }?.first?.uuid ?: db.content.group.uuid; render()
                     }
+                    autofillPicking -> finish()
                     else -> requestExit()
                 }
             }
@@ -383,6 +384,12 @@ class MainActivity : AppCompatActivity() {
         loginPassword?.text?.clear(); loginPassword = null
         binding.content.removeAllViews()
         val db = repo.database.value
+        val fillToken = intent.getStringExtra("fillToken")
+        if (db != null && fillToken != null && !model.autofillInitialized) {
+            model.autofillInitialized = true
+            chooseAutofill(fillToken)
+            return
+        }
         updateToolbar(db)
         binding.addButton.visibility = View.GONE
         if (db == null) {
@@ -405,7 +412,17 @@ class MainActivity : AppCompatActivity() {
         val entry = model.entry?.let { id -> db.getEntryBy { uuid == id } }
         if (entry != null) { showEntry(entry); return }
         model.entry = null
-        binding.addButton.visibility = View.VISIBLE
+        binding.addButton.visibility = if (autofillPicking) View.GONE else View.VISIBLE
+        val fillTarget = model.autofillPickerToken?.let(FillRequests::get)
+        if (autofillPicking) {
+            if (fillTarget == null) { finish(); return }
+            val appName = runCatching {
+                packageManager.getApplicationLabel(packageManager.getApplicationInfo(fillTarget.packageName, 0)).toString()
+            }.getOrDefault(fillTarget.packageName)
+            binding.content.addView(panelInfo(if (fillTarget.domain != null)
+                L10n.text(this, R.string.autofill_select_for_website, AutofillResponses.websiteUrl(fillTarget) ?: fillTarget.domain)
+            else L10n.text(this, R.string.autofill_select_for_app, appName)))
+        }
         val group = model.group?.let { Kdbx.group(db, it) } ?: db.content.group
         model.group = group.uuid
         val recycler = RecyclerView(this).apply {
@@ -413,10 +430,14 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, dp(8), 0, dp(104)); clipToPadding = false
         }
         val adapter = RowsAdapter({ row ->
+            if (autofillPicking && !row.folder) {
+                db.getEntryBy { uuid == row.id }?.let { selectAutofillEntry(it) }
+                return@RowsAdapter
+            }
             hideKeyboard(); model.searching = false; model.query = ""
             if (row.folder) model.group = row.id else model.entry = row.id
             render()
-        }, ::rowMenu)
+        }, { row -> if (!autofillPicking) rowMenu(row) })
         listAdapter = adapter; recycler.adapter = adapter
         val emptyTitle = TextView(this).apply {
             textSize = 20f; gravity = Gravity.CENTER
@@ -442,7 +463,12 @@ class MainActivity : AppCompatActivity() {
             searchJob = lifecycleScope.launch {
                 delay(120)
                 val rows = withContext(Dispatchers.Default) {
-                    if (query.isBlank()) group.groups.map { Row(it.uuid, it.name, L10n.text(this@MainActivity, R.string.ui_folders_entries_59, it.groups.size, it.entries.size), true, icons.resolve(it)) } + group.entries.map { entryRow(it, icons) }
+                    if (query.isBlank()) {
+                        val suggested = if (fillTarget != null && group.uuid == db.content.group.uuid)
+                            AutofillResponses.candidates(db, fillTarget, requireTrusted = false).map { entryRow(it, icons) }
+                        else emptyList()
+                        (suggested + group.groups.map { Row(it.uuid, it.name, L10n.text(this@MainActivity, R.string.ui_folders_entries_59, it.groups.size, it.entries.size), true, icons.resolve(it)) } + group.entries.map { entryRow(it, icons) }).distinctBy { it.id }
+                    }
                     else db.searchUnprotected(query)
                         .flatMap { (g, entries) -> entries.map { entryRow(it, icons).copy(subtitle = "${g.name} · ${it.fields.userName?.content.orEmpty()}") } }
                 }
@@ -456,8 +482,6 @@ class MainActivity : AppCompatActivity() {
         }
         filterRows = ::filter
         filter(model.query)
-        val fillToken = intent.getStringExtra("fillToken")
-        if (fillToken != null && !fillShown) { fillShown = true; chooseAutofill(fillToken) }
     }
     private fun showLogin() {
         fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
@@ -598,7 +622,7 @@ class MainActivity : AppCompatActivity() {
         val searching = unlocked && model.searching && entry == null && !editing
         val folder = if (db != null) model.group?.takeIf { it != db.content.group.uuid }?.let { Kdbx.group(db, it) } else null
         val panel = model.panel
-        val canNavigateUp = !searching && (panel != null || editing || generator != null || entry != null || folder != null)
+        val canNavigateUp = !searching && (autofillPicking || panel != null || editing || generator != null || entry != null || folder != null)
         binding.header.text = when {
             panel == Panel.SETTINGS -> L10n.text(this@MainActivity, R.string.ui_settings_71)
             panel == Panel.DATA -> L10n.text(this@MainActivity, R.string.ui_data_72)
@@ -608,6 +632,7 @@ class MainActivity : AppCompatActivity() {
             draft != null -> draft.values["Title"]?.content.orEmpty().ifBlank { getString(if (draft.original == null) R.string.new_entry else R.string.edit_entry) }
             entry != null -> entry.fields.title?.content.orEmpty().ifBlank { getString(R.string.untitled_entry) }
             folder != null -> folder.name
+            autofillPicking -> L10n.text(this, R.string.autofill_select_entry)
             else -> getString(R.string.app_name)
         }
         binding.header.visibility = if (searching) View.GONE else View.VISIBLE
@@ -626,7 +651,7 @@ class MainActivity : AppCompatActivity() {
         binding.saveButton.alpha = if (binding.saveButton.isEnabled) 1f else 0.4f
         binding.saveButton.contentDescription = getString(if (generator != null) R.string.use_password else R.string.save_entry)
         binding.saveButton.tooltipText = binding.saveButton.contentDescription
-        binding.menuButton.visibility = if (panel == null && unlocked && !searching && generator == null) View.VISIBLE else View.GONE
+        binding.menuButton.visibility = if (!autofillPicking && panel == null && unlocked && !searching && generator == null) View.VISIBLE else View.GONE
         binding.menuButton.isEnabled = !model.saving.value
         binding.menuButton.contentDescription = getString(if (entry == null) R.string.open_menu else R.string.open_entry_menu)
         updatingSearch = true
@@ -665,8 +690,11 @@ class MainActivity : AppCompatActivity() {
     private fun entryRow(e: Entry, icons: VaultIcons) = Row(e.uuid, e.fields.title?.content.orEmpty().ifBlank { L10n.text(this@MainActivity, R.string.untitled_entry) }, e.fields.userName?.content.orEmpty(), false, icons.resolve(e))
     private fun showEntry(entry: Entry) {
         val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        orderedFields(entry.fields).filterNot { it.second.isEmpty() }.forEach { (name, value) ->
-            val row = EntryFieldView(this, fieldLabel(this, name), value, name == "Password" || value is EntryValue.Encrypted, ::copySecret, isUrl = name == "URL")
+        orderedFields(entry.fields).filterNot {
+            it.second.isEmpty() || it.first in setOf(ApplicationBinding.SIGNATURE, "Android Signature")
+        }.forEach { (name, value) ->
+            val row = EntryFieldView(this, fieldLabel(this, name), value, name == "Password" || value is EntryValue.Encrypted, ::copySecret,
+                isUrl = name == "URL", isApplication = name == ApplicationBinding.PACKAGE)
             entryFieldViews += row
             body.addView(row, LinearLayout.LayoutParams(-1, -2))
         }
@@ -1363,10 +1391,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun chooseAutofill(token: String) {
-        val target = FillRequests.get(token) ?: return
-        if (runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) return
+        val target = FillRequests.get(token) ?: run { finish(); return }
+        if (runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) { finish(); return }
+        if (target.domain == null) {
+            showAutofillPicker(token)
+            return
+        }
         val prefs = repo.store.preferences
-        if (target.domain != null && prefs.getString("browser.${target.packageName}", null) != target.certificate) {
+        if (prefs.getString("browser.${target.packageName}", null) != target.certificate) {
             dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_trust_this_browser_177))
                 .setMessage(L10n.text(this@MainActivity, R.string.ui_certificate_this_app_reports_the_website_address_allow_only_brows_178, target.packageName, target.certificate, target.domain))
                 .setNegativeButton(L10n.text(this@MainActivity, R.string.ui_cancel_82)) { _, _ -> finish() }
@@ -1375,35 +1407,87 @@ class MainActivity : AppCompatActivity() {
         }
         val db = repo.database.value ?: return
         val candidates = AutofillResponses.candidates(db, target)
-        if (target.domain != null && candidates.isNotEmpty() && !target.chooseInApp) {
-            val response = AutofillResponses.entries(this, target, candidates) ?: return
+        if (candidates.isNotEmpty() && !target.chooseInApp) {
+            val response = AutofillResponses.entries(this, target, candidates, VaultIcons(db.content.meta.customIcons)) ?: return
             FillRequests.remove(token)
             setResult(RESULT_OK, Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response))
             finish()
             return
         }
-        val body = column()
-        body.addView(label(if (target.domain == null) L10n.text(this@MainActivity, R.string.ui_app_180, target.packageName) else L10n.text(this@MainActivity, R.string.ui_website_181, target.domain)))
-        candidates.forEach { entry -> body.addView(button(entry.fields.title?.content.orEmpty() + " · " + entry.fields.userName?.content.orEmpty()) { finishAutofill(token, entry) }) }
-        if (target.domain == null) body.addView(button(L10n.text(this@MainActivity, R.string.ui_link_an_entry_to_this_app_182)) {
-            val all = Kdbx.entries(db)
-            dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_allow_autofill_in_183, target.packageName)).setItems(all.map { it.fields.title?.content.orEmpty() }.toTypedArray()) { _, index ->
-                val entry = all[index]
-                dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_link_this_entry_184)).setMessage(L10n.text(this@MainActivity, R.string.ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185, target.packageName, target.certificate))
-                    .setNegativeButton(L10n.text(this@MainActivity, R.string.ui_cancel_82), null).setPositiveButton(L10n.text(this@MainActivity, R.string.ui_allow_186)) { _, _ -> lifecycleScope.launch {
-                        repo.mutate { current -> Kdbx.putEntry(current, current.getEntry { it.uuid == entry.uuid }!!.first.uuid, Kdbx.edit(entry, entry.fields + mapOf("Keyra.Package" to EntryValue.Plain(target.packageName), "Keyra.Signature" to EntryValue.Plain(target.certificate)))) }
-                        if (repo.message.value.isEmpty()) finishAutofill(token, entry)
-                    } })
+        showAutofillPicker(token)
+    }
+    private fun showAutofillPicker(token: String) {
+        model.autofillPickerToken = token
+        model.group = null; model.entry = null; model.query = ""; model.searching = false
+        render()
+    }
+    private fun selectAutofillEntry(entry: Entry) {
+        if (model.linkingAutofill) return
+        val token = model.autofillPickerToken ?: return
+        val target = FillRequests.get(token) ?: run { finish(); return }
+        if (target.domain != null) {
+            selectWebsiteAutofillEntry(token, target, entry)
+            return
+        }
+        if (ApplicationBinding.trusted(entry, target.packageName, target.certificate)) {
+            finishAutofill(token, entry)
+            return
+        }
+        hideKeyboard()
+        dialog(AlertDialog.Builder(this).setTitle(L10n.text(this, R.string.ui_link_this_entry_184))
+            .setMessage(L10n.text(this, R.string.ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185, target.packageName, target.certificate))
+            .setNegativeButton(L10n.text(this, R.string.ui_cancel_82), null)
+            .setPositiveButton(L10n.text(this, R.string.ui_allow_186)) { _, _ ->
+                if (model.linkingAutofill) return@setPositiveButton
+                model.linkingAutofill = true
+                lifecycleScope.launch {
+                    try {
+                        if (FillRequests.get(token) == null || runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) {
+                            finish(); return@launch
+                        }
+                        repo.mutate { current ->
+                            val (parent, latest) = current.getEntry { it.uuid == entry.uuid } ?: error("ENTRY_NO_LONGER_EXISTS")
+                            Kdbx.putEntry(current, parent.uuid, Kdbx.edit(latest,
+                                ApplicationBinding.fields(latest, target.packageName, target.certificate)))
+                        }
+                        val saved = repo.database.value?.getEntryBy { uuid == entry.uuid }
+                        if (repo.message.value.isEmpty() && saved != null && ApplicationBinding.trusted(saved, target.packageName, target.certificate)) {
+                            finishAutofill(token, saved)
+                        }
+                    } finally { model.linkingAutofill = false }
+                }
             })
-        })
-        if (candidates.isEmpty() && target.domain != null) body.addView(label(L10n.text(this@MainActivity, R.string.ui_no_entries_exactly_match_this_domain_set_the_website_address_in_t_187)))
-        dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_autofill_188)).setView(scroll(body)).setNegativeButton(L10n.text(this@MainActivity, R.string.ui_cancel_82)) { _, _ -> finish() })
+    }
+    private fun selectWebsiteAutofillEntry(token: String, target: FillTarget, entry: Entry) {
+        val url = AutofillResponses.websiteUrl(target) ?: return
+        if (!AutofillResponses.trustedBrowser(repo.store.preferences, target)) return
+        hideKeyboard()
+        model.linkingAutofill = true
+        lifecycleScope.launch {
+            try {
+                if (FillRequests.get(token) == null || runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) {
+                    finish(); return@launch
+                }
+                repo.mutate { current ->
+                    val (parent, latest) = current.getEntry { it.uuid == entry.uuid } ?: error("ENTRY_NO_LONGER_EXISTS")
+                    val value = if (latest.fields.url is EntryValue.Encrypted)
+                        EntryValue.Encrypted(app.keemobile.kotpass.cryptography.EncryptedValue.fromString(url))
+                    else EntryValue.Plain(url)
+                    Kdbx.putEntry(current, parent.uuid, Kdbx.edit(latest, latest.fields + ("URL" to value)))
+                }
+                val saved = repo.database.value?.getEntryBy { uuid == entry.uuid }
+                if (repo.message.value.isEmpty() && saved != null && saved.fields.url?.content == url) {
+                    finishAutofill(token, saved)
+                }
+            } finally { model.linkingAutofill = false }
+        }
     }
     @Suppress("DEPRECATION")
     private fun finishAutofill(token: String, entry: Entry) {
         val target = FillRequests.get(token) ?: return
-        if (repo.database.value == null || runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) return
-        val dataset = AutofillResponses.dataset(this, target, entry)
+        val db = repo.database.value ?: return
+        if (runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) return
+        val dataset = AutofillResponses.dataset(this, target, entry, VaultIcons(db.content.meta.customIcons))
         val response: android.os.Parcelable = if (target.chooseInApp) dataset
             else android.service.autofill.FillResponse.Builder().addDataset(dataset).build()
         FillRequests.remove(token)

@@ -97,7 +97,7 @@ F-Droid build не мешает независимой Linux-сборке: эт�
 
 - База Ubuntu 24.04 закреплена по digest в Dockerfile.
 - Только JDK 21, включая уровень байткода Java/Kotlin;
-  Gradle 8.11.1 с SHA-256 из wrapper проекта, Android Platform 36 и
+  Gradle 9.1.0 с SHA-256 из wrapper проекта, Android Platform 36 и
   Build Tools 35.0.0; Command-line Tools 19.0 проверяется по checksum Google.
 - fdroidserver 2.4.5; фактические версии его зависимостей записываются в отчёт.
 - Каталоги fdroiddata закреплены на коммите

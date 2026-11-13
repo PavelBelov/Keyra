@@ -298,6 +298,10 @@
     <string name="chrome_autofill_manual">Open Chrome → Settings → Autofill and passwords → Autofill settings → Autofill using another service.</string>
     <string name="chrome_autofill_help">Select Keyra in Android and enable autofill using another service in Chrome. Restart Chrome if prompted. Entries match the exact website domain; email fields use the entry’s Username value.</string>
     <string name="autofill_more_entries">More entries…</string>
+    <string name="autofill_select">Select</string>
+    <string name="autofill_select_for_website">Select an entry for %1$s. Its website URL will be replaced with this address.</string>
+    <string name="autofill_select_entry">Select an entry</string>
+    <string name="autofill_select_for_app">Select an entry to fill in %1$s. Browse folders or search your vault.</string>
     <string name="about_title">About</string>
     <string name="about_version">Version</string>
     <string name="about_application_id">Application ID</string>

@@ -10,12 +10,13 @@ import android.widget.RemoteViews
 import app.keyra.KeyraApp
 import app.keyra.L10n
 import app.keyra.R
+import app.keyra.VaultIcons
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
-data class FillTarget(val user: AutofillId?, val password: AutofillId?, val packageName: String, val domain: String?, val certificate: String, val expires: Long, val chooseInApp: Boolean = false)
+data class FillTarget(val user: AutofillId?, val password: AutofillId?, val packageName: String, val domain: String?, val certificate: String, val expires: Long, val chooseInApp: Boolean = false, val webScheme: String = "https")
 object FillRequests {
     private val requests = ConcurrentHashMap<String, FillTarget>()
     fun put(target: FillTarget): String {
@@ -40,8 +41,10 @@ class KeyraAutofillService : AutofillService() {
         val fields = mutableListOf<CredentialField<AutofillId>>()
         var nextScope = 0
         val domains = hashSetOf<String>()
+        val schemes = hashSetOf<String>()
         fun visit(node: AssistStructure.ViewNode, parentScope: Int, visible: Boolean) {
             node.webDomain?.let { domains += it.lowercase(Locale.ROOT) }
+            node.webScheme?.takeIf { it.isNotBlank() }?.let { schemes += it.lowercase(Locale.ROOT) }
             val scope = if (node.htmlInfo?.tag.equals("form", true)) ++nextScope else parentScope
             val shown = visible && node.visibility == View.VISIBLE
             val html = node.htmlInfo?.attributes.orEmpty().associate { it.first.lowercase(Locale.ROOT) to it.second }
@@ -56,16 +59,18 @@ class KeyraAutofillService : AutofillService() {
         }
         repeat(structure.windowNodeCount) { visit(structure.getWindowNodeAt(it).rootViewNode, ++nextScope, true) }
         val (user, password) = CredentialFields.select(fields)
-        if ((user == null && password == null) || domains.size > 1 || cancellationSignal.isCanceled) return callback.onSuccess(null)
+        if ((user == null && password == null) || domains.size > 1 || schemes.size > 1 ||
+            schemes.any { it !in setOf("http", "https") } || cancellationSignal.isCanceled) return callback.onSuccess(null)
         val domain = domains.singleOrNull()
         val certificate = runCatching { packageCertificate(packageManager, app) }.getOrNull()?.takeIf { it.isNotBlank() } ?: return callback.onSuccess(null)
-        val target = FillTarget(user, password, app, domain, certificate, System.currentTimeMillis() + 120_000)
+        val target = FillTarget(user, password, app, domain, certificate, System.currentTimeMillis() + 120_000,
+            webScheme = schemes.singleOrNull() ?: "https")
         val repo = (application as KeyraApp).repository
         val database = repo.database.value
         if (database != null && (domain == null || AutofillResponses.trustedBrowser(repo.store.preferences, target))) {
             val candidates = AutofillResponses.candidates(database, target)
-            if (domain != null || candidates.isNotEmpty()) {
-                val direct = AutofillResponses.entries(this, target, candidates)
+            if (candidates.isNotEmpty()) {
+                val direct = AutofillResponses.entries(this, target, candidates, VaultIcons(database.content.meta.customIcons))
                 if (!cancellationSignal.isCanceled && repo.database.value === database) callback.onSuccess(direct)
                 else callback.onSuccess(null)
                 return
@@ -73,7 +78,7 @@ class KeyraAutofillService : AutofillService() {
         }
         val sender = AutofillResponses.authentication(this, target)
         val presentation = RemoteViews(packageName, R.layout.autofill_unlock).apply {
-            setContentDescription(R.id.autofillUnlockIcon, L10n.text(this@KeyraAutofillService, R.string.ui_unlock_keyra_0))
+            setTextViewText(R.id.autofillSelectLabel, L10n.text(this@KeyraAutofillService, R.string.autofill_select))
         }
         val ids = listOfNotNull(user, password).toTypedArray()
         val response = FillResponse.Builder()

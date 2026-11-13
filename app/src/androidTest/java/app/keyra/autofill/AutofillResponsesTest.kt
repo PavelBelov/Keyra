@@ -43,8 +43,8 @@ class AutofillResponsesTest {
             db = Kdbx.putEntry(db, db.content.group.uuid, entry)
         }
         assertEquals(listOf(matching.uuid), AutofillResponses.candidates(db, target).map { it.uuid })
-        val bound = entry().let { it.copy(fields = it.fields + mapOf("Keyra.Package" to EntryValue.Plain(target.packageName),
-            "Keyra.Signature" to EntryValue.Plain(target.certificate))) }
+        val bound = entry().let { it.copy(fields = it.fields + mapOf("AndroidApp" to EntryValue.Plain(target.packageName),
+            "AndroidApp Signature" to EntryValue.Plain(target.certificate))) }
         db = Kdbx.putEntry(db, db.content.group.uuid, bound)
         assertEquals(listOf(bound.uuid), AutofillResponses.candidates(db, target.copy(domain = null)).map { it.uuid })
         assertTrue(AutofillResponses.candidates(db, target.copy(domain = null, certificate = "changed")).isEmpty())
@@ -59,6 +59,22 @@ class AutofillResponsesTest {
             assertFalse(AutofillResponses.trustedBrowser(prefs, target.copy(certificate = "changed")))
             assertFalse(AutofillResponses.trustedBrowser(prefs, target.copy(domain = null)))
         } finally { prefs.edit().clear().commit() }
+    }
+    @Test fun androidUrlsAreAppCandidatesAndNeverWebsiteCandidates() {
+        val target = target(domain = null)
+        val unsigned = entry(url = "androidapp://${target.packageName}")
+        val signed = unsigned.copy(uuid = UUID.randomUUID(), fields = unsigned.fields +
+            mapOf("AndroidApp Signature" to EntryValue.Plain(target.certificate)))
+        val explicit = entry().let { it.copy(fields = it.fields + mapOf(
+            "AndroidApp" to EntryValue.Plain(target.packageName),
+            "AndroidApp Signature" to EntryValue.Plain(target.certificate))) }
+        var db = Kdbx.create(Kdbx.credentials("synthetic"))
+        for (entry in listOf(unsigned, signed, explicit)) db = Kdbx.putEntry(db, db.content.group.uuid, entry)
+        assertEquals(setOf(signed.uuid, explicit.uuid), AutofillResponses.candidates(db, target).map { it.uuid }.toSet())
+        assertEquals(setOf(unsigned.uuid, signed.uuid, explicit.uuid),
+            AutofillResponses.candidates(db, target, requireTrusted = false).map { it.uuid }.toSet())
+        assertTrue(AutofillResponses.candidates(db, target.copy(certificate = "changed")).isEmpty())
+        assertTrue(AutofillResponses.candidates(db, target.copy(domain = target.packageName)).isEmpty())
     }
     @Test fun emptyListReturnsNoResponseAndOverflowBuildsValidResponse() {
         val target = target()

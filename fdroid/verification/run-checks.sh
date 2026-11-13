@@ -33,7 +33,7 @@ run_check() {
     cat /etc/os-release
     java -version
     fdroid --version
-    /opt/gradle-8.11.1/bin/gradle --version
+    /opt/gradle-9.1.0/bin/gradle --version
     pip freeze
     dpkg-query -W openjdk-21-jdk-headless
     cat /opt/android-sdk/build-tools/35.0.0/source.properties
@@ -68,7 +68,7 @@ python3 /checks/fetch-catalog.py 1efffc05164ce92b374ef44a64be111e70818617 \
     "$job/fdroid/config" "$output/fdroiddata-catalog.json"
 cat > "$job/fdroid/config.yml" <<'YAML'
 sdk_path: /opt/android-sdk
-gradle: /opt/gradle-8.11.1/bin/gradle
+gradle: /opt/gradle-9.1.0/bin/gradle
 apksigner: /opt/android-sdk/build-tools/35.0.0/apksigner
 scan_binary: true
 YAML

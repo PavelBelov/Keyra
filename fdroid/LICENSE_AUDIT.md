@@ -1,6 +1,8 @@
 # Release dependency and artwork audit
 
-Reviewed on November 10, 2026 for Keyra 0.1.0, version code 1, package `xnet13.keyra`.
+Runtime inventory refreshed on November 13, 2026 for Keyra 0.1.2, version code 3,
+package `xnet13.keyra`, using Gradle 9.1.0, AGP 8.13.2, and Kotlin 2.3.21.
+The original embedded-source and artwork review was performed on November 10, 2026.
 
 ## Runtime artifacts
 
@@ -8,7 +10,7 @@ The Gradle `releaseRuntimeClasspath` was resolved rather than inferred from dire
 
 [dependency-audit.json](dependency-audit.json) records each selected coordinate, filename/type, SHA-256 of the downloaded artifact, primary POM URL/hash, declared license name, and license POM URL/hash. Guava ListenableFuture has no local license declaration and inherits Apache-2.0 from `com.google.guava:guava-parent:26.0-android`; the report resolves that parent explicitly. All other artifacts declare licenses in their own POM.
 
-The resolved stdlib version is 2.1.21 even though the Kotlin compiler plugin is 2.1.20. Okio resolves to 3.15.0 via Kotpass. Neither should be reported merely as the versions requested by a direct dependency.
+The resolved stdlib and Kotlin compiler plugin versions are both 2.3.21. View Binding resolves to 8.13.2 with the Android Gradle Plugin. Okio resolves to 3.15.0 via Kotpass. Neither should be reported merely as the versions requested by a direct dependency.
 
 These licenses permit redistribution in the GPLv3-based application subject to preserving their terms and notices. The graph is measured before R8 shrinking; artifact presence does not imply all of its code is retained in the final APK. This inventory excludes build/test tooling, which is not bundled as runtime code.
 

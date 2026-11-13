@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minWidth="64dp"
     android:minHeight="48dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:padding="8dp">
 
     <ImageView
@@ -12,6 +14,14 @@
         android:layout_height="32dp"
         android:layout_gravity="center"
         android:src="@mipmap/ic_launcher"
-        android:contentDescription="@string/ui_unlock_keyra_0"
+        android:importantForAccessibility="no"
         android:scaleType="fitCenter" />
-</FrameLayout>
+    <TextView
+        android:id="@+id/autofillSelectLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/autofill_select"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorPrimary" />
+</LinearLayout>
