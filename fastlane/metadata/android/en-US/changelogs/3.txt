@@ -1,3 +1,6 @@
 Migrated the build and CI to JDK 21.
 Updated F-Droid submission preparation.
 Updated Gradle and Android build plugins.
+Improved record selection fot autofill.
+Improved autofill for application.
+
