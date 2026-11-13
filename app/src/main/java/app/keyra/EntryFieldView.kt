@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.Toast
 import app.keemobile.kotpass.models.EntryValue
 import app.keyra.databinding.RowEntryFieldBinding
+import app.keyra.autofill.ApplicationBinding
 
 /** Compact field row. Revealed values stay in the view only and are never saved as UI state. */
 // Constructed in code with required data and callbacks; never inflated from XML.
@@ -51,8 +52,13 @@ class EntryFieldView(
     }
 
     private fun displayValue(text: CharSequence) {
-        if (isApplication && displayApplication()) return
         val raw = value.content.trim()
+        val applicationPackage = when {
+            isApplication -> raw
+            isUrl -> ApplicationBinding.packageFromUrl(raw)
+            else -> null
+        }
+        if (applicationPackage != null && displayApplication(applicationPackage)) return
         val target = if (raw.contains("://")) raw else "https://$raw"
         val uri = runCatching { target.toUri() }.getOrNull()
         val link = isUrl && raw.isNotEmpty() && uri?.scheme in setOf("http", "https") && !uri?.host.isNullOrBlank()
@@ -65,9 +71,8 @@ class EntryFieldView(
         }
     }
 
-    private fun displayApplication(): Boolean {
+    private fun displayApplication(packageName: String): Boolean {
         val manager = context.packageManager
-        val packageName = value.content.trim()
         val application = runCatching {
             manager.getApplicationInfo(packageName, 0).takeIf { it.flags and ApplicationInfo.FLAG_INSTALLED != 0 }
                 ?.let { manager.getApplicationLabel(it).toString() to manager.getApplicationIcon(it) }

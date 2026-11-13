@@ -11,8 +11,10 @@ internal object ApplicationBinding {
     private fun explicitPackage(entry: Entry) =
         entry.fields[PACKAGE]?.content
 
-    private fun urlPackage(entry: Entry): String? = runCatching {
-        val uri = URI(entry.fields.url?.content.orEmpty())
+    private fun urlPackage(entry: Entry) = packageFromUrl(entry.fields.url?.content.orEmpty())
+
+    fun packageFromUrl(url: String): String? = runCatching {
+        val uri = URI(url.trim())
         uri.rawAuthority?.takeIf {
             uri.scheme.equals("androidapp", true) &&
                 (uri.rawPath.isNullOrEmpty() || uri.rawPath == "/") &&

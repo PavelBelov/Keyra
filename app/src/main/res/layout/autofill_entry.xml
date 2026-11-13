@@ -1,0 +1,12 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:minHeight="48dp" android:orientation="horizontal" android:gravity="center_vertical"
+    android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+    <ImageView android:id="@+id/autofillEntryIcon"
+        android:layout_width="32dp" android:layout_height="32dp" android:layout_marginEnd="12dp"
+        android:scaleType="fitCenter" android:importantForAccessibility="no" />
+    <TextView android:id="@+id/autofillEntryTitle"
+        android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+        android:textSize="16sp" android:textColor="?android:attr/textColorPrimary"
+        android:maxLines="2" android:ellipsize="end" />
+</LinearLayout>

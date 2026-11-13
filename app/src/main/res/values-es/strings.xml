@@ -311,6 +311,8 @@
     <string name="about_licenses">Licencias y avisos</string>
     <string name="about_link_unavailable">No hay ninguna aplicación para abrir este enlace.</string>
     <string name="about_warranty">Se proporciona sin garantías. Consulte las condiciones en las licencias.</string>
+    <string name="autofill_select">Seleccionar</string>
+    <string name="autofill_select_for_website">Selecciona una entrada para %1$s. Su URL se sustituirá por esta dirección.</string>
     <string name="autofill_select_entry">Seleccionar una entrada</string>
     <string name="autofill_select_for_app">Selecciona una entrada para iniciar sesión en %1$s. Abre una carpeta o busca en tu base de datos.</string>
 </resources>

@@ -298,6 +298,8 @@
     <string name="chrome_autofill_manual">Откройте Chrome → Настройки → Автозаполнение и пароли → Настройки автозаполнения → Автозаполнение с помощью другого сервиса.</string>
     <string name="chrome_autofill_help">Выберите Keyra в Android и включите автозаполнение с помощью другого сервиса в Chrome. Если потребуется, перезапустите Chrome. Записи подбираются по точному домену сайта; в поле email подставляется значение поля «Логин» записи.</string>
     <string name="autofill_more_entries">Другие записи…</string>
+    <string name="autofill_select">Выбор</string>
+    <string name="autofill_select_for_website">Выберите запись для %1$s. URL сайта в записи будет заменён этим адресом.</string>
     <string name="autofill_select_entry">Выбор записи</string>
     <string name="autofill_select_for_app">Выберите запись для входа в %1$s. Откройте папку или воспользуйтесь поиском по базе.</string>
     <string name="about_title">О приложении</string>
