@@ -34,8 +34,8 @@ RUN curl --fail --location --retry 3 \
 # Same distribution/checksum as gradle/wrapper/gradle-wrapper.properties.
 # The PyPI fdroidserver package does not ship gradlew-fdroid.
 RUN curl --fail --location --retry 3 \
-      https://downloads.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip && \
-    echo 'f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6  /tmp/gradle.zip' | sha256sum --check && \
+      https://downloads.gradle.org/distributions/gradle-9.1.0-bin.zip -o /tmp/gradle.zip && \
+    echo 'a17ddd85a26b6a7f5ddb71ff8b05fc5104c0202c6e64782429790c933686c806  /tmp/gradle.zip' | sha256sum --check && \
     unzip -q /tmp/gradle.zip -d /opt && rm /tmp/gradle.zip
 
 RUN update-java-alternatives --set java-1.21.0-openjdk-amd64 && \

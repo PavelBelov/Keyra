@@ -311,21 +311,21 @@
       "licensePomSha256": "ce9e47b87184f5bd5e139e9becd5b26476d42d78c31bf2fdedc37acb41b9ad49"
     },
     {
-      "coordinate": "androidx.databinding:viewbinding:8.10.1",
-      "file": "viewbinding-8.10.1.aar",
+      "coordinate": "androidx.databinding:viewbinding:8.13.2",
+      "file": "viewbinding-8.13.2.aar",
       "type": "aar",
-      "sha256": "8752266dccb7d24416113c400ad7f81d023533fed8eb800fb830e101623744e2",
+      "sha256": "b9a3ae329638ab623dc1daff2ac07489e0e4dbcf90d77ce2d8759f767cd7a135",
       "licenses": [
         "Apache-2.0"
       ],
       "declaredLicenseNames": [
         "The Apache Software License, Version 2.0"
       ],
-      "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/databinding/viewbinding/8.10.1/viewbinding-8.10.1.pom",
-      "pomSha256": "1fd239ed02d207527e5c6469ce8996a2664ae4f4212fa1ce8ef3f64a31ddbc77",
-      "licensePomCoordinate": "androidx.databinding:viewbinding:8.10.1",
-      "licensePomUrl": "https://dl.google.com/dl/android/maven2/androidx/databinding/viewbinding/8.10.1/viewbinding-8.10.1.pom",
-      "licensePomSha256": "1fd239ed02d207527e5c6469ce8996a2664ae4f4212fa1ce8ef3f64a31ddbc77"
+      "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/databinding/viewbinding/8.13.2/viewbinding-8.13.2.pom",
+      "pomSha256": "6b225c77d08b14914bbbab6aa08051c755fee85eb4be8d8fef914fa6a87be1c1",
+      "licensePomCoordinate": "androidx.databinding:viewbinding:8.13.2",
+      "licensePomUrl": "https://dl.google.com/dl/android/maven2/androidx/databinding/viewbinding/8.13.2/viewbinding-8.13.2.pom",
+      "licensePomSha256": "6b225c77d08b14914bbbab6aa08051c755fee85eb4be8d8fef914fa6a87be1c1"
     },
     {
       "coordinate": "androidx.drawerlayout:drawerlayout:1.0.0",
@@ -1042,21 +1042,21 @@
       "licensePomSha256": "928f2187217476313cb816d48070bc7654aa3b9a5ae81d3fc5f8c279cc8f8d9e"
     },
     {
-      "coordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.1.21",
-      "file": "kotlin-stdlib-2.1.21.jar",
+      "coordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.3.21",
+      "file": "kotlin-stdlib-2.3.21.jar",
       "type": "jar",
-      "sha256": "263bdc679e1f62012db7b091796279b6d71cf36f4797a98ff1ace05835f201c8",
+      "sha256": "6f64eac736db9434dd6925b4a518b9d1d17177652320c37916cf9ba3ce7d7d7a",
       "licenses": [
         "Apache-2.0"
       ],
       "declaredLicenseNames": [
-        "The Apache License, Version 2.0"
+        "Apache-2.0"
       ],
-      "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.1.21/kotlin-stdlib-2.1.21.pom",
-      "pomSha256": "c5524086ca3e49a67986df8fdccd66037baf5f3c5a358b76f9dd609bee7bb638",
-      "licensePomCoordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.1.21",
-      "licensePomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.1.21/kotlin-stdlib-2.1.21.pom",
-      "licensePomSha256": "c5524086ca3e49a67986df8fdccd66037baf5f3c5a358b76f9dd609bee7bb638"
+      "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.3.21/kotlin-stdlib-2.3.21.pom",
+      "pomSha256": "3e0b48daa14dc73f8029d8d9e15ed32940377caf7b915510f88d33219b350186",
+      "licensePomCoordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.3.21",
+      "licensePomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.3.21/kotlin-stdlib-2.3.21.pom",
+      "licensePomSha256": "3e0b48daa14dc73f8029d8d9e15ed32940377caf7b915510f88d33219b350186"
     },
     {
       "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2",

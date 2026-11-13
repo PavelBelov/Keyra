@@ -36,7 +36,7 @@ F-Droid's `WebSite` field should not duplicate the source-repository URL.
 
 The current app has one full-featured release variant and no proprietary payment,
 advertising, or analytics SDK. It does not need a dedicated F-Droid flavor yet.
-Current sources build the `app` module using Gradle 8.11.1, AGP 8.10.1, OpenJDK 21,
+Current sources build the `app` module using Gradle 9.1.0, AGP 8.13.2, Kotlin 2.3.21, OpenJDK 21,
 Android SDK Platform 36, and explicitly pinned Build Tools 35.0.0.
 
 The draft contains a single build entry for the next release, `v0.1.2` (3),
