@@ -688,8 +688,11 @@ class MainActivity : AppCompatActivity() {
     private fun entryRow(e: Entry, icons: VaultIcons) = Row(e.uuid, e.fields.title?.content.orEmpty().ifBlank { L10n.text(this@MainActivity, R.string.untitled_entry) }, e.fields.userName?.content.orEmpty(), false, icons.resolve(e))
     private fun showEntry(entry: Entry) {
         val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        orderedFields(entry.fields).filterNot { it.second.isEmpty() }.forEach { (name, value) ->
-            val row = EntryFieldView(this, fieldLabel(this, name), value, name == "Password" || value is EntryValue.Encrypted, ::copySecret, isUrl = name == "URL")
+        orderedFields(entry.fields).filterNot {
+            it.second.isEmpty() || it.first in setOf(ApplicationBinding.SIGNATURE, "Android Signature")
+        }.forEach { (name, value) ->
+            val row = EntryFieldView(this, fieldLabel(this, name), value, name == "Password" || value is EntryValue.Encrypted, ::copySecret,
+                isUrl = name == "URL", isApplication = name == ApplicationBinding.PACKAGE)
             entryFieldViews += row
             body.addView(row, LinearLayout.LayoutParams(-1, -2))
         }

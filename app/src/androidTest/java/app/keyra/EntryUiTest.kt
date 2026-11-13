@@ -144,6 +144,56 @@ class EntryUiTest {
         clickPopupText(activity.getString(R.string.ui_cancel_82), optional = true)
     }
 
+    @Test fun applicationFieldShowsInstalledAppAndKeepsSignatureInEditorOnly() {
+        runBlocking {
+            repository.mutate { db ->
+                val entry = db.getEntryBy { uuid == entryId }!!
+                Kdbx.putEntry(db, folderId, Kdbx.edit(entry, entry.fields + mapOf(
+                    "AndroidApp" to EntryValue.Plain(context.packageName),
+                    "AndroidApp Signature" to EntryValue.Plain("synthetic-signature"))))
+            }
+        }
+        openEntry()
+        onUi {
+            val rows = descendants(activity.findViewById(R.id.content)).filterIsInstance<EntryFieldView>()
+            assertFalse(rows.any { it.findViewById<TextView>(R.id.fieldLabel).text.toString() == "AndroidApp Signature" })
+            val app = rows.first { it.findViewById<TextView>(R.id.fieldLabel).text.toString() == "AndroidApp" }
+            assertEquals(context.packageManager.getApplicationLabel(context.applicationInfo).toString(),
+                app.findViewById<TextView>(R.id.fieldValue).text.toString())
+            assertEquals(View.VISIBLE, app.findViewById<View>(R.id.applicationIcon).visibility)
+            assertEquals(View.GONE, app.findViewById<View>(R.id.copyField).visibility)
+        }
+        screenshot("record-application")
+        click(R.id.editButton)
+        onUi {
+            assertEquals("synthetic-signature", editor("AndroidApp Signature").findViewById<EditText>(R.id.fieldInput).text.toString())
+            assertEquals(context.packageName, editor("AndroidApp").findViewById<EditText>(R.id.fieldInput).text.toString())
+        }
+    }
+
+    @Test fun applicationFieldLaunchesAppAndFallsBackForMissingPackage() {
+        var launched: Intent? = null
+        var copied: String? = null
+        onUi {
+            val launchContext = object : ContextWrapper(activity) {
+                override fun startActivity(intent: Intent) { launched = intent }
+            }
+            val installed = EntryFieldView(launchContext, "AndroidApp", EntryValue.Plain(context.packageName), false,
+                { copied = it }, isApplication = true)
+            installed.getChildAt(0).performClick()
+            assertEquals(context.packageName, launched?.component?.packageName)
+            assertNull(copied)
+            val missingPackage = "app.keyra.nonexistent.synthetic"
+            val missing = EntryFieldView(launchContext, "AndroidApp", EntryValue.Plain(missingPackage), false,
+                { copied = it }, isApplication = true)
+            assertEquals(missingPackage, missing.findViewById<TextView>(R.id.fieldValue).text.toString())
+            assertEquals(View.GONE, missing.findViewById<View>(R.id.applicationIcon).visibility)
+            assertEquals(View.VISIBLE, missing.findViewById<View>(R.id.copyField).visibility)
+            missing.findViewById<View>(R.id.copyField).performClick()
+            assertEquals(missingPackage, copied)
+        }
+    }
+
     @Test fun aboutShowsInstalledIdentityAndOfflineLicense() {
         click(R.id.menuButton)
         clickPopupText(activity.getString(R.string.ui_settings_71))
