@@ -6,9 +6,7 @@ import android.os.CancellationSignal
 import android.service.autofill.*
 import android.view.View
 import android.view.autofill.AutofillId
-import android.widget.RemoteViews
 import app.keyra.KeyraApp
-import app.keyra.L10n
 import app.keyra.R
 import app.keyra.VaultIcons
 import java.security.MessageDigest
@@ -67,19 +65,16 @@ class KeyraAutofillService : AutofillService() {
             webScheme = schemes.singleOrNull() ?: "https")
         val repo = (application as KeyraApp).repository
         val database = repo.database.value
-        if (database != null && (domain == null || AutofillResponses.trustedBrowser(repo.store.preferences, target))) {
-            val candidates = AutofillResponses.candidates(database, target)
-            if (candidates.isNotEmpty()) {
-                val direct = AutofillResponses.entries(this, target, candidates, VaultIcons(database.content.meta.customIcons))
-                if (!cancellationSignal.isCanceled && repo.database.value === database) callback.onSuccess(direct)
-                else callback.onSuccess(null)
-                return
-            }
+        if (database != null) {
+            val candidates = if (domain == null || AutofillResponses.trustedBrowser(repo.store.preferences, target))
+                AutofillResponses.candidates(database, target) else emptyList()
+            val direct = AutofillResponses.entries(this, target, candidates, VaultIcons(database.content.meta.customIcons))
+            if (!cancellationSignal.isCanceled && repo.database.value === database) callback.onSuccess(direct)
+            else callback.onSuccess(null)
+            return
         }
         val sender = AutofillResponses.authentication(this, target)
-        val presentation = RemoteViews(packageName, R.layout.autofill_unlock).apply {
-            setTextViewText(R.id.autofillSelectLabel, L10n.text(this@KeyraAutofillService, R.string.autofill_select))
-        }
+        val presentation = AutofillResponses.keyraPresentation(this, getString(R.string.app_name))
         val ids = listOfNotNull(user, password).toTypedArray()
         val response = FillResponse.Builder()
         if (android.os.Build.VERSION.SDK_INT >= 33) {

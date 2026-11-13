@@ -5,8 +5,16 @@
     <ImageView android:id="@+id/autofillEntryIcon"
         android:layout_width="32dp" android:layout_height="32dp" android:layout_marginEnd="12dp"
         android:scaleType="fitCenter" android:importantForAccessibility="no" />
-    <TextView android:id="@+id/autofillEntryTitle"
-        android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-        android:textSize="16sp" android:textColor="?android:attr/textColorPrimary"
-        android:maxLines="2" android:ellipsize="end" />
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+        android:layout_height="wrap_content" android:orientation="vertical">
+        <TextView android:id="@+id/autofillEntryTitle"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="16sp" android:textColor="?android:attr/textColorPrimary"
+            android:maxLines="1" android:ellipsize="end" />
+        <TextView android:id="@+id/autofillEntryUsername"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" android:visibility="gone"
+            android:textSize="14sp" android:textColor="?android:attr/textColorSecondary"
+            android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
 </LinearLayout>

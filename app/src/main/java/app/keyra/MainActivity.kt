@@ -1393,33 +1393,32 @@ class MainActivity : AppCompatActivity() {
     private fun chooseAutofill(token: String) {
         val target = FillRequests.get(token) ?: run { finish(); return }
         if (runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) { finish(); return }
-        if (target.domain == null) {
-            showAutofillPicker(token)
+        val db = repo.database.value ?: return
+        if (!target.chooseInApp) {
+            val candidates = if (target.domain == null || AutofillResponses.trustedBrowser(repo.store.preferences, target))
+                AutofillResponses.candidates(db, target) else emptyList()
+            val response = AutofillResponses.entries(this, target, candidates, VaultIcons(db.content.meta.customIcons))
+            FillRequests.remove(token)
+            setResult(RESULT_OK, Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response))
+            finish()
             return
         }
         val prefs = repo.store.preferences
-        if (prefs.getString("browser.${target.packageName}", null) != target.certificate) {
+        if (target.domain != null && prefs.getString("browser.${target.packageName}", null) != target.certificate) {
             dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_trust_this_browser_177))
                 .setMessage(L10n.text(this@MainActivity, R.string.ui_certificate_this_app_reports_the_website_address_allow_only_brows_178, target.packageName, target.certificate, target.domain))
                 .setNegativeButton(L10n.text(this@MainActivity, R.string.ui_cancel_82)) { _, _ -> finish() }
                 .setPositiveButton(L10n.text(this@MainActivity, R.string.ui_trust_this_certificate_179)) { _, _ -> prefs.edit { putString("browser.${target.packageName}", target.certificate) }; chooseAutofill(token) })
             return
         }
-        val db = repo.database.value ?: return
-        val candidates = AutofillResponses.candidates(db, target)
-        if (candidates.isNotEmpty() && !target.chooseInApp) {
-            val response = AutofillResponses.entries(this, target, candidates, VaultIcons(db.content.meta.customIcons)) ?: return
-            FillRequests.remove(token)
-            setResult(RESULT_OK, Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response))
-            finish()
-            return
-        }
         showAutofillPicker(token)
     }
     private fun showAutofillPicker(token: String) {
         model.autofillPickerToken = token
-        model.group = null; model.entry = null; model.query = ""; model.searching = false
+        model.group = null; model.entry = null; model.query = ""; model.searching = true
         render()
+        binding.headerSearch.requestFocus()
+        androidx.core.view.WindowCompat.getInsetsController(window, binding.root).show(WindowInsetsCompat.Type.ime())
     }
     private fun selectAutofillEntry(entry: Entry) {
         if (model.linkingAutofill) return
@@ -1434,29 +1433,23 @@ class MainActivity : AppCompatActivity() {
             return
         }
         hideKeyboard()
-        dialog(AlertDialog.Builder(this).setTitle(L10n.text(this, R.string.ui_link_this_entry_184))
-            .setMessage(L10n.text(this, R.string.ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185, target.packageName, target.certificate))
-            .setNegativeButton(L10n.text(this, R.string.ui_cancel_82), null)
-            .setPositiveButton(L10n.text(this, R.string.ui_allow_186)) { _, _ ->
-                if (model.linkingAutofill) return@setPositiveButton
-                model.linkingAutofill = true
-                lifecycleScope.launch {
-                    try {
-                        if (FillRequests.get(token) == null || runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) {
-                            finish(); return@launch
-                        }
-                        repo.mutate { current ->
-                            val (parent, latest) = current.getEntry { it.uuid == entry.uuid } ?: error("ENTRY_NO_LONGER_EXISTS")
-                            Kdbx.putEntry(current, parent.uuid, Kdbx.edit(latest,
-                                ApplicationBinding.fields(latest, target.packageName, target.certificate)))
-                        }
-                        val saved = repo.database.value?.getEntryBy { uuid == entry.uuid }
-                        if (repo.message.value.isEmpty() && saved != null && ApplicationBinding.trusted(saved, target.packageName, target.certificate)) {
-                            finishAutofill(token, saved)
-                        }
-                    } finally { model.linkingAutofill = false }
+        model.linkingAutofill = true
+        lifecycleScope.launch {
+            try {
+                if (FillRequests.get(token) == null || runCatching { packageCertificate(packageManager, target.packageName) }.getOrNull() != target.certificate) {
+                    finish(); return@launch
                 }
-            })
+                repo.mutate { current ->
+                    val (parent, latest) = current.getEntry { it.uuid == entry.uuid } ?: error("ENTRY_NO_LONGER_EXISTS")
+                    Kdbx.putEntry(current, parent.uuid, Kdbx.edit(latest,
+                        ApplicationBinding.fields(latest, target.packageName, target.certificate)))
+                }
+                val saved = repo.database.value?.getEntryBy { uuid == entry.uuid }
+                if (repo.message.value.isEmpty() && saved != null && ApplicationBinding.trusted(saved, target.packageName, target.certificate)) {
+                    finishAutofill(token, saved)
+                }
+            } finally { model.linkingAutofill = false }
+        }
     }
     private fun selectWebsiteAutofillEntry(token: String, target: FillTarget, entry: Entry) {
         val url = AutofillResponses.websiteUrl(target) ?: return

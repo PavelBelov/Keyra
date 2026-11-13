@@ -1,4 +1,8 @@
 <resources>
-    <color name="launcher_background">#216957</color>
-    <color name="launcher_key">#FFFFFF</color>
+    <color name="launcher_background_top">#8CE0C3</color>
+    <color name="launcher_background_middle">#08B48D</color>
+    <color name="launcher_background_bottom">#004A3B</color>
+    <color name="launcher_key_top">#FFFFFF</color>
+    <color name="launcher_key_middle">#F5FFFB</color>
+    <color name="launcher_key_bottom">#CDE8DE</color>
 </resources>

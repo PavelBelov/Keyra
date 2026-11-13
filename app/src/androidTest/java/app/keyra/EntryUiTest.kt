@@ -333,10 +333,12 @@ class EntryUiTest {
         val autofillId = onUiValue { EditText(context).autofillId }
         val certificate = packageCertificate(context.packageManager, context.packageName)
         val token = FillRequests.put(FillTarget(autofillId, null, context.packageName, null,
-            certificate, System.currentTimeMillis() + 120_000))
+            certificate, System.currentTimeMillis() + 120_000, chooseInApp = true))
         try {
             activity = instrumentation.startActivitySync(Intent(context, MainActivity::class.java)
                 .putExtra("fillToken", token).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
+            await { activity.findViewById<View>(R.id.headerSearch).visibility == View.VISIBLE }
+            click(R.id.closeSearch)
             await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.autofill_select_entry) }
             assertEquals(View.GONE, onUiValue { activity.findViewById<View>(R.id.addButton).visibility })
             assertEquals(View.GONE, onUiValue { activity.findViewById<View>(R.id.menuButton).visibility })
@@ -351,11 +353,8 @@ class EntryUiTest {
             onUi { activity.findViewById<EditText>(R.id.headerSearch).setText("UI Synthetic") }
             await { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>().any { it.text.toString() == "UI Synthetic Entry" } }
             screenshot("autofill-picker-search")
-            clickPopupText("UI Synthetic Entry")
-            clickPopupText(activity.getString(R.string.ui_cancel_82))
             assertNull(repository.database.value!!.getEntryBy { uuid == entryId }!!.fields["AndroidApp"])
             clickPopupText("UI Synthetic Entry")
-            clickPopupText(activity.getString(R.string.ui_allow_186))
             await { activity.isFinishing }
             val saved = repository.database.value!!.getEntryBy { uuid == entryId }!!
             assertEquals(context.packageName, saved.fields["AndroidApp"]?.content)

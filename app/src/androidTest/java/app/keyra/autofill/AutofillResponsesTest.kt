@@ -76,9 +76,16 @@ class AutofillResponsesTest {
         assertTrue(AutofillResponses.candidates(db, target.copy(certificate = "changed")).isEmpty())
         assertTrue(AutofillResponses.candidates(db, target.copy(domain = target.packageName)).isEmpty())
     }
-    @Test fun emptyListReturnsNoResponseAndOverflowBuildsValidResponse() {
+    @Test fun searchIsAlwaysPresentAndOverflowRemainsBounded() {
         val target = target()
-        assertNull(AutofillResponses.entries(context, target, emptyList()))
-        assertNotNull(AutofillResponses.entries(context, target, (1..21).map { entry("Account $it") }))
+        val empty = requireNotNull(AutofillResponses.entries(context, target, emptyList()))
+        assertEquals(1, empty.datasets!!.size)
+        assertNotNull(empty.datasets!!.last().authentication)
+        val single = requireNotNull(AutofillResponses.entries(context, target, listOf(entry())))
+        assertEquals(2, single.datasets!!.size)
+        assertNotNull(single.datasets!!.last().authentication)
+        val many = requireNotNull(AutofillResponses.entries(context, target, (1..21).map { entry("Account $it") }))
+        assertEquals(20, many.datasets!!.size)
+        assertNotNull(many.datasets!!.last().authentication)
     }
 }

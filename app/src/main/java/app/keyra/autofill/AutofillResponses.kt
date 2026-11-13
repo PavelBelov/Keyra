@@ -41,9 +41,11 @@ internal object AutofillResponses {
         else ApplicationBinding.matches(entry, target.packageName)
     }.flatMap { it.second }
 
-    private fun presentation(context: Context, title: String, icon: VaultIcon? = null) =
+    private fun presentation(context: Context, title: String, icon: VaultIcon? = null, username: String = "") =
         RemoteViews(context.packageName, R.layout.autofill_entry).apply {
             setTextViewText(R.id.autofillEntryTitle, title)
+            setTextViewText(R.id.autofillEntryUsername, username)
+            setViewVisibility(R.id.autofillEntryUsername, if (username.isBlank()) View.GONE else View.VISIBLE)
             if (icon == null) setViewVisibility(R.id.autofillEntryIcon, View.GONE)
             else {
                 val bitmap = icon.bitmap
@@ -62,11 +64,17 @@ internal object AutofillResponses {
     @Suppress("DEPRECATION")
     fun dataset(context: Context, target: FillTarget, entry: Entry, icons: VaultIcons = VaultIcons(emptyMap())): Dataset {
         val title = entry.fields.title?.content?.takeIf { it.isNotBlank() } ?: context.getString(R.string.app_name)
-        val builder = Dataset.Builder(presentation(context, title, icons.resolve(entry)))
+        val builder = Dataset.Builder(presentation(context, title, icons.resolve(entry), entry.fields.userName?.content.orEmpty()))
         target.user?.let { builder.setValue(it, AutofillValue.forText(entry.fields.userName?.content.orEmpty())) }
         target.password?.let { builder.setValue(it, AutofillValue.forText(entry.fields.password?.content.orEmpty())) }
         return builder.build()
     }
+
+    fun keyraPresentation(context: Context, title: String) =
+        RemoteViews(context.packageName, R.layout.autofill_entry).apply {
+            setTextViewText(R.id.autofillEntryTitle, title)
+            setImageViewResource(R.id.autofillEntryIcon, R.mipmap.ic_launcher)
+        }
 
     fun authentication(context: Context, target: FillTarget): android.content.IntentSender {
         val token = FillRequests.put(target)
@@ -76,19 +84,16 @@ internal object AutofillResponses {
     }
 
     @Suppress("DEPRECATION")
-    fun entries(context: Context, target: FillTarget, entries: List<Entry>, icons: VaultIcons = VaultIcons(emptyMap())): FillResponse? {
-        if (entries.isEmpty()) return null
+    fun entries(context: Context, target: FillTarget, entries: List<Entry>, icons: VaultIcons = VaultIcons(emptyMap())): FillResponse {
         val response = FillResponse.Builder()
         // Keep the response small enough for Binder; preserve access to every match.
-        val visible = if (entries.size > 20) entries.take(19) else entries
+        val visible = entries.take(19)
         visible.forEach { response.addDataset(dataset(context, target, it, icons)) }
-        if (visible.size < entries.size) {
-            val more = Dataset.Builder(presentation(context, L10n.text(context, R.string.autofill_more_entries)))
-            target.user?.let { more.setValue(it, null) }
-            target.password?.let { more.setValue(it, null) }
-            more.setAuthentication(authentication(context, target.copy(chooseInApp = true)))
-            response.addDataset(more.build())
-        }
+        val search = Dataset.Builder(keyraPresentation(context, L10n.text(context, R.string.search)))
+        target.user?.let { search.setValue(it, null) }
+        target.password?.let { search.setValue(it, null) }
+        search.setAuthentication(authentication(context, target.copy(chooseInApp = true)))
+        response.addDataset(search.build())
         return response.build()
     }
 }
