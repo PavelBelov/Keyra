@@ -42,6 +42,7 @@ import java.io.File
 import java.time.Instant
 import java.util.UUID
 import javax.crypto.Cipher
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 class MainActivity : AppCompatActivity() {
     private val model: MainViewModel by viewModels()
@@ -243,6 +244,9 @@ class MainActivity : AppCompatActivity() {
                 } }
                 launch { repo.status.collect { refreshSynchronization?.invoke() } }
                 launch { repo.syncing.collect { refreshSynchronization?.invoke() } }
+                launch { repo.providers.certificates.information.collect {
+                    refreshSynchronization?.invoke(); welcomeView?.refreshCertificateInfo()
+                } }
                 launch { repo.message.collect { if (it.isNotEmpty()) toast(it) } }
                 launch { model.saving.collect { if (repo.database.value != null) render() } }
                 launch { model.importingDatabase.collect { if (repo.database.value != null) render() } }
@@ -253,7 +257,7 @@ class MainActivity : AppCompatActivity() {
                 repo.providers.certificates.pending.collect { challenge ->
                     refreshSynchronization?.invoke()
                     welcomeView?.refreshCertificateInfo()
-                    if (challenge != null) showCertificateWarning(challenge)
+                    if (challenge != null && model.panel != Panel.DATA && welcomeView?.showingWebDav != true) showCertificateWarning(challenge)
                 }
             }
         }
@@ -585,8 +589,8 @@ class MainActivity : AppCompatActivity() {
                     done(null, message)
                 } finally { if (!handedOff) file?.delete() }
             } },
-            pendingCertificate = { connection -> repo.providers.certificates.pendingFor(connection.location) },
-            showCertificate = { challenge -> showCertificateWarning(challenge, force = true) },
+            providers = repo.providers,
+            showDialog = { dialog(it) },
             open = { source, password, key, done -> lifecycleScope.launch {
                 try {
                     repo.openExternal(source.file, password, key, source.connection.takeIf { source.writable })
@@ -972,6 +976,7 @@ class MainActivity : AppCompatActivity() {
         val body = settingsList()
         var connection = runCatching { repo.providers.connection() }.getOrNull()
         var saveWebdav: (() -> Job)? = null
+        var webdavUi: WebDavSettingsUi? = null
         val kinds = listOf("off", "saf", "webdav")
         val names = listOf(L10n.text(this@MainActivity, R.string.ui_off_106), L10n.text(this@MainActivity, R.string.ui_file_107), getString(R.string.webdav_name))
         val selectedKind = model.syncSourceKind?.takeIf { it in kinds } ?: if (repo.store.preferences.getBoolean("syncEnabled", true)) connection?.kind ?: "off" else "off"
@@ -1017,7 +1022,17 @@ class MainActivity : AppCompatActivity() {
                         it.setHintTextColor(ContextCompat.getColor(this, R.color.settings_secondary))
                     }
                     syncSecretFields += password
-                    parameters.addView(url); parameters.addView(user); parameters.addView(password)
+                    val urlRow = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+                    val browse = ImageButton(this).apply {
+                        setImageResource(R.drawable.ic_open_database)
+                        imageTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.settings_control))
+                        background = null
+                        contentDescription = L10n.text(this@MainActivity, R.string.dav_choose_file)
+                        setOnClickListener { webdavUi?.browse() }
+                    }
+                    urlRow.addView(url, LinearLayout.LayoutParams(0, -2, 1f))
+                    urlRow.addView(browse, LinearLayout.LayoutParams(dp(48), dp(60)))
+                    parameters.addView(urlRow); parameters.addView(user); parameters.addView(password)
                     var savedPassword = current?.password.orEmpty()
                     fun persist(): Job {
                         val source = Connection("webdav", url.text.toString().trim(), user.text.toString(), savedPassword)
@@ -1026,8 +1041,24 @@ class MainActivity : AppCompatActivity() {
                             job.invokeOnCompletion { lifecycleScope.launch { refreshSynchronization?.invoke() } }
                         }
                     }
+                    val ui = WebDavSettingsUi(this, repo.providers,
+                        source = { Connection("webdav", url.text.toString().trim(), user.text.toString(), savedPassword) },
+                        showDialog = { dialog(it) }, selected = { url.setText(it); url.setSelection(url.length()) },
+                        browsingChanged = { busy -> browse.isEnabled = !busy; browse.alpha = if (busy) 0.4f else 1f })
+                    webdavUi = ui
+                    parameters.addView(ui.certificateView)
+                    fun updateUrl() {
+                        val parsed = url.text.toString().trim().toHttpUrlOrNull()
+                        browse.visibility = if (parsed != null && parsed.username.isEmpty() && parsed.password.isEmpty()) View.VISIBLE else View.GONE
+                        ui.changed()
+                    }
+                    urlRow.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(view: View) { updateUrl() }
+                        override fun onViewDetachedFromWindow(view: View) { ui.dispose() }
+                    })
+                    updateUrl()
                     saveWebdav = { persist() }
-                    url.doAfterTextChanged { if (!clearingSyncSecrets) persist() }
+                    url.doAfterTextChanged { if (!clearingSyncSecrets) { persist(); updateUrl() } }
                     user.doAfterTextChanged { if (!clearingSyncSecrets) persist() }
                     password.doAfterTextChanged {
                         if (!clearingSyncSecrets) { savedPassword = it.toString(); persist() }
@@ -1058,7 +1089,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         refreshActions()
-        refreshSynchronization = { refreshActions() }
+        refreshSynchronization = { refreshActions(); webdavUi?.refresh() }
         sourcePicker.setOnClickListener {
             dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_sync_108))
                 .setSingleChoiceItems(names.toTypedArray(), kinds.indexOf(selectedKind)) { dialog, position ->
@@ -1085,7 +1116,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun synchronizationActions(body: LinearLayout) {
         val source = runCatching { repo.providers.connection() }.getOrNull()
-        if (source?.kind == "webdav") repo.providers.certificates.pendingFor(source.location)?.let { challenge ->
+        if (source?.kind == "webdav" && model.panel != Panel.DATA) repo.providers.certificates.pendingFor(source.location)?.let { challenge ->
             body.addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_review_server_certificate_116), L10n.text(this@MainActivity, R.string.ui_certificate_approval_required_117)) {
                 showCertificateWarning(challenge, force = true)
             })
@@ -1114,7 +1145,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     withContext(Dispatchers.IO) { repo.providers.certificates.accept(challenge) }
                     if (repo.database.value != null) repo.sync()
-                    else if (welcomeView?.retryCertificate() != true) toast(L10n.text(this@MainActivity, R.string.ui_certificate_saved_try_opening_the_database_again_132))
+                    else toast(L10n.text(this@MainActivity, R.string.ui_certificate_saved_try_opening_the_database_again_132))
                 } catch (_: Exception) { toast(L10n.text(this@MainActivity, R.string.ui_could_not_accept_the_certificate_check_its_validity_dates_133)) }
             } })
     }

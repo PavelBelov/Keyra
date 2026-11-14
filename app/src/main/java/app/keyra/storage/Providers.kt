@@ -34,5 +34,11 @@ class Providers(private val context: Context, private val secrets: SecureSecrets
         secrets.remove("connection")
         context.getSharedPreferences("settings", Context.MODE_PRIVATE).edit { remove("sourceKind").putString("sourceRevision", java.util.UUID.randomUUID().toString()) }
     }
+    fun browse(connection: Connection, endpoint: String) = WebDavBrowser(
+        certificates.client(client, connection.location), connection.user, connection.password).open(endpoint)
+    fun inspectCertificate(connection: Connection) {
+        val request = okhttp3.Request.Builder().url(connection.location).head().build()
+        certificates.client(client, connection.location).newCall(request).execute().use { }
+    }
     fun create(connection: Connection): StorageProvider = factories[connection.kind]?.invoke(connection) ?: throw StorageException(StorageError.UNSUPPORTED)
 }

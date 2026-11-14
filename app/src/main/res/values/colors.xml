@@ -16,4 +16,5 @@
     <color name="secret_digits">#187451</color>
     <color name="secret_other">#9C520C</color>
     <bool name="light_system_bars">true</bool>
+    <color name="settings_warning">#9C6500</color>
 </resources>

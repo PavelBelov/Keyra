@@ -4,4 +4,15 @@
     <string name="vault_empty_hint">Нажмите +, чтобы добавить запись или папку.</string>
     <string name="search_empty">Записи не найдены</string>
     <string name="search_empty_hint">Попробуйте другое имя, логин или сайт.</string>
+    <string name="dav_choose_file">Выбрать файл базы</string>
+    <string name="dav_parent">Родительская папка</string>
+    <string name="dav_empty">Папка пуста</string>
+    <string name="dav_certificate_valid">Валидный</string>
+    <string name="dav_certificate_custom">Невалидный · требуется принятие</string>
+    <string name="dav_certificate_accepted">Невалидный · принят вами</string>
+    <string name="dav_certificate_checking">Проверка…</string>
+    <string name="dav_certificate_unknown">Не удалось проверить сертификат</string>
+    <string name="dav_credentials_required">Укажите логин и пароль WebDAV</string>
+    <string name="dav_error">Не удалось открыть папку. Проверьте адрес, подключение и поддержку WebDAV на сервере.</string>
+    <string name="dav_certificate_details">Сервер: %1$s\nВладелец: %2$s\nИздатель: %3$s\nСрок действия: %4$s — %5$s\nSHA-256: %6$s</string>
 </resources>
