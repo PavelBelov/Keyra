@@ -69,8 +69,8 @@ object Kdbx {
         fun strip(g: Group): Group = g.copy(groups = g.groups.filterNot { it.uuid == id }.map(::strip))
         copy(group = strip(group))
     }
-    fun edit(entry: Entry, fields: Map<String, EntryValue>, tags: List<String> = entry.tags): Entry = entry.copy(
+    fun edit(entry: Entry, fields: Map<String, EntryValue>, tags: List<String> = entry.tags): Entry = EntryFieldClocks.edited(entry, entry.copy(
         fields = EntryFields(fields), tags = tags.toList(), history = entry.history + entry.copy(history = emptyList()),
         times = (entry.times ?: TimeData.create()).copy(lastModificationTime = Instant.now())
-    )
+    ))
 }

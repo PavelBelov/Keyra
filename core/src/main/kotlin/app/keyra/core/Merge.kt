@@ -8,12 +8,20 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-data class MergeIssue(val objectId: UUID?, val reason: String, val requiresChoice: Boolean)
-data class MergeResult(val database: KeePassDatabase, val issues: List<MergeIssue>) {
+data class MergeConflictKey(val objectId: UUID?, val reason: String, val fieldName: String? = null)
+data class MergeIssue(val objectId: UUID?, val reason: String, val requiresChoice: Boolean, val fieldName: String? = null) {
+    val key get() = MergeConflictKey(objectId, reason, fieldName)
+    val isObjectConflict get() = reason in objectReasons
+
+    companion object {
+        private val objectReasons = setOf("ENTRY_FIELD", "ENTRY_PROPERTIES", "PARALLEL_ENTRY", "DELETE_EDIT", "GROUP_OR_TYPE_CONFLICT")
+    }
+}
+data class MergeResult(val database: KeePassDatabase, val issues: List<MergeIssue>, val partialDatabase: KeePassDatabase = database) {
     val blocked get() = issues.any { it.requiresChoice }
 }
 
-/** Three-way object merge. Alternate complete entries survive in history; ambiguous changes stop publication. */
+/** Three-way object merge. Alternate complete entries survive in history; fields merge by baseline and verified clocks; ambiguous changes require a choice. */
 object Merge {
     /** Compare logical values rather than the randomized buffers of protected fields. */
     fun entriesEquivalent(left: Entry, right: Entry): Boolean = left === right || entryKey(left) == entryKey(right)
@@ -49,10 +57,9 @@ object Merge {
         a == null || b == null -> a == b
         a.parent != b.parent -> false
         a.value is Entry && b.value is Entry -> a.entryFingerprint == b.entryFingerprint
-        a.value is Group && b.value is Group -> a.value.copy(times = normalized(a.value.times)) == b.value.copy(times = normalized(b.value.times))
+        a.value is Group && b.value is Group -> MergeValues.groupKey(a.value) == MergeValues.groupKey(b.value)
         else -> a.value == b.value
     }
-    private fun modified(n: Node) = n.value.times?.lastModificationTime ?: Instant.EPOCH
     private fun security(db: KeePassDatabase): String {
         val kdf = when (db) {
             is KeePassDatabase.Ver3x -> "AES:${db.header.transformRounds}"
@@ -65,12 +72,71 @@ object Merge {
     }
     private fun metaKey(db: KeePassDatabase): Meta {
         val m = db.modifyBinaries { emptyMap() }.content.meta
-        return m.copy(generator = "", headerHash = null, lastSelectedGroup = null, lastTopVisibleGroup = null, customIcons = emptyMap(), customData = emptyMap(),
-            settingsChanged = m.settingsChanged?.seconds(), nameChanged = m.nameChanged?.seconds(), descriptionChanged = m.descriptionChanged?.seconds(),
-            defaultUserChanged = m.defaultUserChanged?.seconds(), masterKeyChanged = m.masterKeyChanged?.seconds(), recycleBinChanged = m.recycleBinChanged?.seconds(), entryTemplatesGroupChanged = m.entryTemplatesGroupChanged?.seconds())
+        return m.copy(generator = "", headerHash = null, lastSelectedGroup = null, lastTopVisibleGroup = null, customIcons = emptyMap(), customData = emptyMap(), color = m.color.orEmpty(),
+            settingsChanged = null, nameChanged = null, descriptionChanged = null,
+            defaultUserChanged = null, masterKeyChanged = m.masterKeyChanged?.seconds(), recycleBinChanged = null, entryTemplatesGroupChanged = null)
     }
 
-    fun combine(local: KeePassDatabase, remote: KeePassDatabase, base: KeePassDatabase?, importing: Boolean = false, choices: Map<UUID?, Boolean> = emptyMap()): MergeResult {
+    private fun buildGroups(root: UUID, nodes: Map<UUID, Node>): Group {
+        val children = nodes.values.groupBy { it.parent }
+        fun build(id: UUID): Group {
+            val group = nodes[id]?.value as? Group ?: error("MISSING_GROUP")
+            return group.copy(
+                groups = children[id].orEmpty().filter { it.value is Group }.map { build(it.value.uuid) },
+                entries = children[id].orEmpty().mapNotNull { it.value as? Entry })
+        }
+        return build(root)
+    }
+
+    /** Keep unresolved objects exactly as they were locally. Defer dependent moves/additions
+     * when their parent cannot be made reachable without deciding a structural conflict. */
+    private fun partial(local: KeePassDatabase, remote: KeePassDatabase, left: Map<UUID, Node>,
+                        selected: Map<UUID, Node>, deleted: Map<UUID, DeletedObject>, issues: List<MergeIssue>): KeePassDatabase {
+        val root = local.content.group.uuid
+        val visible = selected.toMutableMap()
+        for (id in issues.filter { it.requiresChoice && it.isObjectConflict }.mapNotNull { it.objectId }.distinct()) {
+            val original = left[id]
+            if (original == null) visible.remove(id) else visible[id] = original
+        }
+        if (issues.any { it.reason == "INVALID_GROUP_TREE" }) {
+            visible.toMap().forEach { (id, node) -> left[id]?.let { visible[id] = node.withParent(it.parent) } }
+        }
+        visible[root] = left.getValue(root)
+        fun reachable(id: UUID): Boolean {
+            var cursor: UUID? = id
+            val seen = hashSetOf<UUID>()
+            while (cursor != root) {
+                if (cursor == null || !seen.add(cursor)) return false
+                val parent = visible[cursor]?.parent ?: return false
+                if (visible[parent]?.value !is Group) return false
+                cursor = parent
+            }
+            return true
+        }
+        fun restoreParents(id: UUID?) {
+            if (id == null || reachable(id) && visible[id]?.value is Group) return
+            val original = left[id]?.takeIf { it.value is Group } ?: return
+            visible[id] = original
+            restoreParents(original.parent)
+        }
+        for ((id, node) in visible.toMap()) {
+            if (!reachable(id)) left[id]?.let { original ->
+                visible[id] = node.withParent(original.parent)
+                restoreParents(original.parent)
+            }
+        }
+        val connected = visible.filterKeys(::reachable)
+        val meta = local.content.meta.copy(
+            customData = DatabaseMetadataMerge.preferRemote(local.content.meta.customData, remote.content.meta.customData),
+            customIcons = remote.content.meta.customIcons + local.content.meta.customIcons)
+        return Kdbx.mergeTemplate(local, remote).modifyContent {
+            copy(group = buildGroups(root, connected), meta = meta, deletedObjects = deleted.filterKeys { it !in connected }.values.toList())
+        }.modifyBinaries { it + remote.binaries }
+    }
+
+    fun combine(local: KeePassDatabase, remote: KeePassDatabase, base: KeePassDatabase?, importing: Boolean = false, choices: Map<UUID?, Boolean> = emptyMap(), resolutions: Map<MergeConflictKey, Boolean> = emptyMap()): MergeResult {
+        fun choice(id: UUID?, reason: String, field: String? = null): Boolean? =
+            resolutions[MergeConflictKey(id, reason, field)] ?: resolutions[MergeConflictKey(id, "PARALLEL_ENTRY")] ?: choices[id]
         val issues = mutableListOf<MergeIssue>()
         val root = local.content.group.uuid
         if (!importing && root != remote.content.group.uuid) return MergeResult(local, listOf(MergeIssue(null, "DIFFERENT_DATABASE", true)))
@@ -88,8 +154,8 @@ object Merge {
                 val survivor = l ?: r
                 if (survivor == null) continue
                 if (b != null && equivalent(survivor, b)) continue
-                if (choices.containsKey(id)) {
-                    val chosen = if (choices[id] == true) r else l
+                if (choice(id, "DELETE_EDIT") != null) {
+                    val chosen = if (choice(id, "DELETE_EDIT") == true) r else l
                     if (chosen != null) { selected[id] = chosen; deleted.remove(id) }
                     continue
                 }
@@ -98,69 +164,103 @@ object Merge {
                 continue
             }
             val chosen = when {
-                equivalent(l, r) -> l
+                equivalent(l, r) -> if (l?.value is Group && r?.value is Group)
+                    Node(MergeValues.group(l.value, r.value), l.parent) else l
                 l == null -> r // Absence alone is not a deletion.
                 r == null -> l
+                l.value is Entry && r.value is Entry -> {
+                    val result = EntryMerge.combine(l.value, r.value, b?.value as? Entry, l.parent, r.parent, b?.parent) { reason, field ->
+                        choice(id, reason, field)
+                    }
+                    issues += result.issues
+                    Node(result.entry, result.parent)
+                }
                 equivalent(l, b) -> r
                 equivalent(r, b) -> l
-                l.value is Entry && r.value is Entry -> {
-                    val newer = if (choices.containsKey(id)) { if (choices[id] == true) r else l } else if (modified(r) > modified(l)) r else l
-                    val older = if (newer === l) r else l
-                    val current = newer.value as Entry; val alternate = older.value as Entry
-                    if (!choices.containsKey(id)) issues += MergeIssue(id, "PARALLEL_ENTRY", modified(l) == modified(r))
-                    val histories = (current.history + alternate.history + alternate.copy(history = emptyList()))
-                        .distinctBy(::entryKey)
-                    Node(current.copy(history = histories), newer.parent)
-                }
                 else -> {
-                    if (choices.containsKey(id)) { if (choices[id] == true) r else l }
+                    if (choice(id, "GROUP_OR_TYPE_CONFLICT") != null) { if (choice(id, "GROUP_OR_TYPE_CONFLICT") == true) r else l }
                     else { issues += MergeIssue(id, "GROUP_OR_TYPE_CONFLICT", true); l }
                 }
             }
             if (chosen != null) selected[id] = chosen
         }
-        val childrenByParent = selected.values.groupBy { it.parent }
-        fun build(id: UUID, path: Set<UUID>): Group {
-            val node = selected[id]?.value as? Group ?: error("MISSING_GROUP")
-            if (id in path) error("GROUP_CYCLE")
-            val children = childrenByParent[id].orEmpty()
-            return node.copy(
-                groups = children.filter { it.value is Group }.map { build(it.value.uuid, path + id) },
-                entries = children.mapNotNull { it.value as? Entry }
-            )
-        }
-        val tree = try {
+        fun buildTree(): Group {
             selected.forEach { (id, node) ->
                 if (id != root && selected[node.parent]?.value !is Group) error("ORPHAN")
                 var cursor: UUID? = id; val seen = hashSetOf<UUID>()
                 while (cursor != null) { check(seen.add(cursor)) { "GROUP_CYCLE" }; cursor = selected[cursor]?.parent }
             }
-            build(root, emptySet())
-        } catch (_: IllegalStateException) {
-            return MergeResult(local, issues + MergeIssue(null, "INVALID_GROUP_TREE", true))
+            return buildGroups(root, selected)
+        }
+        val tree = try { buildTree() } catch (_: IllegalStateException) {
+            val external = choice(null, "INVALID_GROUP_TREE")
+            if (external == null) {
+                issues += MergeIssue(null, "INVALID_GROUP_TREE", true)
+                local.content.group // Keep collecting settings conflicts as well.
+            } else {
+                // A structural choice takes precedence over individual move choices. Retain merged values
+                // and independent additions, restoring ancestors needed to keep them reachable.
+                val preferred = if (external) right else left
+                val alternate = if (external) left else right
+                for ((id, node) in selected.toMap()) {
+                    preferred[id]?.let { selected[id] = node.withParent(it.parent) }
+                }
+                fun restoreParent(id: UUID, path: Set<UUID>) {
+                    check(id !in path) { "GROUP_CYCLE" }
+                    val node = selected.getValue(id)
+                    val parent = node.parent ?: return
+                    if (selected[parent]?.value !is Group) {
+                        val ancestorNode = preferred[parent] ?: alternate[parent] ?: error("ORPHAN")
+                        check(ancestorNode.value is Group) { "ORPHAN" }
+                        selected[parent] = ancestorNode
+                        deleted.remove(parent)
+                    }
+                    restoreParent(parent, path + id)
+                }
+                try {
+                    selected.keys.toList().forEach { restoreParent(it, emptySet()) }
+                    buildTree()
+                } catch (_: IllegalStateException) {
+                    issues += MergeIssue(null, "INVALID_GROUP_TREE", true)
+                    local.content.group
+                }
+            }
         }
         val lm = local.content.meta; val rm = remote.content.meta
+        val localSettings = if (importing) null else metaKey(local)
+        val remoteSettings = if (importing) null else metaKey(remote)
+        val baseSettings = if (importing) null else base?.let(::metaKey)
         var meta = lm
-        if (!importing && metaKey(local) != metaKey(remote)) {
-            if (base != null && metaKey(local) == metaKey(base)) meta = rm
-            else if (base == null || metaKey(remote) != metaKey(base)) {
-                if (choices.containsKey(null)) meta = if (choices[null] == true) rm else lm
+        if (!importing && localSettings != remoteSettings) {
+            if (base != null && localSettings == baseSettings) meta = rm
+            else if (base == null || remoteSettings != baseSettings) {
+                if (choice(null, "DATABASE_SETTINGS") != null) meta = if (choice(null, "DATABASE_SETTINGS") == true) rm else lm
                 else issues += MergeIssue(null, "DATABASE_SETTINGS", true)
             }
         }
+        if (!importing && localSettings == remoteSettings) meta = meta.copy(
+            settingsChanged = MergeValues.latest(lm.settingsChanged, rm.settingsChanged),
+            nameChanged = MergeValues.latest(lm.nameChanged, rm.nameChanged),
+            descriptionChanged = MergeValues.latest(lm.descriptionChanged, rm.descriptionChanged),
+            defaultUserChanged = MergeValues.latest(lm.defaultUserChanged, rm.defaultUserChanged),
+            recycleBinChanged = MergeValues.latest(lm.recycleBinChanged, rm.recycleBinChanged),
+            entryTemplatesGroupChanged = MergeValues.latest(lm.entryTemplatesGroupChanged, rm.entryTemplatesGroupChanged))
         for (id in lm.customIcons.keys.intersect(rm.customIcons.keys)) {
-            if (lm.customIcons[id] != rm.customIcons[id] && !choices.containsKey(id)) issues += MergeIssue(id, "CUSTOM_ICON", true)
+            val a = lm.customIcons.getValue(id); val b = rm.customIcons.getValue(id)
+            if ((a.name.orEmpty() != b.name.orEmpty() || a.lastModified?.seconds() != b.lastModified?.seconds() || !a.data.contentEquals(b.data)) &&
+                choice(id, "CUSTOM_ICON") == null) issues += MergeIssue(id, "CUSTOM_ICON", true)
         }
         for (key in lm.customData.keys.intersect(rm.customData.keys)) {
-            if (lm.customData[key] != rm.customData[key] && !choices.containsKey(null)) issues += MergeIssue(null, "CUSTOM_METADATA", true)
+            if (!DatabaseMetadataMerge.requiresChoice(key)) continue
+            if (lm.customData[key]?.value != rm.customData[key]?.value && choice(null, "CUSTOM_METADATA") == null) issues += MergeIssue(null, "CUSTOM_METADATA", true)
         }
-        meta = meta.copy(customIcons = (rm.customIcons + lm.customIcons).mapValues { (id, v) -> if (choices[id] == true) rm.customIcons[id] ?: v else v },
-            customData = if (choices[null] == true) lm.customData + rm.customData else rm.customData + lm.customData)
+        meta = meta.copy(customIcons = (rm.customIcons + lm.customIcons).mapValues { (id, v) -> if (choice(id, "CUSTOM_ICON") == true) rm.customIcons[id] ?: v else v },
+            customData = DatabaseMetadataMerge.merge(lm.customData, rm.customData, choice(null, "CUSTOM_METADATA") == true))
         var template = Kdbx.mergeTemplate(local, remote)
         if (!importing && security(local) != security(remote)) {
             if (base != null && security(remote) == security(base)) Unit
-            else if (choices.containsKey(null)) {
-                if (choices[null] == true) template = when (remote) {
+            else if (choice(null, "ENCRYPTION_SETTINGS") != null) {
+                if (choice(null, "ENCRYPTION_SETTINGS") == true) template = when (remote) {
                     is KeePassDatabase.Ver3x -> (template as? KeePassDatabase.Ver3x)?.copy(header = remote.header) ?: template
                     is KeePassDatabase.Ver4x -> (template as KeePassDatabase.Ver4x).copy(header = remote.header)
                 }
@@ -168,11 +268,11 @@ object Merge {
         }
         if (template is KeePassDatabase.Ver4x && remote is KeePassDatabase.Ver4x) {
             val mine = template.header.publicCustomData; val theirs = remote.header.publicCustomData
-            if (mine.keys.intersect(theirs.keys).any { mine[it] != theirs[it] } && !choices.containsKey(null)) issues += MergeIssue(null, "HEADER_METADATA", true)
-            template = template.copy(header = template.header.copy(publicCustomData = if (choices[null] == true) mine + theirs else theirs + mine))
+            if (mine.keys.intersect(theirs.keys).any { mine[it] != theirs[it] } && choice(null, "HEADER_METADATA") == null) issues += MergeIssue(null, "HEADER_METADATA", true)
+            template = template.copy(header = template.header.copy(publicCustomData = if (choice(null, "HEADER_METADATA") == true) mine + theirs else theirs + mine))
         }
         val combined = template.modifyContent { copy(group = tree, meta = meta, deletedObjects = deleted.values.toList()) }
             .modifyBinaries { it + remote.binaries }
-        return MergeResult(combined, issues)
+        return MergeResult(combined, issues, if (issues.any { it.requiresChoice }) partial(local, remote, left, selected, deleted, issues) else combined)
     }
 }

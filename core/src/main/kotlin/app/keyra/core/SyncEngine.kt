@@ -56,11 +56,20 @@ class SyncEngine(private val files: SyncWorkspace) {
             val result = Merge.combine(open, external, base)
             issues = result.issues
             files.log("MERGE_ISSUES ${issues.size}")
-            Kdbx.write(result.database, files.candidate)
-            if (result.blocked) { files.log("MERGE_BLOCKED"); return SyncOutcome(SyncStatus.CONFLICT, issues = issues) }
+            val candidate = if (result.blocked) result.database else DatabaseMetadataMerge.completed(result.database)
+            Kdbx.write(candidate, files.candidate)
             if (!isUnlocked()) return SyncOutcome(SyncStatus.LOCKED)
-            merged = result.database
+            if (result.blocked) {
+                Kdbx.write(result.partialDatabase, files.local)
+                files.log("MERGE_BLOCKED")
+                return SyncOutcome(SyncStatus.CONFLICT, result.partialDatabase, issues)
+            }
+            merged = candidate
             atomicCopy(files.candidate, files.local)
+        } else {
+            // Remote-owned metadata must also survive a local-only edit/upload.
+            merged = DatabaseMetadataMerge.completed(DatabaseMetadataMerge.applyRemote(open, external))
+            if (merged !== open) Kdbx.write(merged, files.local)
         }
         if (!isUnlocked()) return SyncOutcome(SyncStatus.LOCKED)
         // metadata/download may have established actual provider capabilities.

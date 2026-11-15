@@ -120,16 +120,95 @@ class CoreTest {
         val result = Merge.combine(add(base, first), add(base, second), base)
         assertTrue(result.issues.isEmpty())
     }
-    @Test fun parallelVersionsStayWhole() {
+    @Test fun independentFieldsMergeAndOriginalEntriesStayInHistory() {
         val original = entry(); val base = add(db(), original)
-        val left = original.copy(fields = original.fields + ("UserName" to EntryValue.Plain("left-user")), times = TimeData.create(now.plusSeconds(1)))
-        val right = entry(original.uuid, "right-password", now.plusSeconds(2))
+        val left = original.copy(fields = original.fields + ("UserName" to EntryValue.Plain("left-user")), times = original.times!!.copy(lastModificationTime = now.plusSeconds(1)))
+        val right = entry(original.uuid, "right-password", now.plusSeconds(2)).copy(times = original.times!!.copy(lastModificationTime = now.plusSeconds(2)))
         val result = Merge.combine(add(base, left), add(base, right), base)
         val merged = get(result.database, original.uuid)
         assertFalse(result.blocked)
-        assertEquals("alice", merged.fields.userName?.content)
+        assertTrue(result.issues.isEmpty())
+        assertEquals("left-user", merged.fields.userName?.content)
         assertEquals("right-password", merged.fields.password?.content)
         assertTrue(merged.history.any { it.fields.userName?.content == "left-user" && it.fields.password?.content == "initial" })
+    }
+    @Test fun manualChoiceKeepsIndependentChangesAndAlternateHistory() {
+        val original = entry(); val base = add(db(), original)
+        val localOnly = entry(); val remoteOnly = entry()
+        val local = add(add(base, entry(original.uuid, "local", now.plusSeconds(1)).copy(times = original.times!!.copy(lastModificationTime = now.plusSeconds(1)))), localOnly)
+        val remote = add(add(base, entry(original.uuid, "remote", now.plusSeconds(2)).copy(times = original.times!!.copy(lastModificationTime = now.plusSeconds(2)))), remoteOnly)
+        val result = Merge.combine(local, remote, base,
+            resolutions = mapOf(MergeConflictKey(original.uuid, "ENTRY_FIELD", "Password") to false))
+        assertFalse(result.blocked)
+        assertEquals(setOf(original.uuid, localOnly.uuid, remoteOnly.uuid), Kdbx.entries(result.database).map { it.uuid }.toSet())
+        val kept = get(result.database, original.uuid)
+        assertEquals("local", kept.fields.password?.content)
+        assertTrue(kept.history.any { it.fields.password?.content == "remote" })
+    }
+    @Test fun eachParallelEntryNeedsItsOwnChoice() {
+        val first = entry(); val second = entry(); val base = add(add(db(), first), second)
+        val local = add(add(base, entry(first.uuid, "local-1")), entry(second.uuid, "local-2"))
+        val remote = add(add(base, entry(first.uuid, "remote-1", now.plusSeconds(1)).copy(times = first.times!!.copy(lastModificationTime = now.plusSeconds(1)))), entry(second.uuid, "remote-2", now.plusSeconds(1)).copy(times = second.times!!.copy(lastModificationTime = now.plusSeconds(1))))
+        val result = Merge.combine(local, remote, base,
+            resolutions = mapOf(MergeConflictKey(first.uuid, "ENTRY_FIELD", "Password") to false))
+        assertTrue(result.blocked)
+        assertEquals(second.uuid, result.issues.single().objectId)
+        assertEquals("local-1", get(result.database, first.uuid).fields.password?.content)
+    }
+    @Test fun settingsChoicesAreIndependent() {
+        val base = db()
+        val local = base.modifyContent { copy(meta = meta.copy(name = "local", customData = mapOf("key" to CustomDataValue("local", now)))) }
+        val remote = base.modifyContent { copy(meta = meta.copy(name = "remote", customData = mapOf("key" to CustomDataValue("remote", now)))) }
+        val initial = Merge.combine(local, remote, base)
+        assertEquals(setOf("DATABASE_SETTINGS", "CUSTOM_METADATA"), initial.issues.map { it.reason }.toSet())
+        val resolved = Merge.combine(local, remote, base, resolutions = mapOf(
+            MergeConflictKey(null, "DATABASE_SETTINGS") to false,
+            MergeConflictKey(null, "CUSTOM_METADATA") to true))
+        assertFalse(resolved.blocked)
+        assertEquals("local", resolved.database.content.meta.name)
+        assertEquals("remote", resolved.database.content.meta.customData["key"]?.value)
+    }
+    @Test fun folderStructureChoiceResolvesCombinedCycle() {
+        val base = db(); val a = Group(UUID.randomUUID(), "A"); val b = Group(UUID.randomUUID(), "B")
+        val initialized = base.modifyContent { copy(group = group.copy(groups = listOf(a, b))) }
+        val local = initialized.modifyContent { copy(group = group.copy(groups = listOf(b.copy(groups = listOf(a))))) }
+        val remote = initialized.modifyContent { copy(group = group.copy(groups = listOf(a.copy(groups = listOf(b))))) }
+        val resolved = Merge.combine(local, remote, initialized,
+            resolutions = mapOf(MergeConflictKey(null, "INVALID_GROUP_TREE") to true))
+        assertFalse(resolved.blocked)
+        assertEquals(b.uuid, Kdbx.group(resolved.database, a.uuid)!!.groups.single().uuid)
+    }
+    @Test fun ambiguousFieldChangesNeverPublishBeforeUserChoice() {
+        val w = Workspace(); val original = entry(); val base = add(db(), original)
+        Kdbx.write(base, w.baseline)
+        val local = add(base, entry(original.uuid, "local", now.plusSeconds(1)).copy(times = original.times!!.copy(lastModificationTime = now.plusSeconds(1))))
+        Kdbx.write(local, w.local)
+        val source = temp.newFile(); Kdbx.write(add(base, entry(original.uuid, "remote", now.plusSeconds(2)).copy(times = original.times!!.copy(lastModificationTime = now.plusSeconds(2)))), source)
+        val remoteHash = source.sha256(); val provider = Provider(source)
+        val result = SyncEngine(w).run(provider, local)
+        assertEquals(SyncStatus.CONFLICT, result.status)
+        assertTrue(result.issues.any { it.reason == "ENTRY_FIELD" && it.fieldName == "Password" && it.requiresChoice })
+        assertEquals(0, provider.writes)
+        assertNotNull(result.database)
+        assertTrue(Merge.entriesEquivalent(get(local, original.uuid), get(Kdbx.read(w.local, local.credentials), original.uuid)))
+        assertEquals(remoteHash, source.sha256())
+    }
+    @Test fun automaticallyResolvedFieldsPublishWithoutManualConflict() {
+        val w = Workspace(); val original = EntryFieldClocks.trackCreation(entry()); val base = add(db(), original)
+        Kdbx.write(base, w.baseline)
+        fun changed(password: String, second: Long) = EntryFieldClocks.edited(original, original.copy(
+            fields = original.fields + ("Password" to EntryValue.Encrypted(EncryptedValue.fromString(password))),
+            history = listOf(original.copy(history = emptyList())),
+            times = original.times!!.copy(lastModificationTime = now.plusSeconds(second))))
+        val local = add(base, changed("local", 10)); Kdbx.write(local, w.local)
+        val source = temp.newFile(); Kdbx.write(add(base, changed("remote", 20)), source)
+        val provider = Provider(source)
+        val result = SyncEngine(w).run(provider, local)
+        assertEquals(SyncStatus.SYNCED, result.status); assertTrue(result.issues.isEmpty())
+        assertEquals(1, provider.writes)
+        val saved = Kdbx.read(source, local.credentials)
+        assertEquals("remote", get(saved, original.uuid).fields.password?.content)
+        assertEquals(now.plusSeconds(20), EntryFieldClocks.lastChange(get(saved, original.uuid), "Password"))
     }
     @Test fun equalTimestampConflictRequiresChoice() {
         val original = entry(); val base = add(db(), original)
@@ -252,6 +331,26 @@ class CoreTest {
         val local = add(base, entry()); Kdbx.write(local, w.local)
         val p = Provider(source); val result = SyncEngine(w).run(p, local)
         assertEquals(SyncStatus.SYNCED, result.status); assertEquals(1, p.writes); assertEquals(source.sha256(), w.baseline.sha256())
+    }
+    @Test fun localOnlyUploadPreservesRemoteRandomSlug() {
+        for (remoteHasSlug in listOf(false, true)) {
+            val w = Workspace()
+            val key = DatabaseMetadataMerge.REMOTE_RANDOM_SLUG_KEY
+            val base = db().modifyContent { copy(meta = meta.copy(customData =
+                if (remoteHasSlug) mapOf(key to CustomDataValue("remote", now)) else emptyMap())) }
+            Kdbx.write(base, w.local); atomicCopy(w.local, w.baseline)
+            val source = temp.newFile(); atomicCopy(w.local, source)
+            val local = add(base, entry()).modifyContent {
+                copy(meta = meta.copy(customData = meta.customData + (key to CustomDataValue("local", now.plusSeconds(10)))))
+            }
+            Kdbx.write(local, w.local)
+            val result = SyncEngine(w).run(Provider(source), local)
+            assertEquals(SyncStatus.SYNCED, result.status)
+            val expected = if (remoteHasSlug) "remote" else null
+            assertEquals(expected, result.database!!.content.meta.customData[key]?.value)
+            assertEquals(expected, Kdbx.read(source, base.credentials).content.meta.customData[key]?.value)
+            assertEquals(1, Kdbx.entries(result.database!!).size)
+        }
     }
     @Test fun lockedDatabaseDoesNotDecryptOrWrite() {
         val w = Workspace(); val source = temp.newFile().apply { writeText("encrypted") }; val p = Provider(source)

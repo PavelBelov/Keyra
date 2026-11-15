@@ -52,7 +52,7 @@ You can use the same KDBX database on multiple devices, for example in Keyra on 
 
 Keyra keeps an encrypted local copy of the database so you can work offline. Changes are uploaded when the chosen storage is available and the database is unlocked. The app checks for updates when opened, after editing, and while its process is running. Synchronization is not necessarily instant: it is affected by Android restrictions, the network, and the cloud client's behavior. On your computer, synchronization must also be handled by your chosen password manager or file client.
 
-When changes occur on both sides, Keyra attempts to merge the data; if there is a conflict or a write requires confirmation, the app notifies you.
+When changes occur on both sides, Keyra merges entry fields using the common version and reliable per-field change times stored in entry metadata or recovered from history. Ambiguous fields and other unresolved conflicts require your choice; original entry versions remain in history. Conflict-free entries, including automatically merged entries, become available locally immediately. Entries that still need a choice keep their original local version. Upload waits until all conflicts are resolved; records whose location depends on a conflicting folder may also need to wait. If the storage provider requires write confirmation, the app asks before uploading.
 
 ### Through the system file picker
 
