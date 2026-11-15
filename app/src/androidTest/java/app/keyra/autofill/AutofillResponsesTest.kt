@@ -1,6 +1,8 @@
 package app.keyra.autofill
 
 import android.content.Context
+import android.service.autofill.Dataset
+import android.service.autofill.FillResponse
 import android.view.autofill.AutofillId
 import android.widget.EditText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -76,16 +78,24 @@ class AutofillResponsesTest {
         assertTrue(AutofillResponses.candidates(db, target.copy(certificate = "changed")).isEmpty())
         assertTrue(AutofillResponses.candidates(db, target.copy(domain = target.packageName)).isEmpty())
     }
+    // Framework test getters are omitted from SDK stubs and require the instrumentation-only
+    // --no-hidden-api-checks flag. scripts/test-qa.ps1 supplies it without changing device policy.
+    @Suppress("UNCHECKED_CAST")
+    private fun datasets(response: FillResponse): List<Dataset> =
+        FillResponse::class.java.getDeclaredMethod("getDatasets").invoke(response) as List<Dataset>
+    private fun authentication(dataset: Dataset) =
+        Dataset::class.java.getDeclaredMethod("getAuthentication").invoke(dataset)
+
     @Test fun searchIsAlwaysPresentAndOverflowRemainsBounded() {
         val target = target()
         val empty = requireNotNull(AutofillResponses.entries(context, target, emptyList()))
-        assertEquals(1, empty.datasets!!.size)
-        assertNotNull(empty.datasets!!.last().authentication)
+        assertEquals(1, datasets(empty).size)
+        assertNotNull(authentication(datasets(empty).last()))
         val single = requireNotNull(AutofillResponses.entries(context, target, listOf(entry())))
-        assertEquals(2, single.datasets!!.size)
-        assertNotNull(single.datasets!!.last().authentication)
+        assertEquals(2, datasets(single).size)
+        assertNotNull(authentication(datasets(single).last()))
         val many = requireNotNull(AutofillResponses.entries(context, target, (1..21).map { entry("Account $it") }))
-        assertEquals(20, many.datasets!!.size)
-        assertNotNull(many.datasets!!.last().authentication)
+        assertEquals(20, datasets(many).size)
+        assertNotNull(authentication(datasets(many).last()))
     }
 }

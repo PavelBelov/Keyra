@@ -40,6 +40,7 @@ class VaultRepository(private val context: Context) {
     val busy = MutableStateFlow(false)
     val message = MutableStateFlow("")
     @Volatile private var generation = 0L
+    @Volatile private var preparedConflictReview: ConflictReview? = null
     private var unlockMaterial: EncryptedValue? = null
     private val importConflict = File(store.directory, "import-conflict.kdbx")
     private val lockHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -48,7 +49,7 @@ class VaultRepository(private val context: Context) {
     fun cancelScheduledLock() { lockHandler.removeCallbacks(lockAction) }
 
     fun lock() {
-        generation++; mutableDb.value = null; unlockMaterial = null
+        generation++; preparedConflictReview = null; mutableDb.value = null; unlockMaterial = null
         message.value = ""
     }
     fun quickMaterial(): ByteArray = unlockMaterial?.getBinary() ?: error("LOCKED")
@@ -92,6 +93,7 @@ class VaultRepository(private val context: Context) {
                 secrets.putVaultKeyfile(selectedKey)
                 val bytes = material(password, selectedKey); remember(bytes); bytes.fill(0)
                 mutableDb.value = db
+                if (store.preferences.getBoolean("conflict", false)) tryResolveSavedConflict()
             }
         } finally { selectedKey?.fill(0) }
     }
@@ -131,6 +133,7 @@ class VaultRepository(private val context: Context) {
                 require(remote.content.group.uuid == db.content.group.uuid) { "DIFFERENT_DATABASE" }
                 operation {
                     check(generation == token && mutableDb.value?.content?.group?.uuid == db.content.group.uuid) { "LOCKED" }
+                    check(!store.preferences.getBoolean("conflict", false)) { "RESOLVE_CONFLICT_FIRST" }
                     providers.save(connection); store.resetSourceState()
                     check(store.preferences.commitChanges { putBoolean("syncEnabled", true) })
                     SyncWorker.schedule(context)
@@ -155,6 +158,7 @@ class VaultRepository(private val context: Context) {
         SyncWorker.afterEdit(context)
     }
     suspend fun changePassword(password: String, keyfile: ByteArray?) = operation {
+        check(!store.preferences.getBoolean("conflict", false)) { "RESOLVE_CONFLICT_FIRST" }
         val token = generation
         val db = mutableDb.value ?: error("LOCKED")
         val result = db.modifyCredentials { Kdbx.credentials(password, keyfile) }
@@ -176,40 +180,164 @@ class VaultRepository(private val context: Context) {
                 is KeePassDatabase.Ver4x -> other.copy(credentials = db.credentials)
             }
             Kdbx.write(normalized, importConflict)
-            setConflict(true, result.issues)
+            applyPartial(db, result.partialDatabase, true, result.issues, token)
+            prepareConflictReview(db, normalized, null, true, result.issues, token)
         } else {
-            Kdbx.write(result.database, store.local)
-            store.logChanges(db, result.database)
-            if (generation == token) mutableDb.value = result.database
+            val merged = DatabaseMetadataMerge.completed(result.database)
+            Kdbx.write(merged, store.local)
+            store.logChanges(db, merged)
+            if (generation == token) mutableDb.value = merged
             mutableStatus.value = if (result.issues.isEmpty()) SyncStatus.PENDING else SyncStatus.CONFLICT
             SyncWorker.afterEdit(context)
         }
         store.log(if (result.blocked || result.issues.isNotEmpty()) "IMPORT_CONFLICT" else "IMPORT_COMPLETE")
     }
-    private fun setConflict(importing: Boolean, issues: List<MergeIssue>) {
+    private fun setConflict(importing: Boolean, issues: List<MergeIssue>,
+                            partial: Boolean = store.preferences.getBoolean("partialMerge", false),
+                            appliedHash: String? = store.preferences.getString("partialAppliedHash", null)) {
+        preparedConflictReview = null
         check(store.preferences.commitChanges {
             putBoolean("conflict", true)
             putBoolean("importConflict", importing)
+            putBoolean("partialMerge", partial)
+            if (partial) putString("partialAppliedHash", appliedHash) else remove("partialAppliedHash")
             putString("issues", issues.joinToString("\n") { "${it.objectId ?: "DATABASE"}: ${it.reason}" })
         })
         mutableStatus.value = SyncStatus.CONFLICT
     }
-    suspend fun resolve(preferExternal: Boolean) = operation {
-        val token = generation
-        val local = mutableDb.value ?: error("LOCKED")
-        val importing = store.preferences.getBoolean("importConflict", false)
-        val file = if (importing) importConflict else store.remote
-        val remote = Kdbx.read(file, local.credentials)
-        val base = if (importing) null else store.baseline.takeIf(File::exists)?.let { Kdbx.read(it, local.credentials) }
-        val initial = Merge.combine(local, remote, base, importing)
-        val choices = initial.issues.associate { it.objectId to preferExternal }
-        val resolved = Merge.combine(local, remote, base, importing, choices)
+    private fun currentConflictReview() = preparedConflictReview?.takeIf {
+        it.generation == generation && it.active === mutableDb.value
+    }
+
+    /** Prepared forms only read memory; an early click can await the ongoing preparation. */
+    suspend fun conflictReview(): ConflictReview? {
+        if (!store.preferences.getBoolean("conflict", false)) return null
+        currentConflictReview()?.let { return it }
+        // A click can arrive while the sync is finishing preparation. Wait for that work,
+        // without starting another read/merge or holding up a form already prepared.
+        return gate.withLock {
+            if (!store.preferences.getBoolean("conflict", false)) null
+            else requireNotNull(currentConflictReview()) { "CONFLICT_REVIEW_CHANGED" }
+        }
+    }
+
+    /** Called with gate held, after the encrypted snapshots and partial database are committed. */
+    private fun prepareConflictReview(local: KeePassDatabase, remote: KeePassDatabase, base: KeePassDatabase?,
+                                      importing: Boolean, issues: List<MergeIssue>, token: Long) {
+        val active = mutableDb.value ?: return
+        val review = ConflictReview(local, remote, base, importing, issues.distinctBy { it.key }, token,
+            store.local.sha256(), conflictRemoteFile(importing).sha256(), conflictBaseFile(importing)?.sha256(),
+            store.preferences.getString("sourceRevision", null), store.pendingWrite(), active,
+            conflictOriginalFile()?.sha256())
+        review.prepare(context)
+        if (generation == token && mutableDb.value === active) {
+            preparedConflictReview = review
+            // lock() may race the publication without acquiring gate.
+            if (generation != token || mutableDb.value !== active) preparedConflictReview = null
+        }
+    }
+
+    internal suspend fun prepareConflictResolution(review: ConflictReview, choices: Map<MergeConflictKey, Boolean>) =
+        withContext(Dispatchers.IO) {
+            val selected = choices.toMap()
+            PreparedConflictResolution(review, selected,
+                Merge.combine(review.local, review.remote, review.base, review.importing, resolutions = selected))
+        }
+
+    suspend fun resolve(review: ConflictReview, choices: Map<MergeConflictKey, Boolean>) = operation {
+        applyResolution(review, choices) {
+            Merge.combine(review.local, review.remote, review.base, review.importing, resolutions = choices)
+        }
+    }
+
+    internal suspend fun resolve(prepared: PreparedConflictResolution) = operation {
+        applyResolution(prepared.review, prepared.choices) { prepared.result }
+    }
+
+    /** A prepared result never bypasses checks of the original encrypted snapshots. */
+    private fun applyResolution(review: ConflictReview, choices: Map<MergeConflictKey, Boolean>, merge: () -> MergeResult) {
+        val file = conflictRemoteFile(review.importing)
+        check(generation == review.generation && mutableDb.value === review.active &&
+            store.preferences.getBoolean("conflict", false) &&
+            store.preferences.getBoolean("importConflict", false) == review.importing &&
+            store.preferences.getString("sourceRevision", null) == review.sourceRevision &&
+            store.pendingWrite() == review.pendingWrite &&
+            conflictOriginalFile()?.sha256() == review.originalHash &&
+            store.local.sha256() == review.localHash && file.sha256() == review.remoteHash &&
+            conflictBaseFile(review.importing)?.sha256() == review.baseHash) { "CONFLICT_REVIEW_CHANGED" }
+        check(review.issues.all { choices.containsKey(it.key) }) { "CONFLICT_CHOICES_REQUIRED" }
+        val resolved = merge()
         check(!resolved.blocked) { "UNRESOLVABLE_TREE_EXPORT_REQUIRED" }
-        Kdbx.write(resolved.database, store.local)
-        store.logChanges(local, resolved.database)
+        applyMerged(review.active, resolved.database, review.importing, review.generation)
+    }
+    /** Called with gate held. Uncertain uploads still require explicit reconciliation. */
+    private fun tryResolveSavedConflict(): Boolean {
+        if (currentConflictReview() != null) return false
+        val active = mutableDb.value ?: return false
+        val token = generation
+        val (local, remote, base, importing) = readConflictSources(active)
+        val result = Merge.combine(local, remote, base, importing)
+        check(token == generation && mutableDb.value === active) { "CONFLICT_REVIEW_CHANGED" }
+        if (store.pendingWrite() != null) {
+            prepareConflictReview(local, remote, base, importing, result.issues, token)
+            return false
+        }
+        if (result.blocked) {
+            applyPartial(active, result.partialDatabase, importing, result.issues, token)
+            prepareConflictReview(local, remote, base, importing, result.issues, token)
+            return false
+        }
+        applyMerged(active, result.database, importing, token)
+        return true
+    }
+    private fun conflictRemoteFile(importing: Boolean) = if (importing) importConflict else store.remote
+    private fun conflictBaseFile(importing: Boolean) = store.baseline.takeIf { !importing && it.exists() }
+    private fun conflictOriginalFile() = store.conflictLocal.takeIf { store.preferences.getBoolean("partialMerge", false) }
+
+    private data class ConflictSources(val local: KeePassDatabase, val remote: KeePassDatabase,
+                                       val base: KeePassDatabase?, val importing: Boolean)
+
+    /** Called with gate held; always reads the frozen original when a partial merge is active. */
+    private fun readConflictSources(active: KeePassDatabase): ConflictSources {
+        val importing = store.preferences.getBoolean("importConflict", false)
+        val local = conflictOriginalFile()?.let { Kdbx.read(it, active.credentials) } ?: active
+        val remote = Kdbx.read(conflictRemoteFile(importing), local.credentials)
+        val base = conflictBaseFile(importing)?.let { Kdbx.read(it, local.credentials) }
+        return ConflictSources(local, remote, base, importing)
+    }
+
+    /** Save the original left side and conflict intent before exposing the partial snapshot. */
+    private fun applyPartial(before: KeePassDatabase, after: KeePassDatabase, importing: Boolean,
+                             issues: List<MergeIssue>, token: Long, prepared: File? = null) {
+        check(token == generation && mutableDb.value === before) { "CONFLICT_REVIEW_CHANGED" }
+        val alreadyPartial = store.preferences.getBoolean("partialMerge", false)
+        val localHash = store.local.sha256()
+        if (alreadyPartial && store.preferences.getString("partialAppliedHash", null) == localHash) {
+            setConflict(importing, issues)
+            return
+        }
+        // Recover an interrupted application only while local still equals the saved original.
+        if (alreadyPartial) check(localHash == store.conflictLocal.sha256()) { "CONFLICT_REVIEW_CHANGED" }
+        val candidate = prepared ?: File.createTempFile("partial-", ".kdbx", context.cacheDir)
+        try {
+            if (prepared == null) Kdbx.write(after, candidate)
+            if (!alreadyPartial) atomicCopy(store.local, store.conflictLocal)
+            setConflict(importing, issues, partial = true, appliedHash = candidate.sha256())
+            atomicCopy(candidate, store.local)
+            store.logChanges(before, after)
+            if (token == generation) mutableDb.value = after
+        } finally { if (prepared == null) candidate.delete() }
+    }
+
+    private fun applyMerged(before: KeePassDatabase, after: KeePassDatabase, importing: Boolean, token: Long) {
+        preparedConflictReview = null
+        val merged = DatabaseMetadataMerge.completed(after)
+        Kdbx.write(merged, store.local)
+        store.logChanges(before, merged)
         if (!importing) atomicCopy(store.remote, store.baseline)
-        check(store.preferences.commitChanges { putBoolean("conflict", false).remove("issues").remove("pendingWrite") })
-        if (token == generation) mutableDb.value = resolved.database
+        check(store.preferences.commitChanges { putBoolean("conflict", false).remove("issues").remove("pendingWrite").remove("importConflict").remove("partialMerge").remove("partialAppliedHash") })
+        store.conflictLocal.delete()
+        if (token == generation) mutableDb.value = merged
         mutableStatus.value = SyncStatus.PENDING; store.log("CONFLICT_RESOLVED")
         SyncWorker.afterEdit(context)
     }
@@ -236,6 +364,7 @@ class VaultRepository(private val context: Context) {
                 gate.withLock {
                     if (edit != webdavEditRevision.get() || generation != token || mutableDb.value == null) return@withLock
                     if (providers.connection() == connection && store.preferences.getBoolean("syncEnabled", true)) return@withLock
+                    check(!store.preferences.getBoolean("conflict", false)) { "RESOLVE_CONFLICT_FIRST" }
                     providers.save(connection)
                     store.resetSourceState()
                     check(store.preferences.commitChanges { putBoolean("syncEnabled", true) })
@@ -270,7 +399,7 @@ class VaultRepository(private val context: Context) {
                 var webdavModified = -1L
                 var webdavVersion: String? = null
                 gate.withLock snapshot@ {
-                    if (store.preferences.getBoolean("conflict", false)) {
+                    if (store.preferences.getBoolean("conflict", false) && !tryResolveSavedConflict()) {
                         mutableStatus.value = SyncStatus.CONFLICT; return@snapshot
                     }
                     if (store.preferences.getString("sourceRevision", null) != connectionRevision) throw SyncSuperseded()
@@ -328,13 +457,26 @@ class VaultRepository(private val context: Context) {
                         !store.preferences.getBoolean("syncEnabled", true) || store.preferences.getBoolean("conflict", false) ||
                         store.local.sha256() != originalHash) throw SyncSuperseded()
                     val synchronizedDatabase = outcome.database
-                    work.apply(replaceLocal = synchronizedDatabase != null)
-                    if (synchronizedDatabase != null) {
-                        mutableDb.value?.let { store.logChanges(it, synchronizedDatabase) }
-                        mutableDb.value = synchronizedDatabase
+                    val unresolved = outcome.issues.any { it.requiresChoice }
+                    // Copy remote/baseline first; applyPartial persists the conflict's original
+                    // local side and intent before replacing the active encrypted database.
+                    work.apply(replaceLocal = synchronizedDatabase != null && !unresolved)
+                    if (unresolved && synchronizedDatabase != null) {
+                        applyPartial(requireNotNull(mutableDb.value), synchronizedDatabase, false, outcome.issues, token, work.local)
+                    } else {
+                        if (synchronizedDatabase != null) {
+                            mutableDb.value?.let { store.logChanges(it, synchronizedDatabase) }
+                            mutableDb.value = synchronizedDatabase
+                        }
+                        if (unresolved) setConflict(false, outcome.issues)
+                        else if (outcome.status == SyncStatus.CONFLICT && store.pendingWrite() != null) setConflict(false, emptyList(), partial = false)
                     }
-                    if (outcome.issues.any { it.requiresChoice }) setConflict(false, outcome.issues)
-                    else if (outcome.status == SyncStatus.CONFLICT && store.pendingWrite() != null) setConflict(false, emptyList())
+                    if (store.preferences.getBoolean("conflict", false)) {
+                        val active = requireNotNull(mutableDb.value)
+                        val (local, remote, base, importing) = readConflictSources(active)
+                        val issues = if (store.pendingWrite() != null) Merge.combine(local, remote, base).issues else outcome.issues
+                        prepareConflictReview(local, remote, base, importing, issues, token)
+                    }
                     if (provider is SafStorage && outcome.status == SyncStatus.SYNCED) {
                         check(store.preferences.commitChanges {
                             remove("fileSyncUri"); remove("fileSyncModified")
@@ -402,6 +544,8 @@ class VaultRepository(private val context: Context) {
             catch (e: Exception) {
                 store.log("OPERATION_FAILED ${e.javaClass.simpleName.uppercase().replace(Regex("[^A-Z0-9_]"), "_").take(64)}")
                 message.value = when (e.message) {
+                    "CONFLICT_REVIEW_CHANGED" -> L10n.text(context, R.string.merge_review_changed)
+                    "CONFLICT_CHOICES_REQUIRED" -> L10n.text(context, R.string.merge_choose_all)
                     "DIFFERENT_DATABASE" -> L10n.text(context, R.string.ui_this_file_is_a_different_database_use_import_to_merge_its_data_205)
                     "RESOLVE_CONFLICT_FIRST" -> L10n.text(context, R.string.ui_resolve_the_sync_conflict_first_206)
                     "READ_ONLY_SOURCE" -> L10n.text(context, R.string.ui_the_source_is_read_only_open_a_separate_copy_or_import_its_data_207)

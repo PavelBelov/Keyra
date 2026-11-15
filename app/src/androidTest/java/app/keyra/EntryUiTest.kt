@@ -64,6 +64,14 @@ class EntryUiTest {
 
     @Before fun setUp() {
         assumeTrue("UI fixtures may run only in the isolated QA package", context.packageName.endsWith(".qa"))
+        // View callbacks can run while the display sleeps, but menus and RecyclerView layout
+        // cannot be tested then. Wake only for this run; do not change device timeout settings.
+        for (command in listOf("input keyevent KEYCODE_WAKEUP", "wm dismiss-keyguard")) {
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(instrumentation.uiAutomation.executeShellCommand(command))
+                .use { it.readBytes() }
+        }
+        assertFalse("Unlock the test device before running UI tests",
+            context.getSystemService(android.app.KeyguardManager::class.java).isKeyguardLocked)
         InstrumentationRegistry.getArguments().getString("keyraThemeIndex")?.toInt()?.let { index ->
             originalTheme = ApplicationTheme.selectedIndex(context)
             instrumentation.runOnMainSync { ApplicationTheme.select(context, index) }
@@ -94,6 +102,7 @@ class EntryUiTest {
         runBlocking { repository.unlock("qa-fixture-password", null) }
         KeyraApp::class.java.getDeclaredField("repository").apply { isAccessible = true }.set(app, repository)
         activity = instrumentation.startActivitySync(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) as MainActivity
+        onUi { activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         await { activity.findViewById<ImageButton>(R.id.addButton).visibility == View.VISIBLE }
     }
 
@@ -142,6 +151,52 @@ class EntryUiTest {
         }
         clickPopupText(activity.getString(R.string.entry_history))
         clickPopupText(activity.getString(R.string.ui_cancel_82), optional = true)
+    }
+
+    @Test fun conflictWarningUpdatesAboveListsAndOpensResolution() {
+        onUi { assertEquals(View.GONE, activity.findViewById<View>(R.id.syncConflictWarning).visibility) }
+        val before = repository.database.value!!
+        val original = before.getEntryBy { uuid == entryId }!!
+        val remote = Kdbx.putEntry(before, folderId, original.copy(fields = original.fields +
+            ("Password" to EntryValue.Encrypted(EncryptedValue.fromString("synthetic-remote-password")))))
+        val file = File.createTempFile("warning-fixture-", ".kdbx", context.cacheDir)
+        try {
+            runBlocking {
+                repository.mutate { db ->
+                    val changedPassword = EntryValue.Encrypted(EncryptedValue.fromString("synthetic-local-password"))
+                    val updated = Kdbx.edit(original, original.fields + ("Password" to changedPassword))
+                    Kdbx.putEntry(db, folderId, updated)
+                }
+                Kdbx.write(remote, file)
+                repository.import(file, "qa-fixture-password", null)
+            }
+        } finally { file.delete() }
+        assertEquals("", repository.message.value)
+        await { activity.findViewById<View>(R.id.syncConflictWarning)?.visibility == View.VISIBLE }
+        onUi {
+            val warning = activity.findViewById<Button>(R.id.syncConflictWarning)
+            assertEquals(activity.getString(R.string.merge_conflicts_required), warning.text.toString())
+            assertEquals(0, (warning.parent as ViewGroup).indexOfChild(warning))
+        }
+        screenshot("conflict-warning")
+        await { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>().any { it.text.toString() == "QA Folder" } }
+        onUi { descendants(activity.findViewById(R.id.content)).filterIsInstance<TextView>()
+            .first { it.text.toString() == "QA Folder" }.parent.let { (it as View).parent as View }.performClick() }
+        await { activity.findViewById<TextView>(R.id.header).text.toString() == "QA Folder" }
+        onUi { assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.syncConflictWarning).visibility) }
+        click(R.id.syncConflictWarning)
+        await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.merge_resolve_title) }
+        onUi {
+            assertNull(activity.findViewById<View>(R.id.syncConflictWarning))
+            descendants(activity.findViewById(R.id.content)).filterIsInstance<android.widget.RadioButton>().first().performClick()
+            descendants(activity.findViewById(R.id.content)).filterIsInstance<Button>()
+                .single { it.text.toString() == activity.getString(R.string.merge_apply) }.performClick()
+        }
+        await { activity.findViewById<TextView>(R.id.header).text.toString() == activity.getString(R.string.ui_data_72) }
+        click(R.id.navigateBack)
+        await { activity.findViewById<TextView>(R.id.header).text.toString() == "QA Folder" }
+        onUi { assertEquals(View.GONE, activity.findViewById<View>(R.id.syncConflictWarning).visibility) }
+        assertFalse(repository.store.preferences.getBoolean("conflict", false))
     }
 
     @Test fun applicationFieldShowsInstalledAppAndKeepsSignatureInEditorOnly() {

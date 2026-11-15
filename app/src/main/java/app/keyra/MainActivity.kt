@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
     private var welcomeFileCallback: ((Uri, String) -> Unit)? = null
     private var keyExportBytes: ByteArray? = null
     private var refreshSynchronization: (() -> Unit)? = null
+    private var refreshConflictWarning: (() -> Unit)? = null
     private var refreshAutofill: (() -> Unit)? = null
     private var autofillStatusJob: Job? = null
     private val syncSecretFields = mutableListOf<EditText>()
@@ -204,6 +205,8 @@ class MainActivity : AppCompatActivity() {
                     db == null -> finish()
                     model.saving.value -> Unit
                     model.importingDatabase.value -> Unit
+                    model.resolvingConflicts.value -> Unit
+                    model.panel == Panel.CONFLICTS -> { model.discardConflicts(); model.panel = Panel.DATA; render() }
                     model.panel == Panel.IMPORT -> { model.discardImport(); model.panel = Panel.DATA; hideKeyboard(); render() }
                     model.panel == Panel.JOURNAL -> { model.panel = Panel.DATA; render() }
                     model.panel != null -> { model.panel = null; render() }
@@ -227,7 +230,7 @@ class MainActivity : AppCompatActivity() {
             // Clear secrets from views even while the activity is stopped.
             repo.database.collect { db ->
                 if (db == null) {
-                    model.discardEditing(); model.discardImport(); model.entry = null; model.query = ""; model.searching = false; model.panel = null; model.syncSourceKind = null
+                    model.discardEditing(); model.discardImport(); model.discardConflicts(); model.entry = null; model.query = ""; model.searching = false; model.panel = null; model.syncSourceKind = null
                     mainMenu?.dismiss(); hideKeyboard(); dialogs.toList().forEach { it.dismiss() }; dialogs.clear()
                     render()
                 } else if (model.panel != null) {
@@ -242,13 +245,17 @@ class MainActivity : AppCompatActivity() {
                     binding.progress.visibility = if (it) View.VISIBLE else View.GONE
                     if (!it && model.panel != null && repo.database.value != null) render()
                 } }
-                launch { repo.status.collect { refreshSynchronization?.invoke() } }
+                launch { repo.status.collect {
+                    refreshSynchronization?.invoke()
+                    refreshConflictWarning?.invoke()
+                } }
                 launch { repo.syncing.collect { refreshSynchronization?.invoke() } }
                 launch { repo.providers.certificates.information.collect {
                     refreshSynchronization?.invoke(); welcomeView?.refreshCertificateInfo()
                 } }
                 launch { repo.message.collect { if (it.isNotEmpty()) toast(it) } }
                 launch { model.saving.collect { if (repo.database.value != null) render() } }
+                launch { model.resolvingConflicts.collect { if (repo.database.value != null) render() } }
                 launch { model.importingDatabase.collect { if (repo.database.value != null) render() } }
             }
         }
@@ -301,6 +308,7 @@ class MainActivity : AppCompatActivity() {
         journalJob?.cancel()
         clearImportPassword()
         refreshSynchronization = null
+        refreshConflictWarning = null
         clearSyncSecrets()
         loginPassword?.text?.clear(); loginPassword = null
         welcomeView?.dispose(); welcomeView = null
@@ -351,6 +359,7 @@ class MainActivity : AppCompatActivity() {
         catch (_: Exception) { toast(L10n.text(this@MainActivity, R.string.ui_operation_failed_check_access_permissions_and_your_connection_47)); false }
 
     private fun synchronizationStatusText(): String {
+        if (repo.store.preferences.getBoolean("conflict", false)) return getString(R.string.merge_conflicts_required)
         if (repo.syncing.value) return L10n.text(this@MainActivity, R.string.ui_syncing_48)
         val preferences = repo.store.preferences
         val time = preferences.getLong("lastSyncAttempt", preferences.getLong("lastSync", 0))
@@ -376,6 +385,7 @@ class MainActivity : AppCompatActivity() {
         journalJob?.cancel(); journalJob = null
         clearImportPassword()
         refreshSynchronization = null
+        refreshConflictWarning = null
         clearSyncSecrets()
         searchJob?.cancel(); listAdapter = null; filterRows = null
         entryFieldViews.forEach { it.hideValue() }
@@ -408,6 +418,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (model.panel == Panel.JOURNAL) { showJournalForm(); return }
         if (model.panel == Panel.IMPORT) { showImportForm(); return }
+        if (model.panel == Panel.CONFLICTS) { showConflictForm(); return }
         if (model.panel != null) { showPanel(); return }
         val generator = model.generator
         if (generator != null) { showPasswordGenerator(generator); return }
@@ -427,6 +438,39 @@ class MainActivity : AppCompatActivity() {
                 L10n.text(this, R.string.autofill_select_for_website, AutofillResponses.websiteUrl(fillTarget) ?: fillTarget.domain)
             else L10n.text(this, R.string.autofill_select_for_app, appName)))
         }
+        val conflictWarning = Button(this).apply {
+            id = R.id.syncConflictWarning
+            text = getString(R.string.merge_conflicts_required)
+            isAllCaps = false; textSize = 14f
+            gravity = Gravity.START or Gravity.CENTER_VERTICAL
+            backgroundTintList = null; stateListAnimator = null; elevation = 0f
+            setBackgroundResource(R.drawable.bg_sync_warning)
+            setTextColor(getColor(R.color.settings_warning))
+            minHeight = dp(64); minWidth = 0
+            setPadding(dp(16), dp(12), dp(16), dp(12))
+            val icon = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_warning)!!.apply {
+                setBounds(0, 0, dp(24), dp(24))
+            }
+            val arrow = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_settings_chevron)!!.mutate().apply {
+                setTint(getColor(R.color.settings_warning))
+                setBounds(0, 0, dp(20), dp(20))
+            }
+            setCompoundDrawablesRelative(icon, null, arrow, null)
+            compoundDrawablePadding = dp(12)
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
+            setOnClickListener {
+                if (repo.store.preferences.getBoolean("conflict", false)) {
+                    hideKeyboard(); openConflictForm()
+                } else refreshConflictWarning?.invoke()
+            }
+        }
+        binding.content.addView(conflictWarning, LinearLayout.LayoutParams(-1, -2).apply {
+            setMargins(dp(14), dp(8), dp(14), dp(8))
+        })
+        refreshConflictWarning = {
+            conflictWarning.visibility = if (repo.store.preferences.getBoolean("conflict", false)) View.VISIBLE else View.GONE
+        }
+        refreshConflictWarning?.invoke()
         val group = model.group?.let { Kdbx.group(db, it) } ?: db.content.group
         model.group = group.uuid
         val recycler = RecyclerView(this).apply {
@@ -631,6 +675,7 @@ class MainActivity : AppCompatActivity() {
             panel == Panel.SETTINGS -> L10n.text(this@MainActivity, R.string.ui_settings_71)
             panel == Panel.DATA -> L10n.text(this@MainActivity, R.string.ui_data_72)
             panel == Panel.IMPORT -> L10n.text(this@MainActivity, R.string.ui_import_73)
+            panel == Panel.CONFLICTS -> getString(R.string.merge_resolve_title)
             panel == Panel.JOURNAL -> L10n.text(this@MainActivity, R.string.ui_log_74)
             generator != null -> getString(R.string.password_generator)
             draft != null -> draft.values["Title"]?.content.orEmpty().ifBlank { getString(if (draft.original == null) R.string.new_entry else R.string.edit_entry) }
@@ -644,7 +689,7 @@ class MainActivity : AppCompatActivity() {
         binding.closeSearch.visibility = if (searching) View.VISIBLE else View.GONE
         binding.clearSearch.visibility = if (searching) View.VISIBLE else View.GONE
         binding.navigateBack.visibility = if (canNavigateUp) View.VISIBLE else View.GONE
-        binding.navigateBack.isEnabled = !model.saving.value && !model.importingDatabase.value
+        binding.navigateBack.isEnabled = !model.saving.value && !model.importingDatabase.value && !model.resolvingConflicts.value
         binding.searchButton.visibility = if (panel == null && unlocked && !searching && entry == null && !editing) View.VISIBLE else View.GONE
         binding.editButton.visibility = if (generator != null || (entry != null && !searching && !editing)) View.VISIBLE else View.GONE
         binding.editButton.setImageResource(if (generator != null) R.drawable.ic_wand else R.drawable.ic_edit)
@@ -981,6 +1026,9 @@ class MainActivity : AppCompatActivity() {
         val names = listOf(L10n.text(this@MainActivity, R.string.ui_off_106), L10n.text(this@MainActivity, R.string.ui_file_107), getString(R.string.webdav_name))
         val selectedKind = model.syncSourceKind?.takeIf { it in kinds } ?: if (repo.store.preferences.getBoolean("syncEnabled", true)) connection?.kind ?: "off" else "off"
         model.syncSourceKind = selectedKind
+        if (selectedKind == "off" && repo.store.preferences.getBoolean("conflict", false)) {
+            body.addView(settingsAction(getString(R.string.merge_conflicts_required)) { openConflictForm() })
+        }
         val sourcePicker = settingsAction(L10n.text(this@MainActivity, R.string.ui_sync_108), names[kinds.indexOf(selectedKind).coerceAtLeast(0)]) { }
         body.addView(sourcePicker)
         val parameters = settingsList()
@@ -1075,12 +1123,16 @@ class MainActivity : AppCompatActivity() {
             actions.removeAllViews()
             if (selectedKind == "off") return
             val summary = if (connection?.kind != selectedKind || !repo.store.preferences.getBoolean("syncEnabled", true)) L10n.text(this@MainActivity, R.string.ui_configure_the_selected_source_to_enable_sync_113) else synchronizationStatusText()
-            actions.addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_sync_now_114), summary) { lifecycleScope.launch { saveWebdav?.invoke()?.join(); repo.sync() } }.apply {
-                isEnabled = !repo.syncing.value && (selectedKind == "webdav" || (connection?.kind == selectedKind && repo.store.preferences.getBoolean("syncEnabled", true)))
+            val conflict = repo.store.preferences.getBoolean("conflict", false)
+            actions.addView(settingsAction(if (conflict) getString(R.string.merge_conflicts_required) else L10n.text(this@MainActivity, R.string.ui_sync_now_114), if (conflict) null else summary) {
+                if (repo.store.preferences.getBoolean("conflict", false)) openConflictForm()
+                else lifecycleScope.launch { saveWebdav?.invoke()?.join(); repo.sync() }
+            }.apply {
+                isEnabled = conflict || (!repo.syncing.value && (selectedKind == "webdav" || (connection?.kind == selectedKind && repo.store.preferences.getBoolean("syncEnabled", true))))
                 alpha = if (isEnabled || repo.syncing.value) 1f else 0.4f
             })
             synchronizationActions(actions)
-            if (selectedKind != "webdav" && !repo.store.preferences.getBoolean("syncEnabled", true)) {
+            if (!conflict && selectedKind != "webdav" && !repo.store.preferences.getBoolean("syncEnabled", true)) {
                 fun disable(view: View) {
                     view.isEnabled = false
                     if (view is ViewGroup) for (i in 0 until view.childCount) disable(view.getChildAt(i))
@@ -1125,13 +1177,37 @@ class MainActivity : AppCompatActivity() {
             dialog(AlertDialog.Builder(this).setTitle(L10n.text(this@MainActivity, R.string.ui_upload_database_119)).setMessage(L10n.text(this@MainActivity, R.string.ui_this_storage_provider_does_not_guarantee_conditional_writes_uploa_120))
                 .setNegativeButton(L10n.text(this@MainActivity, R.string.ui_cancel_82), null).setPositiveButton(L10n.text(this@MainActivity, R.string.ui_upload_121)) { _, _ -> lifecycleScope.launch { repo.sync(true) } })
         })
-        if (repo.store.preferences.getBoolean("conflict", false)) {
-            body.addView(label(repo.store.preferences.getString("issues", L10n.text(this@MainActivity, R.string.ui_upload_result_unknown_122)).orEmpty(), 12f))
-            body.addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_keep_local_versions_of_conflicting_items_123)) { lifecycleScope.launch { repo.resolve(false) } })
-            body.addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_keep_remote_versions_of_conflicting_items_124)) { lifecycleScope.launch { repo.resolve(true) } })
-            body.addView(label(L10n.text(this@MainActivity, R.string.ui_independent_changes_are_merged_choose_which_versions_to_keep_for__125)))
+        if (repo.store.preferences.getBoolean("conflict", false) && model.panel != Panel.DATA) {
+            body.addView(settingsAction(getString(R.string.merge_conflicts_required)) { openConflictForm() })
         }
     }
+    private var loadingConflictReview = false
+    private fun openConflictForm() {
+        if (loadingConflictReview || model.resolvingConflicts.value) return
+        loadingConflictReview = true
+        lifecycleScope.launch {
+            try {
+                val review = repo.conflictReview()
+                if (review == null && repo.database.value != null) {
+                    model.discardConflicts(); model.panel = Panel.DATA; render(); repo.sync()
+                } else if (review != null && repo.database.value === review.active) {
+                    model.conflictDraft = ConflictDraft(review); model.panel = Panel.CONFLICTS; render()
+                }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { toast(getString(R.string.merge_review_changed)) }
+            finally { loadingConflictReview = false }
+        }
+    }
+    private fun showConflictForm() {
+        val draft = model.conflictDraft
+        if (draft == null) { model.panel = Panel.DATA; render(); return }
+        val body = ConflictResolutionView(this, draft, model.resolvingConflicts.value,
+            showDialog = { dialog(it); Unit }, modeChanged = { render() },
+            registerField = { entryFieldViews += it }, copy = ::copySecret,
+            onApply = { model.applyConflicts() })
+        binding.content.addView(scroll(body), LinearLayout.LayoutParams(-1, 0, 1f))
+    }
+
     private fun showCertificateWarning(challenge: WebDavCertificateChallenge, force: Boolean = false) {
         if (!force && lastCertificatePrompt == challenge.identity) return
         lastCertificatePrompt = challenge.identity

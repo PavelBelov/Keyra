@@ -4,4 +4,15 @@
     <string name="vault_empty_hint">Tippe auf +, um einen Eintrag oder Ordner hinzuzufügen.</string>
     <string name="search_empty">Keine passenden Einträge</string>
     <string name="search_empty_hint">Versuche einen anderen Namen, Benutzernamen oder eine Website.</string>
+    <string name="dav_choose_file">Datenbankdatei auswählen</string>
+    <string name="dav_parent">Übergeordneter Ordner</string>
+    <string name="dav_empty">Dieser Ordner ist leer</string>
+    <string name="dav_certificate_valid">Gültig</string>
+    <string name="dav_certificate_custom">Ungültig · Bestätigung erforderlich</string>
+    <string name="dav_certificate_accepted">Ungültig · von dir akzeptiert</string>
+    <string name="dav_certificate_checking">Wird geprüft…</string>
+    <string name="dav_certificate_unknown">Zertifikat konnte nicht geprüft werden</string>
+    <string name="dav_credentials_required">WebDAV-Benutzernamen und Passwort eingeben</string>
+    <string name="dav_error">Ordner konnte nicht geöffnet werden. Prüfe Adresse, Verbindung und WebDAV-Unterstützung des Servers.</string>
+    <string name="dav_certificate_details">Server: %1$s\nInhaber: %2$s\nAussteller: %3$s\nGültig: %4$s — %5$s\nSHA-256: %6$s</string>
 </resources>

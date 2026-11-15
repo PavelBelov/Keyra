@@ -4,4 +4,15 @@
     <string name="vault_empty_hint">Appuyez sur + pour ajouter une entrée ou un dossier.</string>
     <string name="search_empty">Aucune entrée correspondante</string>
     <string name="search_empty_hint">Essayez un autre nom, identifiant ou site web.</string>
+    <string name="dav_choose_file">Choisir le fichier de la base</string>
+    <string name="dav_parent">Dossier parent</string>
+    <string name="dav_empty">Ce dossier est vide</string>
+    <string name="dav_certificate_valid">Valide</string>
+    <string name="dav_certificate_custom">Non valide · accord nécessaire</string>
+    <string name="dav_certificate_accepted">Non valide · accepté par vous</string>
+    <string name="dav_certificate_checking">Vérification…</string>
+    <string name="dav_certificate_unknown">Impossible de vérifier le certificat</string>
+    <string name="dav_credentials_required">Saisissez votre identifiant et mot de passe WebDAV</string>
+    <string name="dav_error">Impossible d’ouvrir le dossier. Vérifiez l’adresse, la connexion et la prise en charge de WebDAV sur le serveur.</string>
+    <string name="dav_certificate_details">Serveur : %1$s\nSujet : %2$s\nÉmetteur : %3$s\nValidité : %4$s — %5$s\nSHA-256 : %6$s</string>
 </resources>

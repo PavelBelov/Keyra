@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
-enum class Panel { SETTINGS, DATA, IMPORT, JOURNAL }
+enum class Panel { SETTINGS, DATA, IMPORT, JOURNAL, CONFLICTS }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     val repository = (application as KeyraApp).repository
@@ -27,6 +27,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var linkingAutofill = false
     var panel: Panel? = null
     var syncSourceKind: String? = null
+    var conflictDraft: ConflictDraft? = null
+    val resolvingConflicts = MutableStateFlow(false)
+    fun discardConflicts() { conflictDraft = null }
+    fun applyConflicts() {
+        val draft = conflictDraft ?: return
+        if (resolvingConflicts.value || !draft.complete) return
+        val choices = draft.resolutions()
+        resolvingConflicts.value = true
+        viewModelScope.launch {
+            try {
+                val prepared = repository.prepareConflictResolution(draft.review, choices)
+                if (conflictDraft !== draft || repository.database.value == null) return@launch
+                if (prepared.result.blocked) {
+                    draft.additionalIssues = (draft.additionalIssues + prepared.result.issues).distinctBy { it.key }
+                    draft.error = L10n.text(getApplication<Application>(), R.string.merge_incompatible_choices)
+                    return@launch
+                }
+                draft.error = ""
+                repository.resolve(prepared)
+                if (conflictDraft === draft && repository.database.value != null && repository.message.value.isEmpty()) {
+                    discardConflicts(); panel = Panel.DATA
+                    resolvingConflicts.value = false
+                    repository.sync()
+                }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) {
+                if (conflictDraft === draft) draft.error = L10n.text(getApplication<Application>(), R.string.ui_operation_failed_check_the_password_key_file_access_permissions_a_212)
+            } finally { resolvingConflicts.value = false }
+        }
+    }
     var editing: EntryDraft? = null
     var generator: PasswordGeneratorDraft? = null
     val saving = MutableStateFlow(false)
@@ -82,7 +112,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val parent: UUID
                     if (original == null) {
                         check(Kdbx.group(db, draft.parent) != null) { "PARENT_GROUP_MISSING" }
-                        updated = Entry(draft.id, fields = fields, tags = tags); parent = draft.parent
+                        updated = app.keyra.core.EntryFieldClocks.trackCreation(Entry(draft.id, fields = fields, tags = tags)); parent = draft.parent
                     } else {
                         val current = db.getEntry { it.uuid == draft.id } ?: error("ENTRY_NO_LONGER_EXISTS")
                         check(sameEntryFields(current.second.fields, original.fields) && current.second.tags == original.tags) { "ENTRY_CHANGED_DURING_EDIT" }
@@ -99,5 +129,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    override fun onCleared() { discardEditing(); discardImport(); super.onCleared() }
+    override fun onCleared() { discardEditing(); discardImport(); discardConflicts(); super.onCleared() }
 }

@@ -13,6 +13,7 @@ class LocalStore(private val context: Context) {
     val baseline = File(directory, "baseline.kdbx")
     val remote = File(directory, "remote.kdbx")
     val transaction = File(directory, "transaction.kdbx")
+    val conflictLocal = File(directory, "conflict-local.kdbx")
     val journal = File(directory, "journal.txt")
     val journalRevision = kotlinx.coroutines.flow.MutableStateFlow(0L)
     fun log(event: String) = logEvents(listOf(event))
@@ -47,11 +48,13 @@ class LocalStore(private val context: Context) {
     fun resetSourceState() {
         check(preferences.commitChanges {
             remove("pendingWrite"); remove("lastHash"); remove("lastSync")
+            remove("partialMerge"); remove("partialAppliedHash")
             remove("lastSyncAttempt"); remove("lastSyncResult"); remove("lastSyncDetail"); remove("lastSyncDetailCode")
             remove("fileSyncUri"); remove("fileSyncModified")
             remove("webdavSyncUri"); remove("webdavSyncModified"); remove("webdavSyncVersion")
         })
         baseline.delete(); remote.delete(); transaction.delete()
+        conflictLocal.delete()
         File(directory, "candidate.kdbx").delete() // Clean up files left by older builds.
     }
     private companion object {

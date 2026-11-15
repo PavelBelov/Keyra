@@ -4,4 +4,15 @@
     <string name="vault_empty_hint">Tocca + per aggiungere una voce o una cartella.</string>
     <string name="search_empty">Nessuna voce corrispondente</string>
     <string name="search_empty_hint">Prova un altro nome, nome utente o sito web.</string>
+    <string name="dav_choose_file">Scegli il file del database</string>
+    <string name="dav_parent">Cartella superiore</string>
+    <string name="dav_empty">Questa cartella è vuota</string>
+    <string name="dav_certificate_valid">Valido</string>
+    <string name="dav_certificate_custom">Non valido · approvazione necessaria</string>
+    <string name="dav_certificate_accepted">Non valido · accettato da te</string>
+    <string name="dav_certificate_checking">Verifica…</string>
+    <string name="dav_certificate_unknown">Impossibile verificare il certificato</string>
+    <string name="dav_credentials_required">Inserisci nome utente e password WebDAV</string>
+    <string name="dav_error">Impossibile aprire la cartella. Controlla l’indirizzo, la connessione e il supporto WebDAV del server.</string>
+    <string name="dav_certificate_details">Server: %1$s\nSoggetto: %2$s\nEmittente: %3$s\nValidità: %4$s — %5$s\nSHA-256: %6$s</string>
 </resources>

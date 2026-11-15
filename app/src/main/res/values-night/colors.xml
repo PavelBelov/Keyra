@@ -17,4 +17,6 @@
     <color name="secret_other">#F2C078</color>
     <bool name="light_system_bars">false</bool>
     <color name="settings_warning">#F2C078</color>
+    <color name="warning_surface">#3A2E18</color>
+    <color name="warning_outline">#84652F</color>
 </resources>

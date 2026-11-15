@@ -45,7 +45,7 @@ if ($DeviceSerial) {
 } elseif ($DeviceHardwareSerial) {
     $matchingTransports = @()
     foreach ($transport in ($onlineDevices | Where-Object { $_ -notmatch '^emulator-' })) {
-        $hardwareOutput = & $adb -s $transport shell getprop ro.serialno 2>$null
+        $hardwareOutput = & $adb -s $transport shell getprop ro.serial 2>$null
         if ($LASTEXITCODE -ne 0) { continue }
         $hardwareSerial = ($hardwareOutput -join '').Trim()
         if (-not $hardwareSerial) {

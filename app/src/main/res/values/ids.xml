@@ -1,3 +1,4 @@
 <resources>
     <item name="password_input_mask" type="id" />
+    <item name="syncConflictWarning" type="id" />
 </resources>

@@ -2,7 +2,7 @@
 
 [English](README.md) | [Русский](README.ru.md)
 
-A lightweight and fast password manager for Android that works with KeePass KDBX databases. Store passwords on your device, use them in apps and browsers, and sync your database with other devices through the storage of your choice.
+A lightweight and fast password manager for Android that works with KeePass KDBX databases. Store passwords on your device, use them in apps and browsers, and sync your database with other devices.
 
 Keyra is an open-source project: anyone can inspect its source code to review how the app works and protects their data.
 
@@ -11,8 +11,8 @@ Keyra features:
 - Database protection with a master password, a key file, or a combination of both.
 - Quick unlock using biometrics or your device's screen lock.
 - Autofill for usernames and passwords in Android apps and supported browsers.
-- Synchronization through WebDAV and files available in Android's system file picker.
-- Offline access to your local database.
+- Synchronization with other devices.
+- Offline use.
 - Password generator, search, groups, tags, and entry change history.
 - Compatibility with desktop password managers that support the KDBX format, such as KeePass and KeePassXC.
 
@@ -28,7 +28,7 @@ To open a database, you can use:
 - **A key file** — a separate file containing an additional secret.
 - **A master password and a key file together** — in this case, both components are required to open the database.
 
-If an attacker obtains only the database file, they will still need its master key. When both forms of protection are used, knowing the password without the key file or having the key file without the password is insufficient for normal decryption. Use a long, unique master password and keep a backup of your key file separate from the database: losing a required component means losing access to your data.
+If an attacker obtains only the database file, they will still need its master key. When both forms of protection are used, decryption requires both the password and the key file. Use a long, unique master password and keep a backup of your key file separate from the database: losing a required component means losing access to your data.
 
 For more information about the composite master key, see the [KeePass documentation](https://keepass.info/help/base/keys.html).
 
@@ -52,7 +52,7 @@ You can use the same KDBX database on multiple devices, for example in Keyra on 
 
 Keyra keeps an encrypted local copy of the database so you can work offline. Changes are uploaded when the chosen storage is available and the database is unlocked. The app checks for updates when opened, after editing, and while its process is running. Synchronization is not necessarily instant: it is affected by Android restrictions, the network, and the cloud client's behavior. On your computer, synchronization must also be handled by your chosen password manager or file client.
 
-When changes occur on both sides, Keyra attempts to merge the data; if there is a conflict or a write requires confirmation, the app notifies you.
+When changes occur on both sides, Keyra merges entry fields using the common version and reliable per-field change times stored in entry metadata or recovered from history. Ambiguous fields and other unresolved conflicts require your choice; original entry versions remain in history. Conflict-free entries, including automatically merged entries, become available locally immediately. Entries that still need a choice keep their original local version. Upload waits until all conflicts are resolved; records whose location depends on a conflicting folder may also need to wait. If the storage provider requires write confirmation, the app asks before uploading.
 
 ### Through the system file picker
 
