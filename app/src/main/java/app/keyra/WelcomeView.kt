@@ -2,32 +2,32 @@ package app.keyra
 
 import android.net.Uri
 
-import androidx.core.net.toUri
-
-import android.content.Context
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.core.widget.doAfterTextChanged
 import app.keyra.storage.Connection
-import app.keyra.storage.WebDavCertificateChallenge
+import app.keyra.storage.Providers
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.security.SecureRandom
 
 /** First-run forms. Secrets live only for the lifetime of this view. */
 // Constructed in code with required data and callbacks; never inflated from XML.
 @android.annotation.SuppressLint("ViewConstructor")
 class WelcomeView(
-    context: Context,
+    private val activity: AppCompatActivity,
     private val title: (String, Boolean) -> Unit,
     private val pickKey: ((ByteArray?) -> Unit) -> Unit,
     private val pickFile: ((Uri, String) -> Unit) -> Unit,
     private val create: (String, ByteArray?, () -> Unit) -> Unit,
     private val prepare: (Uri?, Connection?, (PreparedVault?, String?) -> Unit) -> Unit,
-    private val pendingCertificate: (Connection) -> WebDavCertificateChallenge?,
-    private val showCertificate: (WebDavCertificateChallenge) -> Unit,
+    private val providers: Providers,
+    private val showDialog: (AlertDialog.Builder) -> AlertDialog,
     private val open: (PreparedVault, String, ByteArray?, (String?) -> Unit) -> Unit
-) : LinearLayout(context) {
+) : LinearLayout(activity) {
     private var key: ByteArray? = null
     private var revision = 0
     private var working = false
@@ -36,9 +36,8 @@ class WelcomeView(
     private var prepared: PreparedVault? = null
     private var webdavDraft: Connection? = null
     private var accessFromWebdav = false
-    private var certificateRetry: (() -> Unit)? = null
-    private var certificateRefresh: (() -> Unit)? = null
-    private var retryAfterCertificate = false
+    private var webdavUi: WebDavSettingsUi? = null
+    val showingWebDav: Boolean get() = page == "webdav"
     var inForm = false
         private set
 
@@ -62,10 +61,9 @@ class WelcomeView(
         prepared?.dispose(); prepared = null; webdavDraft = null
     }
     private fun clearInputs() {
+        webdavUi?.dispose(); webdavUi = null
         revision++; key?.fill(0); key = null
         secrets.forEach { it.text.clear() }; secrets.clear()
-        certificateRetry = null; certificateRefresh = null
-        retryAfterCertificate = false
     }
     fun back(): Boolean {
         if (!inForm || working) return false
@@ -206,41 +204,57 @@ class WelcomeView(
             addView(row(L10n.text(context, R.string.webdav_name), L10n.text(context, R.string.ui_http_or_https_226)) { showWebdav() })
         }
     }
-    fun refreshCertificateInfo() { certificateRefresh?.invoke() }
-    fun retryCertificate(): Boolean {
-        val retry = certificateRetry ?: return false
-        if (page != "webdav") return false
-        if (working) { retryAfterCertificate = true; return true }
-        retry(); return true
-    }
+    fun refreshCertificateInfo() { webdavUi?.refresh() }
     private fun showWebdav() {
         page = "webdav"
         val previous = webdavDraft
         val body = settingsForm(L10n.text(context, R.string.webdav_name))
         val fields = card(body, L10n.text(context, R.string.ui_connection_227))
-        val url = styledInput(L10n.text(context, R.string.url_hint), previous?.location.orEmpty()).apply { inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI }
+        val url = styledInput(L10n.text(context, R.string.url_hint), previous?.location.orEmpty()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+        }
         val user = styledInput(L10n.text(context, R.string.field_login), previous?.user.orEmpty())
         val password = styledInput(L10n.text(context, R.string.field_password), previous?.password.orEmpty(), true)
-        fields.addView(url); fields.addView(user); fields.addView(password)
-        val certificateCard = card(body, L10n.text(context, R.string.ui_certificate_228))
-        val error = note("").apply { visibility = GONE; setTextColor(context.getColor(R.color.settings_error)) }
-        body.addView(error)
-        fun connection() = Connection("webdav", url.text.toString().trim(), user.text.toString(), password.text.toString())
-        certificateRefresh = {
-            certificateCard.removeAllViews()
-            val source = connection()
-            val challenge = pendingCertificate(source)
-            if (challenge != null) certificateCard.addView(row(L10n.text(context, R.string.ui_review_server_certificate_116), L10n.text(context, R.string.ui_approval_required_sha_256_229, challenge.fingerprint)) { showCertificate(challenge) })
-            else certificateCard.addView(note(if (source.location.toUri().scheme == "http") L10n.text(context, R.string.ui_http_no_certificate_is_used_230) else L10n.text(context, R.string.ui_the_https_certificate_is_checked_when_connecting_231)))
+        val urlRow = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
+        val browse = ImageButton(context).apply {
+            setImageResource(R.drawable.ic_open_database)
+            imageTintList = android.content.res.ColorStateList.valueOf(context.getColor(R.color.settings_control))
+            background = null
+            contentDescription = L10n.text(context, R.string.dav_choose_file)
         }
-        refreshCertificateInfo()
-        url.doAfterTextChanged { refreshCertificateInfo() }
+        urlRow.addView(url, LayoutParams(0, -2, 1f))
+        urlRow.addView(browse, LayoutParams(dp(48), dp(64)))
+        fields.addView(urlRow); fields.addView(user); fields.addView(password)
+        fun connection() = Connection("webdav", url.text.toString().trim(), user.text.toString(), password.text.toString())
+        val formRevision = revision
+        val ui = WebDavSettingsUi(activity, providers, source = { connection() }, showDialog = showDialog,
+            selected = { url.setText(it); url.setSelection(url.length()) },
+            browsingChanged = { busy ->
+                if (revision == formRevision) setWorking(busy)
+                browse.alpha = if (busy) 0.4f else 1f
+            })
+        webdavUi = ui
+        fields.addView(ui.certificateView)
+        browse.setOnClickListener { if (!working) ui.browse() }
+        fun updateUrl() {
+            val parsed = url.text.toString().trim().toHttpUrlOrNull()
+            browse.visibility = if (parsed != null && parsed.username.isEmpty() && parsed.password.isEmpty()) VISIBLE else GONE
+            ui.changed()
+        }
+        urlRow.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View) { updateUrl() }
+            override fun onViewDetachedFromWindow(view: View) { ui.dispose() }
+        })
+        url.doAfterTextChanged { updateUrl() }
+        updateUrl()
         fun proceed() {
             val source = connection()
             webdavDraft = source
-            val parsed = source.location.toUri()
-            if (parsed.scheme !in setOf("http", "https") || parsed.host.isNullOrBlank()) { url.error = L10n.text(context, R.string.ui_enter_an_http_or_https_address_for_the_database_file_232); return }
-            error.visibility = GONE
+            val parsed = source.location.toHttpUrlOrNull()
+            if (parsed == null || parsed.username.isNotEmpty() || parsed.password.isNotEmpty()) {
+                url.error = L10n.text(context, R.string.ui_enter_an_http_or_https_address_for_the_database_file_232)
+                return
+            }
             val token = revision
             setWorking(true)
             prepare(null, source) { vault, message ->
@@ -248,12 +262,13 @@ class WelcomeView(
                 else {
                     setWorking(false)
                     if (vault != null) showAccess(vault, true)
-                    else if (retryAfterCertificate) { retryAfterCertificate = false; proceed() }
-                    else { error.text = message ?: L10n.text(context, R.string.ui_could_not_connect_233); error.visibility = VISIBLE; refreshCertificateInfo() }
+                    else {
+                        ui.showError(message ?: L10n.text(context, R.string.ui_could_not_connect_233))
+                        refreshCertificateInfo()
+                    }
                 }
             }
         }
-        certificateRetry = { proceed() }
         primary(body, L10n.text(context, R.string.ui_continue_234)) { proceed() }
     }
     private fun showAccess(source: PreparedVault, fromWebdav: Boolean) {

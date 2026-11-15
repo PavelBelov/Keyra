@@ -21,8 +21,14 @@ data class WebDavCertificateChallenge(val origin: String, val certificate: X509C
     val identity: String get() = "$origin|$fingerprint"
 }
 
+data class WebDavCertificateInfo(val challenge: WebDavCertificateChallenge, val trusted: Boolean, val accepted: Boolean)
+
 /** Explicit trust is scoped to one HTTPS host and port and one exact server certificate. */
 class WebDavCertificates(private val secrets: SecureSecrets) {
+    private val mutableInfo = MutableStateFlow<Map<String, WebDavCertificateInfo>>(emptyMap())
+    val information = mutableInfo.asStateFlow()
+    fun infoFor(endpoint: String): WebDavCertificateInfo? = runCatching { information.value[origin(endpoint)] }.getOrNull()
+    @Synchronized private fun record(info: WebDavCertificateInfo) { mutableInfo.value = mutableInfo.value + (info.challenge.origin to info) }
     private val mutablePending = MutableStateFlow<WebDavCertificateChallenge?>(null)
     val pending = mutablePending.asStateFlow()
     fun pendingFor(endpoint: String): WebDavCertificateChallenge? = runCatching {
@@ -36,6 +42,7 @@ class WebDavCertificates(private val secrets: SecureSecrets) {
     fun accept(challenge: WebDavCertificateChallenge) {
         challenge.certificate.checkValidity()
         secrets.putTransport(name(challenge.origin), challenge.certificate.encoded)
+        record(WebDavCertificateInfo(challenge, trusted = false, accepted = true))
         if (mutablePending.value?.identity == challenge.identity) mutablePending.value = null
     }
 
@@ -56,19 +63,30 @@ class WebDavCertificates(private val secrets: SecureSecrets) {
             override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
                 val leaf = chain.firstOrNull() ?: throw CertificateException("Empty server certificate chain")
                 // Expired certificates are never accepted via this exception mechanism.
-                leaf.checkValidity()
+                try { leaf.checkValidity() } catch (error: CertificateException) {
+                    record(WebDavCertificateInfo(WebDavCertificateChallenge(origin, leaf, pinned != null), trusted = false, accepted = false))
+                    throw error
+                }
                 if (pinned != null) {
                     if (MessageDigest.isEqual(pinned, leaf.encoded)) return
                 } else {
                     try { system.checkServerTrusted(chain, authType); return }
                     catch (_: CertificateException) { /* Require explicit approval below. */ }
                 }
-                mutablePending.value = WebDavCertificateChallenge(origin, leaf, pinned != null)
+                val challenge = WebDavCertificateChallenge(origin, leaf, pinned != null)
+                record(WebDavCertificateInfo(challenge, trusted = false, accepted = false))
+                mutablePending.value = challenge
                 throw WebDavCertificateApprovalRequired()
             }
         }
         val tls = SSLContext.getInstance("TLS").apply { init(null, arrayOf(trust), null) }
         // Keep OkHttp's standard hostname verifier. No redirects or trust-all fallback.
-        return base.newBuilder().sslSocketFactory(tls.socketFactory, trust).build()
+        return base.newBuilder().sslSocketFactory(tls.socketFactory, trust).addNetworkInterceptor { chain ->
+            val response = chain.proceed(chain.request())
+            val leaf = response.handshake?.peerCertificates?.firstOrNull() as? X509Certificate
+            if (leaf != null) record(WebDavCertificateInfo(WebDavCertificateChallenge(origin, leaf, false),
+                trusted = pinned == null, accepted = pinned != null))
+            response
+        }.build()
     }
 }
