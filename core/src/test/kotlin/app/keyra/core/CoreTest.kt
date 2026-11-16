@@ -44,6 +44,19 @@ class CoreTest {
         val file = temp.newFile(); Kdbx.write(add(db, entry()), file)
         assertEquals(3.toShort(), Kdbx.read(file, db.credentials).header.version.major)
     }
+    @Test fun modernTotpRoundtripPreservesUriAndProtection() {
+        val uri = "otpauth://totp/Example:alice?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&issuer=Example"
+        for (value in listOf(EntryValue.Plain(uri), EntryValue.Encrypted(EncryptedValue.fromString(uri)))) {
+            val e = entry().let { it.copy(fields = it.fields + (Totp.FIELD to value)) }
+            val original = add(db(), e)
+            val file = temp.newFile()
+            Kdbx.write(original, file)
+            val restored = get(Kdbx.read(file, original.credentials), e.uuid).fields[Totp.FIELD]!!
+            assertEquals(uri, restored.content)
+            assertEquals(value is EntryValue.Encrypted, restored is EntryValue.Encrypted)
+            assertEquals(Totp.parse(uri)!!.codeAt(59_000), Totp.parse(restored.content)!!.codeAt(59_000))
+        }
+    }
     @Test fun argon2AndChacha20Roundtrip() {
         val original = db()
         val argon = KdfParameters.Argon2.default(original.header.masterSeed).copy(memory = 1024UL * 1024UL, iterations = 1UL)

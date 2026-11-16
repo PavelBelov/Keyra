@@ -34,6 +34,7 @@ import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.Group
 import app.keyra.core.Kdbx
+import app.keyra.core.Totp
 import app.keyra.autofill.FillRequests
 import app.keyra.autofill.FillTarget
 import app.keyra.autofill.packageCertificate
@@ -151,6 +152,123 @@ class EntryUiTest {
         }
         clickPopupText(activity.getString(R.string.entry_history))
         clickPopupText(activity.getString(R.string.ui_cancel_82), optional = true)
+    }
+
+    @Test fun totpUpdatesCopiesAndRemainsProtectedInEditor() {
+        val uri = "otpauth://totp/Example:alice?secret=JBSWY3DPEHPK3PXP&period=1&digits=6&issuer=Example"
+        runBlocking {
+            repository.mutate { db ->
+                val entry = db.getEntryBy { uuid == entryId }!!
+                Kdbx.putEntry(db, folderId, Kdbx.edit(entry, entry.fields +
+                    ("otp" to EntryValue.Encrypted(EncryptedValue.fromString(uri)))))
+            }
+        }
+        openEntry()
+        lateinit var row: TotpFieldView
+        await {
+            descendants(activity.findViewById(R.id.content)).filterIsInstance<TotpFieldView>()
+                .singleOrNull()?.findViewById<TextView>(R.id.fieldValue)?.text?.length == 6
+        }
+        val first = onUiValue {
+            row = descendants(activity.findViewById(R.id.content)).filterIsInstance<TotpFieldView>().single()
+            assertTrue(row.findViewById<android.widget.ProgressBar>(R.id.remainingProgress).progress in 1..1000)
+            assertTrue(row.findViewById<TextView>(R.id.remainingTime).text.isNotBlank())
+            row.findViewById<TextView>(R.id.fieldValue).text.toString()
+        }
+        await { row.findViewById<TextView>(R.id.fieldValue).text.toString() != first }
+        onUi {
+            val settings = Totp.parse(uri)!!
+            val before = settings.codeAt(System.currentTimeMillis()).value
+            row.findViewById<ImageButton>(R.id.copyField).performClick()
+            val copied = context.getSystemService(ClipboardManager::class.java).primaryClip!!.getItemAt(0).text.toString()
+            val after = settings.codeAt(System.currentTimeMillis()).value
+            assertTrue(copied == before || copied == after)
+            assertFalse(copied.contains("otpauth"))
+        }
+        screenshot("record-totp")
+        click(R.id.editButton)
+        onUi {
+            assertEquals("", row.findViewById<TextView>(R.id.fieldValue).text.toString())
+            assertFalse(row.findViewById<ImageButton>(R.id.copyField).isEnabled)
+            val field = editor("otp")
+            val input = field.findViewById<EditText>(R.id.fieldInput)
+            assertEquals(uri, input.text.toString())
+            assertNotNull(input.transformationMethod)
+            field.findViewById<ImageButton>(R.id.toggleField).performClick()
+            assertNull(input.transformationMethod)
+            editor(activity.getString(R.string.field_title)).findViewById<EditText>(R.id.fieldInput).setText("TOTP entry")
+        }
+        click(R.id.saveButton)
+        await { activity.findViewById<ImageButton>(R.id.saveButton).visibility == View.GONE }
+        val saved = repository.database.value!!.getEntryBy { uuid == entryId }!!.fields["otp"]!!
+        assertTrue(saved is EntryValue.Encrypted)
+        assertEquals(uri, saved.content)
+    }
+
+    @Test fun plainTotpUriIsEditableAndInvalidUriCannotBeCopiedAsCode() {
+        val uri = "otpauth://totp/Example?secret=INVALID!"
+        runBlocking {
+            repository.mutate { db ->
+                val entry = db.getEntryBy { uuid == entryId }!!
+                Kdbx.putEntry(db, folderId, Kdbx.edit(entry, entry.fields + ("otp" to EntryValue.Plain(uri))))
+            }
+        }
+        openEntry()
+        onUi {
+            val row = descendants(activity.findViewById(R.id.content)).filterIsInstance<TotpFieldView>().single()
+            assertEquals(activity.getString(R.string.totp_invalid), row.findViewById<TextView>(R.id.fieldValue).text.toString())
+            assertFalse(row.findViewById<ImageButton>(R.id.copyField).isEnabled)
+        }
+        click(R.id.editButton)
+        onUi {
+            val field = editor("otp")
+            assertEquals(uri, field.findViewById<EditText>(R.id.fieldInput).text.toString())
+            assertNull(field.findViewById<EditText>(R.id.fieldInput).transformationMethod)
+            assertEquals(View.GONE, field.findViewById<ImageButton>(R.id.toggleField).visibility)
+        }
+    }
+
+    @Test fun editorTotpMenuOpensCameraAndImportsDecodedQrIntoProtectedField() {
+        instrumentation.uiAutomation.grantRuntimePermission(context.packageName, android.Manifest.permission.CAMERA)
+        val uri = "otpauth://totp/Example:alice?secret=JBSWY3DPEHPK3PXP&issuer=Example"
+        // A real QR image goes through ZXing decoding; the optical camera input is synthetic.
+        val matrix = com.google.zxing.qrcode.QRCodeWriter().encode(uri, com.google.zxing.BarcodeFormat.QR_CODE, 400, 400)
+        val pixels = IntArray(400 * 400) { i -> if (matrix[i % 400, i / 400]) android.graphics.Color.BLACK else android.graphics.Color.WHITE }
+        val decoded = com.google.zxing.qrcode.QRCodeReader().decode(com.google.zxing.BinaryBitmap(
+            com.google.zxing.common.HybridBinarizer(com.google.zxing.RGBLuminanceSource(400, 400, pixels)))).text
+        assertEquals(uri, decoded)
+        openEntry()
+        click(R.id.editButton)
+        onUi { editor(activity.getString(R.string.field_title)).findViewById<EditText>(R.id.fieldInput).setText("Unsaved QR title") }
+        click(R.id.menuButton)
+        clickPopupText("TOTP")
+        val field = MainActivity::class.java.getDeclaredField("totpScanner").apply { isAccessible = true }
+        await { (field.get(activity) as? TotpScannerDialog)?.isShowing == true }
+        val result = TotpScannerDialog::class.java.getDeclaredMethod("handleResult", String::class.java).apply { isAccessible = true }
+        onUi {
+            val scanner = field.get(activity) as TotpScannerDialog
+            assertTrue(scanner.window!!.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
+            result.invoke(scanner, "https://example.org")
+            assertTrue(scanner.isShowing)
+            assertTrue(descendants(activity.findViewById(R.id.content)).filterIsInstance<EditableEntryFieldView>()
+                .none { it.findViewById<TextView>(R.id.fieldLabel).text.toString() == "otp" })
+            result.invoke(scanner, decoded)
+            assertFalse(scanner.isShowing)
+            val input = editor("otp").findViewById<EditText>(R.id.fieldInput)
+            assertEquals(uri, input.text.toString())
+            assertNotNull(input.transformationMethod)
+            assertEquals("Unsaved QR title", editor(activity.getString(R.string.field_title)).findViewById<EditText>(R.id.fieldInput).text.toString())
+        }
+        click(R.id.menuButton)
+        clickPopupText("TOTP")
+        await { (field.get(activity) as? TotpScannerDialog)?.isShowing == true }
+        onUi { (field.get(activity) as TotpScannerDialog).cancel() }
+        onUi { assertEquals(uri, editor("otp").findViewById<EditText>(R.id.fieldInput).text.toString()) }
+        click(R.id.saveButton)
+        await { activity.findViewById<ImageButton>(R.id.saveButton).visibility == View.GONE }
+        val saved = repository.database.value!!.getEntryBy { uuid == entryId }!!.fields["otp"]!!
+        assertTrue(saved is EntryValue.Encrypted)
+        assertEquals(uri, saved.content)
     }
 
     @Test fun conflictWarningUpdatesAboveListsAndOpensResolution() {

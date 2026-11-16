@@ -315,4 +315,11 @@
     <string name="about_licenses">Licenses and notices</string>
     <string name="about_link_unavailable">No application is available to open this link.</string>
     <string name="about_warranty">Provided without warranty. See the licenses for terms.</string>
+    <string name="totp_invalid">Invalid TOTP settings</string>
+    <string name="totp_label" translatable="false">TOTP</string>
+    <string name="totp_scan_prompt">Point the camera at a TOTP QR code.</string>
+    <string name="totp_scan_invalid">This QR code does not contain supported TOTP settings.</string>
+    <string name="totp_camera_permission">Allow camera access to scan a TOTP QR code.</string>
+    <string name="totp_camera_unavailable">Camera unavailable. Close the scanner and try again.</string>
+    <string name="totp_remaining">%1$d s remaining</string>
 </resources>

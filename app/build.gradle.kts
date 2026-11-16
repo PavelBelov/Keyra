@@ -76,6 +76,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.0")
     implementation("androidx.work:work-runtime:2.10.1")
     implementation("androidx.biometric:biometric:1.1.0")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
 }

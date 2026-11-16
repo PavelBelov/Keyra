@@ -315,4 +315,10 @@
     <string name="autofill_select_for_website">Seleziona una voce per %1$s. Il suo URL verrà sostituito con questo indirizzo.</string>
     <string name="autofill_select_entry">Seleziona una voce</string>
     <string name="autofill_select_for_app">Seleziona una voce per accedere a %1$s. Apri una cartella o cerca nel database.</string>
+    <string name="totp_invalid">Impostazioni TOTP non valide</string>
+    <string name="totp_scan_prompt">Inquadra un codice QR TOTP con la fotocamera.</string>
+    <string name="totp_scan_invalid">Questo codice QR non contiene impostazioni TOTP supportate.</string>
+    <string name="totp_camera_permission">Consenti l’accesso alla fotocamera per scansionare un codice QR TOTP.</string>
+    <string name="totp_camera_unavailable">Fotocamera non disponibile. Chiudi lo scanner e riprova.</string>
+    <string name="totp_remaining">%1$d s rimanenti</string>
 </resources>

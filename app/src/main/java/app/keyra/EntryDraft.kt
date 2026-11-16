@@ -7,6 +7,7 @@ import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.EntryValue
 import app.keyra.core.PasswordGenerator
 import app.keyra.core.PasswordOptions
+import app.keyra.core.Totp
 import java.util.UUID
 
 val standardEntryFields = listOf("Title", "UserName", "Password", "URL", "Notes")
@@ -68,6 +69,13 @@ class EntryDraft(val original: Entry?, val parent: UUID) {
         require(key.isNotBlank() && key !in values)
         values[key] = if (secret) EntryValue.Encrypted(EncryptedValue.fromString("")) else EntryValue.Plain("")
         modified = true
+    }
+
+    fun importTotp(uri: String): Boolean {
+        if (Totp.parse(uri) == null) return false
+        if (Totp.FIELD !in values) add(Totp.FIELD, secret = true)
+        update(Totp.FIELD, uri.trim())
+        return true
     }
 
     fun protect(key: String, enabled: Boolean) {

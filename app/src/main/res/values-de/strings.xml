@@ -315,4 +315,10 @@
     <string name="autofill_select_for_website">Wählen Sie einen Eintrag für %1$s. Die Website-URL des Eintrags wird durch diese Adresse ersetzt.</string>
     <string name="autofill_select_entry">Eintrag auswählen</string>
     <string name="autofill_select_for_app">Wählen Sie einen Eintrag zum Anmelden bei %1$s. Öffnen Sie einen Ordner oder durchsuchen Sie Ihre Datenbank.</string>
+    <string name="totp_invalid">Ungültige TOTP-Einstellungen</string>
+    <string name="totp_scan_prompt">Richten Sie die Kamera auf einen TOTP-QR-Code.</string>
+    <string name="totp_scan_invalid">Dieser QR-Code enthält keine unterstützten TOTP-Einstellungen.</string>
+    <string name="totp_camera_permission">Erlauben Sie den Kamerazugriff, um einen TOTP-QR-Code zu scannen.</string>
+    <string name="totp_camera_unavailable">Kamera nicht verfügbar. Schließen Sie den Scanner und versuchen Sie es erneut.</string>
+    <string name="totp_remaining">Noch %1$d s</string>
 </resources>
