@@ -3,4 +3,5 @@ Updated F-Droid submission preparation.
 Updated Gradle and Android build plugins.
 Improved record selection fot autofill.
 Improved autofill for application.
+Improved merge.
 
