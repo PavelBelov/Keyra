@@ -63,6 +63,16 @@ class MainActivity : AppCompatActivity() {
     private var updatingSearch = false
     private var addExpanded = false
     private var mainMenu: PopupMenu? = null
+    private var totpScanner: TotpScannerDialog? = null
+    private var pendingTotpDraft: EntryDraft? = null
+    private val cameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val draft = pendingTotpDraft
+        pendingTotpDraft = null
+        if (draft != null && model.editing === draft && repo.database.value != null) {
+            if (granted) showTotpScanner(draft)
+            else Toast.makeText(this, R.string.totp_camera_permission, Toast.LENGTH_LONG).show()
+        }
+    }
     private var lastRootBackAt = -1L
     private var exitToast: Toast? = null
     private val entryFieldViews = mutableListOf<EntryFieldView>()
@@ -294,6 +304,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onStop() {
         super.onStop()
+        totpScanner?.dismiss()
         clearExitConfirmation()
         importPassword?.maskPasswordInput()
         clearSyncSecrets(dispose = false)
@@ -742,6 +753,10 @@ class MainActivity : AppCompatActivity() {
         orderedFields(entry.fields).filterNot {
             it.second.isEmpty() || it.first in setOf(ApplicationBinding.SIGNATURE, "Android Signature")
         }.forEach { (name, value) ->
+            if (name == Totp.FIELD) {
+                body.addView(TotpFieldView(this, Totp.parse(value.content), ::copySecret), LinearLayout.LayoutParams(-1, -2))
+                return@forEach
+            }
             val row = EntryFieldView(this, fieldLabel(this, name), value, name == "Password" || value is EntryValue.Encrypted, ::copySecret,
                 isUrl = name == "URL", isApplication = name == ApplicationBinding.PACKAGE)
             entryFieldViews += row
@@ -862,7 +877,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showEditorMenu(draft: EntryDraft) {
         val popup = PopupMenu(this, binding.menuButton, Gravity.END)
-        intArrayOf(R.string.add_custom_field, R.string.field_protection, R.string.remove_custom_field).forEachIndexed { index, title ->
+        intArrayOf(R.string.add_custom_field, R.string.field_protection, R.string.remove_custom_field, R.string.totp_label).forEachIndexed { index, title ->
             popup.menu.add(0, index, index, title)
         }
         popup.setOnMenuItemClickListener { item ->
@@ -870,10 +885,38 @@ class MainActivity : AppCompatActivity() {
                 0 -> addCustomField(draft)
                 1 -> fieldProtection(draft)
                 2 -> removeCustomField(draft)
+                3 -> scanTotp(draft)
             }
             true
         }
         mainMenu = popup; popup.show()
+    }
+
+    private fun scanTotp(draft: EntryDraft) {
+        if (model.editing !== draft || model.saving.value || repo.database.value == null) return
+        hideKeyboard()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            showTotpScanner(draft)
+        } else {
+            pendingTotpDraft = draft
+            cameraPermission.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun showTotpScanner(draft: EntryDraft) {
+        if (model.editing !== draft || model.saving.value || repo.database.value == null || isFinishing || isDestroyed) return
+        totpScanner?.dismiss()
+        val scanner = TotpScannerDialog(this) { uri ->
+            if (model.editing !== draft || repo.database.value == null || model.saving.value) false
+            else if (draft.importTotp(uri)) { render(); true } else false
+        }
+        totpScanner = scanner
+        dialogs += scanner
+        scanner.setOnDismissListener {
+            dialogs.remove(scanner)
+            if (totpScanner === scanner) totpScanner = null
+        }
+        scanner.show()
     }
 
     private fun addCustomField(draft: EntryDraft) {

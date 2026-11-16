@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "applicationId": "xnet13.keyra",
   "scope": "Selected external releaseRuntimeClasspath artifacts before R8 shrinking; excludes build/test tooling and vendored source/artwork",
-  "artifactCount": 67,
+  "artifactCount": 69,
   "artifacts": [
     {
       "coordinate": "androidx.activity:activity-ktx:1.10.1",
@@ -972,6 +972,40 @@
       "licensePomCoordinate": "com.google.guava:guava-parent:26.0-android",
       "licensePomUrl": "https://repo.maven.apache.org/maven2/com/google/guava/guava-parent/26.0-android/guava-parent-26.0-android.pom",
       "licensePomSha256": "f8698ab46ca996ce889c1afc8ca4f25eb8ac6b034dc898d4583742360016cc04"
+    },
+    {
+      "coordinate": "com.google.zxing:core:3.4.1",
+      "file": "core-3.4.1.jar",
+      "type": "jar",
+      "sha256": "acfa30338c26267b6cab665509c2251bb96e8350bfcad89d59b949ba77011f8d",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "declaredLicenseNames": [
+        "The Apache Software License, Version 2.0"
+      ],
+      "pomUrl": "https://repo.maven.apache.org/maven2/com/google/zxing/core/3.4.1/core-3.4.1.pom",
+      "pomSha256": "b1a0faee424a3c775534c81fa16f5a5d5aa65ca40e6ad857f6961b333ea39fd3",
+      "licensePomCoordinate": "com.google.zxing:zxing-parent:3.4.1",
+      "licensePomUrl": "https://repo.maven.apache.org/maven2/com/google/zxing/zxing-parent/3.4.1/zxing-parent-3.4.1.pom",
+      "licensePomSha256": "20281fe11b8e4bd4c17deec561444d1575bd532fecb73ecf6b89efdad7cd8938"
+    },
+    {
+      "coordinate": "com.journeyapps:zxing-android-embedded:4.3.0",
+      "file": "zxing-android-embedded-4.3.0.aar",
+      "type": "aar",
+      "sha256": "4ab03353127c34e55cbb80fbc9a34031decbcfb1ec5e8f991944d2d494621a33",
+      "licenses": [
+        "Apache-2.0"
+      ],
+      "declaredLicenseNames": [
+        "The Apache License, Version 2.0"
+      ],
+      "pomUrl": "https://repo.maven.apache.org/maven2/com/journeyapps/zxing-android-embedded/4.3.0/zxing-android-embedded-4.3.0.pom",
+      "pomSha256": "c4dd09974335c21efee7ca29183ecae5ef7e26b48265a605c653a3efce47f29b",
+      "licensePomCoordinate": "com.journeyapps:zxing-android-embedded:4.3.0",
+      "licensePomUrl": "https://repo.maven.apache.org/maven2/com/journeyapps/zxing-android-embedded/4.3.0/zxing-android-embedded-4.3.0.pom",
+      "licensePomSha256": "c4dd09974335c21efee7ca29183ecae5ef7e26b48265a605c653a3efce47f29b"
     },
     {
       "coordinate": "com.squareup.okhttp3:okhttp:4.12.0",

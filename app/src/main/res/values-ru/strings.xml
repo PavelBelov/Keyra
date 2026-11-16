@@ -315,4 +315,10 @@
     <string name="about_licenses">Лицензии и уведомления</string>
     <string name="about_link_unavailable">Нет приложения для открытия этой ссылки.</string>
     <string name="about_warranty">Приложение предоставляется без гарантий. Условия приведены в лицензиях.</string>
+    <string name="totp_invalid">Некорректные настройки TOTP</string>
+    <string name="totp_scan_prompt">Наведите камеру на QR-код с настройками TOTP.</string>
+    <string name="totp_scan_invalid">QR-код не содержит поддерживаемых настроек TOTP.</string>
+    <string name="totp_camera_permission">Разрешите доступ к камере для сканирования QR-кода TOTP.</string>
+    <string name="totp_camera_unavailable">Камера недоступна. Закройте сканер и повторите попытку.</string>
+    <string name="totp_remaining">Осталось: %1$d с</string>
 </resources>

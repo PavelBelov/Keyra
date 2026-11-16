@@ -25,10 +25,19 @@ Builds:
     gradle:
       - yes
 
+  - versionName: 0.1.3
+    versionCode: 4
+    commit: v0.1.3
+    subdir: app
+    sudo:
+      - update-java-alternatives --set java-1.21.0-openjdk-amd64
+    gradle:
+      - yes
+
 AllowedAPKSigningKeys:
   - c534c1fa0403986e4a61c24fef8ebdfc0625ca0b991ec765ae6354ec4fed8cea
 
 AutoUpdateMode: None
 UpdateCheckMode: None
-CurrentVersion: 0.1.2
-CurrentVersionCode: 3
+CurrentVersion: 0.1.3
+CurrentVersionCode: 4
