@@ -1,5 +1,4 @@
 <resources>
-    <string name="ui_unlock_keyra_0">Déverrouiller Keyra</string>
     <string name="ui_new_tag_1">Nouveau tag</string>
     <string name="ui_tags_2">Tags</string>
     <string name="ui_add_tag_3">Ajouter un tag</string>
@@ -97,7 +96,6 @@
     <string name="ui_sync_108">Synchronisation</string>
     <string name="ui_no_file_selected_109">Aucun fichier sélectionné</string>
     <string name="ui_getting_file_path_110">Récupération du chemin…</string>
-    <string name="ui_choose_a_database_on_your_device_or_in_cloud_storage_such_as_goog_111">Choisissez une base sur l\'appareil ou dans un stockage cloud, comme Google Drive, si son application est installée et que le service apparaît dans le sélecteur de fichiers du système.</string>
     <string name="field_login">Identifiant</string>
     <string name="ui_configure_the_selected_source_to_enable_sync_113">Configurez la source sélectionnée pour activer la synchronisation</string>
     <string name="ui_sync_now_114">Synchroniser</string>
@@ -108,10 +106,6 @@
     <string name="ui_upload_database_119">Envoyer la base ?</string>
     <string name="ui_this_storage_provider_does_not_guarantee_conditional_writes_uploa_120">Ce service ne garantit pas les écritures conditionnelles. L\'envoi remplacera le fichier distant. Une écriture simultanée par un autre client peut provoquer un conflit.</string>
     <string name="ui_upload_121">Envoyer</string>
-    <string name="ui_upload_result_unknown_122">Résultat de l\'envoi inconnu</string>
-    <string name="ui_keep_local_versions_of_conflicting_items_123">Conserver les versions locales des éléments en conflit</string>
-    <string name="ui_keep_remote_versions_of_conflicting_items_124">Conserver les versions distantes des éléments en conflit</string>
-    <string name="ui_independent_changes_are_merged_choose_which_versions_to_keep_for__125">Les modifications indépendantes sont fusionnées. Choisissez les versions à conserver pour résoudre les conflits.</string>
     <string name="ui_the_certificate_differs_from_the_one_previously_accepted_the_serv_126">Le certificat diffère de celui accepté auparavant. Il a peut-être été remplacé, ou le serveur fait l\'objet d\'une usurpation.</string>
     <string name="ui_the_server_certificate_is_not_verified_by_a_trusted_certificate_a_127">Le certificat du serveur n\'est pas validé par une autorité de certification de confiance.</string>
     <string name="ui_webdav_certificate_changed_128">Certificat WebDAV modifié</string>
@@ -142,18 +136,13 @@
     <string name="ui_lock_after_leaving_seconds_153">Verrouiller après avoir quitté, secondes</string>
     <string name="ui_integration_154">Intégration</string>
     <string name="ui_android_autofill_155">Saisie automatique Android</string>
-    <string name="ui_fill_passwords_in_apps_and_websites_156">Remplir les mots de passe dans les applications et sur les sites</string>
     <string name="ui_quick_unlock_157">Déverrouillage rapide</string>
     <string name="ui_biometrics_or_device_screen_lock_158">Biométrie ou verrouillage de l\'écran</string>
-    <string name="ui_merge_entries_from_a_kdbx_file_159">Fusionner les entrées d\'un fichier KDBX</string>
     <string name="ui_export_160">Exporter</string>
-    <string name="ui_save_the_database_as_a_kdbx_file_161">Enregistrer la base dans un fichier KDBX</string>
     <string name="ui_export_key_162">Exporter la clé</string>
-    <string name="ui_save_the_access_key_to_a_file_163">Enregistrer la clé d\'accès dans un fichier</string>
     <string name="ui_change_the_database_password_164">Modifier le mot de passe de la base</string>
     <string name="ui_password_changed_reconnect_the_source_using_the_new_password_165">Mot de passe modifié. Reconnectez la source avec le nouveau mot de passe.</string>
     <string name="ui_could_not_change_the_database_password_166">Impossible de modifier le mot de passe de la base</string>
-    <string name="ui_entry_and_folder_changes_and_sync_results_167">Modifications des entrées et dossiers et résultats de synchronisation</string>
     <string name="ui_immediately_after_leaving_168">Dès la sortie de l\'application</string>
     <string name="ui_after_s_169">Après %1$s s</string>
     <string name="ui_s_170">%1$s s</string>
@@ -164,15 +153,6 @@
     <string name="ui_trust_this_browser_177">Faire confiance à ce navigateur ?</string>
     <string name="ui_certificate_this_app_reports_the_website_address_allow_only_brows_178">%1$s\nCertificat : %2$s\n\nCette application indique l\'adresse du site %3$s. N\'autorisez que les navigateurs de confiance.</string>
     <string name="ui_trust_this_certificate_179">Faire confiance à ce certificat</string>
-    <string name="ui_app_180">Application : %1$s</string>
-    <string name="ui_website_181">Site : %1$s</string>
-    <string name="ui_link_an_entry_to_this_app_182">Associer une entrée à cette application</string>
-    <string name="ui_allow_autofill_in_183">Autoriser la saisie automatique dans %1$s</string>
-    <string name="ui_link_this_entry_184">Associer cette entrée ?</string>
-    <string name="ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185">%1$s\nCertificat : %2$s\nSeule l\'application possédant ce certificat aura accès.</string>
-    <string name="ui_allow_186">Autoriser</string>
-    <string name="ui_no_entries_exactly_match_this_domain_set_the_website_address_in_t_187">Aucune entrée ne correspond exactement à ce domaine. Renseignez l\'adresse du site dans le champ URL de l\'entrée.</string>
-    <string name="ui_autofill_188">Saisie automatique</string>
     <string name="ui_could_not_import_the_database_check_the_file_password_and_key_189">Impossible d\'importer la base. Vérifiez le fichier, le mot de passe et la clé.</string>
     <string name="ui_lowercase_letters_a_z_190">Lettres minuscules a-z</string>
     <string name="ui_uppercase_letters_a_z_191">Lettres majuscules A-Z</string>
@@ -207,9 +187,6 @@
     <string name="ui_http_or_https_226">HTTP ou HTTPS</string>
     <string name="ui_connection_227">Connexion</string>
     <string name="ui_certificate_228">Certificat</string>
-    <string name="ui_approval_required_sha_256_229">Confirmation requise\nSHA-256 : %1$s</string>
-    <string name="ui_http_no_certificate_is_used_230">HTTP · aucun certificat utilisé</string>
-    <string name="ui_the_https_certificate_is_checked_when_connecting_231">Le certificat HTTPS est vérifié à la connexion</string>
     <string name="ui_enter_an_http_or_https_address_for_the_database_file_232">Saisissez une adresse HTTP ou HTTPS pour le fichier de base</string>
     <string name="ui_could_not_connect_233">Impossible de se connecter</string>
     <string name="ui_continue_234">CONTINUER</string>
@@ -296,8 +273,6 @@
     <string name="chrome_autofill_unknown">État indisponible — vérifiez dans Chrome</string>
     <string name="chrome_not_installed">Chrome n’est pas installé</string>
     <string name="chrome_autofill_manual">Ouvrez Chrome → Paramètres → Saisie automatique et mots de passe → Paramètres de saisie automatique → Saisie automatique avec un autre service.</string>
-    <string name="chrome_autofill_help">Sélectionnez Keyra dans Android et activez la saisie automatique avec un autre service dans Chrome. Redémarrez Chrome si demandé. Les entrées correspondent au domaine exact ; les champs e-mail utilisent le nom d’utilisateur de l’entrée.</string>
-    <string name="autofill_more_entries">Autres entrées…</string>
     <string name="about_title">À propos</string>
     <string name="about_version">Version</string>
     <string name="about_application_id">Identifiant du logiciel</string>
@@ -311,7 +286,6 @@
     <string name="about_licenses">Licences et mentions</string>
     <string name="about_link_unavailable">Aucune application ne peut ouvrir ce lien.</string>
     <string name="about_warranty">Fourni sans garantie. Consultez les licences pour connaître les conditions.</string>
-    <string name="autofill_select">Sélectionner</string>
     <string name="autofill_select_for_website">Sélectionnez une entrée pour %1$s. Son URL sera remplacée par cette adresse.</string>
     <string name="autofill_select_entry">Sélectionner une entrée</string>
     <string name="autofill_select_for_app">Sélectionnez une entrée pour vous connecter à %1$s. Ouvrez un dossier ou effectuez une recherche dans votre base de données.</string>

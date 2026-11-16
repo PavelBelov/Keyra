@@ -6,14 +6,23 @@
         android:orientation="vertical" android:paddingEnd="8dp" android:paddingStart="0dp">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/totp_label" android:textSize="13sp" android:textColor="?android:attr/textColorSecondary" />
-        <TextView android:id="@+id/fieldValue" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="6dp" android:textSize="24sp" android:textColor="?android:attr/textColorPrimary"
-            android:saveEnabled="false" android:textIsSelectable="false" />
-        <ProgressBar android:id="@+id/remainingProgress" style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent" android:layout_height="4dp" android:layout_marginTop="10dp"
-            android:max="1000" android:indeterminate="false" android:layoutDirection="ltr" android:importantForAccessibility="no" />
-        <TextView android:id="@+id/remainingTime" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" android:textSize="12sp" android:textColor="?android:attr/textColorSecondary" android:saveEnabled="false" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical" android:layoutDirection="ltr" android:layout_marginTop="6dp">
+            <FrameLayout android:id="@+id/countdown" android:layout_width="48dp" android:layout_height="48dp"
+                android:layout_marginEnd="12dp" android:importantForAccessibility="yes" android:saveEnabled="false">
+                <ProgressBar android:id="@+id/remainingProgress" style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:progressDrawable="@drawable/bg_totp_countdown" android:progressTint="@null" android:progressBackgroundTint="@null"
+                    android:max="1000" android:indeterminate="false" android:importantForAccessibility="no" android:saveEnabled="false" />
+                <TextView android:id="@+id/remainingTime" android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:gravity="center" android:textSize="12sp" android:textColor="@color/accent"
+                    android:importantForAccessibility="no" android:saveEnabled="false" />
+            </FrameLayout>
+            <TextView android:id="@+id/fieldValue" android:layout_width="0dp" android:layout_weight="1" android:layout_height="48dp"
+                android:gravity="center_vertical" android:textSize="24sp" android:textColor="?android:attr/textColorPrimary"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="16sp" android:autoSizeMaxTextSize="24sp" android:autoSizeStepGranularity="1sp"
+                android:maxLines="1" android:saveEnabled="false" android:textIsSelectable="false" />
+        </LinearLayout>
     </LinearLayout>
     <ImageButton android:id="@+id/copyField" android:layout_width="48dp" android:layout_height="48dp"
         android:layout_gravity="top" android:padding="12dp" android:src="@drawable/ic_copy"

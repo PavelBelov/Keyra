@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Lokale Datenbank bevorzugen</string>
     <string name="merge_priority_remote">Heruntergeladene Datenbank bevorzugen</string>
     <string name="merge_manual">Jedes Objekt manuell auswählen</string>
-    <string name="merge_independent_changes">Felder werden anhand der gemeinsamen Version, verlässlicher Änderungszeiten und des Verlaufs automatisch zusammengeführt. Nur unklare Felder und Eigenschaften erfordern eine Auswahl. Die Priorität gilt nur für diese Konflikte. Ursprüngliche Einträge bleiben im Verlauf. Anwenden speichert lokal und setzt die Synchronisierung fort; der Upload muss eventuell bestätigt werden.</string>
+    <string name="merge_independent_changes">Die Priorität gilt nur für Konflikte. Ursprüngliche Einträge bleiben im Verlauf erhalten.</string>
     <string name="merge_uncertain_write">Das Ergebnis des vorherigen Uploads ist unbekannt. Hier wird die gespeicherte entfernte Kopie verglichen. Nach dem Anwenden prüft die Synchronisierung die aktuelle Quelle erneut.</string>
     <string name="merge_no_object_conflicts">In diesen Kopien gibt es keine weiteren Konflikte. Wähle Anwenden, um die zusammengeführten Daten zu behalten und die Synchronisierung zu wiederholen.</string>
     <string name="merge_local_database">Lokale Datenbank</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Heruntergeladene Daten verwenden</string>
     <string name="merge_apply">Anwenden</string>
     <string name="merge_applying">Wird angewendet…</string>
-    <string name="merge_choose_all">Wähle vor dem Anwenden eine Version für jedes ungelöste Feld, jede Eigenschaft und jedes Objekt.</string>
+    <string name="merge_choose_all">Wähle für jeden Konflikt eine Version.</string>
     <string name="merge_review_changed">Datenbank oder Quelle geändert. Öffne die Konfliktlösung erneut, um die aktuellen Kopien zu prüfen.</string>
     <string name="merge_added">Hinzugefügt</string>
     <string name="merge_deleted">Gelöscht</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Konflikt bei Eintragseigenschaften oder Speicherort</string>
     <string name="merge_field_deleted">Feld gelöscht</string>
     <string name="merge_field_absent">Feld nicht vorhanden</string>
-    <string name="merge_field_value">Wert</string>
     <string name="merge_field_changed_at">Letzte Feldänderung</string>
     <string name="merge_field_time_unknown">Änderungszeitpunkt nicht zuverlässig bestimmbar</string>
     <string name="merge_entry_icon">Eintragssymbol</string>

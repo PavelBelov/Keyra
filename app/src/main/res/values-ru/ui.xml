@@ -5,7 +5,6 @@
     <string name="search_empty">Записи не найдены</string>
     <string name="search_empty_hint">Попробуйте другое имя, логин или сайт.</string>
     <string name="dav_choose_file">Выбрать файл базы</string>
-    <string name="dav_parent">Родительская папка</string>
     <string name="dav_empty">Папка пуста</string>
     <string name="dav_certificate_valid">Валидный</string>
     <string name="dav_certificate_custom">Невалидный · требуется принятие</string>

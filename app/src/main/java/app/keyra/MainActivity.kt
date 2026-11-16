@@ -750,7 +750,10 @@ class MainActivity : AppCompatActivity() {
     private fun entryRow(e: Entry, icons: VaultIcons) = Row(e.uuid, e.fields.title?.content.orEmpty().ifBlank { L10n.text(this@MainActivity, R.string.untitled_entry) }, e.fields.userName?.content.orEmpty(), false, icons.resolve(e))
     private fun showEntry(entry: Entry) {
         val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        orderedFields(entry.fields).filterNot {
+        val fieldOrder = listOf("UserName", "Password", Totp.FIELD, "URL", "Notes")
+        orderedFields(entry.fields).sortedBy { (name, _) ->
+            fieldOrder.indexOf(name).takeIf { it >= 0 } ?: fieldOrder.size
+        }.filterNot {
             it.second.isEmpty() || it.first in setOf(ApplicationBinding.SIGNATURE, "Android Signature")
         }.forEach { (name, value) ->
             if (name == Totp.FIELD) {
@@ -1090,7 +1093,6 @@ class MainActivity : AppCompatActivity() {
                         if (current == null) text = settingsText(L10n.text(this@MainActivity, R.string.ui_file_107), summary, R.color.settings_error)
                     }
                     parameters.addView(fileRow)
-                    parameters.addView(panelInfo(L10n.text(this@MainActivity, R.string.ui_choose_a_database_on_your_device_or_in_cloud_storage_such_as_goog_111)))
                     if (current != null) lifecycleScope.launch {
                         val path = withContext(Dispatchers.IO) {
                             runCatching { documentDisplayPath(current.location.toUri()) }.getOrDefault(current.location)
@@ -1437,7 +1439,6 @@ class MainActivity : AppCompatActivity() {
                     catch (_: ActivityNotFoundException) { toast(L10n.text(this@MainActivity, R.string.chrome_autofill_manual)) }
                 }
                 addView(chromeAutofill)
-                addView(panelInfo(L10n.text(this@MainActivity, R.string.chrome_autofill_help)))
                 refreshAutofill = {
                     val enabled = getSystemService(AutofillManager::class.java)?.hasEnabledAutofillServices() == true
                     androidAutofill.text = settingsText(L10n.text(this@MainActivity, R.string.ui_android_autofill_155),
@@ -1469,9 +1470,9 @@ class MainActivity : AppCompatActivity() {
             })
         } else {
             group(L10n.text(this@MainActivity, R.string.ui_data_72)).apply {
-                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_import_73), L10n.text(this@MainActivity, R.string.ui_merge_entries_from_a_kdbx_file_159)) { importing = true; sourceSelection = false; filePicker.launch(arrayOf("*/*")) })
-                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_export_160), L10n.text(this@MainActivity, R.string.ui_save_the_database_as_a_kdbx_file_161)) { export() })
-                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_export_key_162), L10n.text(this@MainActivity, R.string.ui_save_the_access_key_to_a_file_163)) { exportStoredKey() }.apply {
+                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_import_73)) { importing = true; sourceSelection = false; filePicker.launch(arrayOf("*/*")) })
+                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_export_160)) { export() })
+                addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_export_key_162)) { exportStoredKey() }.apply {
                     visibility = if (runCatching { repo.secrets.getVaultKeyfile()?.let { it.fill(0); true } ?: false }.getOrDefault(false)) View.VISIBLE else View.GONE
                 })
             }
@@ -1488,7 +1489,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
-            group(L10n.text(this@MainActivity, R.string.ui_log_74)).addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_log_74), L10n.text(this@MainActivity, R.string.ui_entry_and_folder_changes_and_sync_results_167)) {
+            group(L10n.text(this@MainActivity, R.string.ui_log_74)).addView(settingsAction(L10n.text(this@MainActivity, R.string.ui_log_74)) {
                 model.panel = Panel.JOURNAL; render()
             })
             group(L10n.text(this@MainActivity, R.string.ui_sync_108)).addView(synchronization())

@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Privilégier la base locale</string>
     <string name="merge_priority_remote">Privilégier la base téléchargée</string>
     <string name="merge_manual">Choisir chaque élément manuellement</string>
-    <string name="merge_independent_changes">Les champs sont fusionnés automatiquement à partir de la version commune, des dates de modification fiables et de l’historique. Seuls les champs et propriétés ambigus nécessitent un choix. La priorité ne concerne que ces conflits. Les entrées originales restent dans l’historique. Appliquer enregistre localement et reprend la synchronisation ; un accord peut encore être requis pour l’envoi.</string>
+    <string name="merge_independent_changes">La priorité ne s’applique qu’aux conflits. Les entrées originales sont conservées dans l’historique.</string>
     <string name="merge_uncertain_write">Le résultat du précédent envoi est inconnu. Cette page compare la copie distante enregistrée. Après application, la synchronisation vérifiera à nouveau la source actuelle.</string>
     <string name="merge_no_object_conflicts">Ces copies ne contiennent plus d’éléments en conflit. Appliquez pour conserver les données fusionnées et relancer la synchronisation.</string>
     <string name="merge_local_database">Base locale</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Utiliser les données téléchargées</string>
     <string name="merge_apply">Appliquer</string>
     <string name="merge_applying">Application…</string>
-    <string name="merge_choose_all">Choisissez une version pour chaque champ, propriété ou élément non résolu avant d’appliquer.</string>
+    <string name="merge_choose_all">Choisissez une version pour chaque conflit.</string>
     <string name="merge_review_changed">La base ou la source a changé. Rouvrez la résolution des conflits pour consulter les copies actuelles.</string>
     <string name="merge_added">Ajouté</string>
     <string name="merge_deleted">Supprimé</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Conflit de propriétés ou d’emplacement de l’entrée</string>
     <string name="merge_field_deleted">Champ supprimé</string>
     <string name="merge_field_absent">Champ absent</string>
-    <string name="merge_field_value">Valeur</string>
     <string name="merge_field_changed_at">Dernière modification du champ</string>
     <string name="merge_field_time_unknown">Impossible de déterminer fiablement la date de modification</string>
     <string name="merge_entry_icon">Icône de l’entrée</string>

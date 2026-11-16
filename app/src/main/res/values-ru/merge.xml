@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Приоритет локальной базы</string>
     <string name="merge_priority_remote">Приоритет загруженной базы</string>
     <string name="merge_manual">Вручную для каждого объекта</string>
-    <string name="merge_independent_changes">Поля объединяются автоматически по общей версии, достоверным датам изменений и истории. Выбор нужен только для неоднозначных полей и свойств. Приоритет действует только на эти конфликты. Исходные записи остаются в истории. Кнопка «Применить» сохраняет результат локально и возобновляет синхронизацию; для отправки может потребоваться подтверждение.</string>
+    <string name="merge_independent_changes">Приоритет применяется только к конфликтам. Исходные записи сохраняются в истории.</string>
     <string name="merge_uncertain_write">Результат предыдущей отправки неизвестен. Здесь показана сохранённая удалённая копия. После применения синхронизация снова проверит текущее состояние источника.</string>
     <string name="merge_no_object_conflicts">В этих копиях нет конфликтующих объектов. Нажмите «Применить», чтобы сохранить объединённые данные и повторить синхронизацию.</string>
     <string name="merge_local_database">Локальная база</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Использовать загруженные данные</string>
     <string name="merge_apply">Применить</string>
     <string name="merge_applying">Применение…</string>
-    <string name="merge_choose_all">Перед применением выберите версию для каждого неразрешённого поля, свойства или объекта.</string>
+    <string name="merge_choose_all">Выберите версию для каждого конфликта.</string>
     <string name="merge_review_changed">База или источник изменились. Откройте разрешение конфликтов заново, чтобы просмотреть актуальные копии.</string>
     <string name="merge_added">Добавлена</string>
     <string name="merge_deleted">Удалена</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Конфликт свойств или расположения записи</string>
     <string name="merge_field_deleted">Поле удалено</string>
     <string name="merge_field_absent">Поле отсутствует</string>
-    <string name="merge_field_value">Значение</string>
     <string name="merge_field_changed_at">Последнее изменение поля</string>
     <string name="merge_field_time_unknown">Не удалось достоверно определить время изменения</string>
     <string name="merge_entry_icon">Значок записи</string>

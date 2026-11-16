@@ -35,8 +35,7 @@ class TotpFieldView(context: Context, private val settings: Totp?, copy: (String
         }
         if (settings == null) {
             binding.fieldValue.setText(R.string.totp_invalid)
-            binding.remainingTime.visibility = View.GONE
-            binding.remainingProgress.visibility = View.GONE
+            binding.countdown.visibility = View.GONE
         }
     }
 
@@ -50,8 +49,13 @@ class TotpFieldView(context: Context, private val settings: Totp?, copy: (String
                     binding.copyField.isEnabled = true
                     while (isActive) {
                         val code = settings.codeAt(System.currentTimeMillis())
-                        if (binding.fieldValue.text.toString() != code.value) binding.fieldValue.text = code.value
-                        binding.remainingTime.text = context.getString(R.string.totp_remaining, code.remainingSeconds)
+                        val value = if (code.value.length > 1 && code.value.all { it.isDigit() }) {
+                            val middle = code.value.length / 2
+                            code.value.substring(0, middle) + " " + code.value.substring(middle)
+                        } else code.value
+                        if (binding.fieldValue.text.toString() != value) binding.fieldValue.text = value
+                        binding.remainingTime.text = code.remainingSeconds.toString()
+                        binding.countdown.contentDescription = context.getString(R.string.totp_remaining, code.remainingSeconds)
                         binding.remainingProgress.progress = (code.remainingMillis * 1000 / code.periodMillis).toInt()
                         delay(minOf(100L, code.remainingMillis))
                     }
@@ -65,6 +69,7 @@ class TotpFieldView(context: Context, private val settings: Totp?, copy: (String
     private fun clearCode() {
         binding.fieldValue.text = ""
         binding.remainingTime.text = ""
+        binding.countdown.contentDescription = null
         binding.remainingProgress.progress = 0
         binding.copyField.isEnabled = false
     }

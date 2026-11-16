@@ -1,5 +1,4 @@
 <resources>
-    <string name="ui_unlock_keyra_0">Unlock Keyra</string>
     <string name="ui_new_tag_1">New tag</string>
     <string name="ui_tags_2">Tags</string>
     <string name="ui_add_tag_3">Add tag</string>
@@ -97,7 +96,6 @@
     <string name="ui_sync_108">Sync</string>
     <string name="ui_no_file_selected_109">No file selected</string>
     <string name="ui_getting_file_path_110">Getting file path…</string>
-    <string name="ui_choose_a_database_on_your_device_or_in_cloud_storage_such_as_goog_111">Choose a database on your device or in cloud storage, such as Google Drive, if its app is installed and the provider appears in the system file picker.</string>
     <string name="field_login">Username</string>
     <string name="ui_configure_the_selected_source_to_enable_sync_113">Configure the selected source to enable sync</string>
     <string name="ui_sync_now_114">Synchronize</string>
@@ -108,10 +106,6 @@
     <string name="ui_upload_database_119">Upload database?</string>
     <string name="ui_this_storage_provider_does_not_guarantee_conditional_writes_uploa_120">This storage provider does not guarantee conditional writes. Uploading will overwrite the remote file. Another client writing at the same time may cause a conflict.</string>
     <string name="ui_upload_121">Upload</string>
-    <string name="ui_upload_result_unknown_122">Upload result unknown</string>
-    <string name="ui_keep_local_versions_of_conflicting_items_123">Keep local versions of conflicting items</string>
-    <string name="ui_keep_remote_versions_of_conflicting_items_124">Keep remote versions of conflicting items</string>
-    <string name="ui_independent_changes_are_merged_choose_which_versions_to_keep_for__125">Independent changes are merged. Choose which versions to keep for conflicting items.</string>
     <string name="ui_the_certificate_differs_from_the_one_previously_accepted_the_serv_126">The certificate differs from the one previously accepted. The server certificate may have been replaced, or the server may be impersonated.</string>
     <string name="ui_the_server_certificate_is_not_verified_by_a_trusted_certificate_a_127">The server certificate is not verified by a trusted certificate authority.</string>
     <string name="ui_webdav_certificate_changed_128">WebDAV certificate changed</string>
@@ -142,18 +136,13 @@
     <string name="ui_lock_after_leaving_seconds_153">Lock after leaving, seconds</string>
     <string name="ui_integration_154">Integration</string>
     <string name="ui_android_autofill_155">Android Autofill</string>
-    <string name="ui_fill_passwords_in_apps_and_websites_156">Fill passwords in apps and websites</string>
     <string name="ui_quick_unlock_157">Quick unlock</string>
     <string name="ui_biometrics_or_device_screen_lock_158">Biometrics or device screen lock</string>
-    <string name="ui_merge_entries_from_a_kdbx_file_159">Merge entries from a KDBX file</string>
     <string name="ui_export_160">Export</string>
-    <string name="ui_save_the_database_as_a_kdbx_file_161">Save the database as a KDBX file</string>
     <string name="ui_export_key_162">Export key</string>
-    <string name="ui_save_the_access_key_to_a_file_163">Save the access key to a file</string>
     <string name="ui_change_the_database_password_164">Change the database password</string>
     <string name="ui_password_changed_reconnect_the_source_using_the_new_password_165">Password changed. Reconnect the source using the new password.</string>
     <string name="ui_could_not_change_the_database_password_166">Could not change the database password</string>
-    <string name="ui_entry_and_folder_changes_and_sync_results_167">Entry and folder changes and sync results</string>
     <string name="ui_immediately_after_leaving_168">Immediately after leaving</string>
     <string name="ui_after_s_169">After %1$s s</string>
     <string name="ui_s_170">%1$s s</string>
@@ -164,15 +153,6 @@
     <string name="ui_trust_this_browser_177">Trust this browser?</string>
     <string name="ui_certificate_this_app_reports_the_website_address_allow_only_brows_178">%1$s\nCertificate: %2$s\n\nThis app reports the website address %3$s. Allow only browsers you trust.</string>
     <string name="ui_trust_this_certificate_179">Trust this certificate</string>
-    <string name="ui_app_180">App: %1$s</string>
-    <string name="ui_website_181">Website: %1$s</string>
-    <string name="ui_link_an_entry_to_this_app_182">Link an entry to this app</string>
-    <string name="ui_allow_autofill_in_183">Allow autofill in %1$s</string>
-    <string name="ui_link_this_entry_184">Link this entry?</string>
-    <string name="ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185">%1$s\nCertificate: %2$s\nOnly the app with this certificate will be granted access.</string>
-    <string name="ui_allow_186">Allow</string>
-    <string name="ui_no_entries_exactly_match_this_domain_set_the_website_address_in_t_187">No entries exactly match this domain. Set the website address in the entry\'s URL field.</string>
-    <string name="ui_autofill_188">Autofill</string>
     <string name="ui_could_not_import_the_database_check_the_file_password_and_key_189">Could not import the database. Check the file, password and key.</string>
     <string name="ui_lowercase_letters_a_z_190">Lowercase letters a-z</string>
     <string name="ui_uppercase_letters_a_z_191">Uppercase letters A-Z</string>
@@ -207,9 +187,6 @@
     <string name="ui_http_or_https_226">HTTP or HTTPS</string>
     <string name="ui_connection_227">Connection</string>
     <string name="ui_certificate_228">Certificate</string>
-    <string name="ui_approval_required_sha_256_229">Approval required\nSHA-256: %1$s</string>
-    <string name="ui_http_no_certificate_is_used_230">HTTP · no certificate is used</string>
-    <string name="ui_the_https_certificate_is_checked_when_connecting_231">The HTTPS certificate is checked when connecting</string>
     <string name="ui_enter_an_http_or_https_address_for_the_database_file_232">Enter an HTTP or HTTPS address for the database file</string>
     <string name="ui_could_not_connect_233">Could not connect</string>
     <string name="ui_continue_234">CONTINUE</string>
@@ -296,9 +273,6 @@
     <string name="chrome_autofill_unknown">Status unavailable — tap to check in Chrome</string>
     <string name="chrome_not_installed">Chrome is not installed</string>
     <string name="chrome_autofill_manual">Open Chrome → Settings → Autofill and passwords → Autofill settings → Autofill using another service.</string>
-    <string name="chrome_autofill_help">Select Keyra in Android and enable autofill using another service in Chrome. Restart Chrome if prompted. Entries match the exact website domain; email fields use the entry’s Username value.</string>
-    <string name="autofill_more_entries">More entries…</string>
-    <string name="autofill_select">Select</string>
     <string name="autofill_select_for_website">Select an entry for %1$s. Its website URL will be replaced with this address.</string>
     <string name="autofill_select_entry">Select an entry</string>
     <string name="autofill_select_for_app">Select an entry to fill in %1$s. Browse folders or search your vault.</string>

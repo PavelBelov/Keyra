@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Dar prioridad a la base local</string>
     <string name="merge_priority_remote">Dar prioridad a la base descargada</string>
     <string name="merge_manual">Elegir cada elemento manualmente</string>
-    <string name="merge_independent_changes">Los campos se combinan automáticamente a partir de la versión común, las fechas fiables de los cambios y el historial. Solo los campos y propiedades ambiguos requieren una elección. La prioridad solo afecta a esos conflictos. Las entradas originales permanecen en el historial. Aplicar guarda los datos localmente y reanuda la sincronización; el envío aún puede requerir confirmación.</string>
+    <string name="merge_independent_changes">La prioridad solo se aplica a los conflictos. Las entradas originales se conservan en el historial.</string>
     <string name="merge_uncertain_write">Se desconoce el resultado del envío anterior. Aquí se compara la copia remota guardada. Tras aplicar los cambios, la sincronización volverá a comprobar el origen actual.</string>
     <string name="merge_no_object_conflicts">Ya no hay elementos en conflicto en estas copias. Pulsa Aplicar para conservar los datos combinados y volver a sincronizar.</string>
     <string name="merge_local_database">Base local</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Usar datos descargados</string>
     <string name="merge_apply">Aplicar</string>
     <string name="merge_applying">Aplicando…</string>
-    <string name="merge_choose_all">Elige una versión para cada campo, propiedad u objeto sin resolver antes de aplicar.</string>
+    <string name="merge_choose_all">Elige una versión para cada conflicto.</string>
     <string name="merge_review_changed">La base o el origen han cambiado. Vuelve a abrir la resolución de conflictos para revisar las copias actuales.</string>
     <string name="merge_added">Añadido</string>
     <string name="merge_deleted">Eliminado</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Conflicto de propiedades o ubicación de la entrada</string>
     <string name="merge_field_deleted">Campo eliminado</string>
     <string name="merge_field_absent">Campo ausente</string>
-    <string name="merge_field_value">Valor</string>
     <string name="merge_field_changed_at">Último cambio del campo</string>
     <string name="merge_field_time_unknown">No se pudo determinar con fiabilidad la fecha del cambio</string>
     <string name="merge_entry_icon">Icono de la entrada</string>

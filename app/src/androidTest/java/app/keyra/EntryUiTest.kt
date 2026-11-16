@@ -167,7 +167,7 @@ class EntryUiTest {
         lateinit var row: TotpFieldView
         await {
             descendants(activity.findViewById(R.id.content)).filterIsInstance<TotpFieldView>()
-                .singleOrNull()?.findViewById<TextView>(R.id.fieldValue)?.text?.length == 6
+                .singleOrNull()?.findViewById<TextView>(R.id.fieldValue)?.text?.toString()?.matches(Regex("[0-9]{3} [0-9]{3}")) == true
         }
         val first = onUiValue {
             row = descendants(activity.findViewById(R.id.content)).filterIsInstance<TotpFieldView>().single()

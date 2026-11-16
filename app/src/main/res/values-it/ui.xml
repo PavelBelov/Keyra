@@ -5,7 +5,6 @@
     <string name="search_empty">Nessuna voce corrispondente</string>
     <string name="search_empty_hint">Prova un altro nome, nome utente o sito web.</string>
     <string name="dav_choose_file">Scegli il file del database</string>
-    <string name="dav_parent">Cartella superiore</string>
     <string name="dav_empty">Questa cartella è vuota</string>
     <string name="dav_certificate_valid">Valido</string>
     <string name="dav_certificate_custom">Non valido · approvazione necessaria</string>

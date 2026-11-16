@@ -5,7 +5,6 @@
     <string name="search_empty">No hay entradas coincidentes</string>
     <string name="search_empty_hint">Prueba otro nombre, usuario o sitio web.</string>
     <string name="dav_choose_file">Elegir archivo de base de datos</string>
-    <string name="dav_parent">Carpeta superior</string>
     <string name="dav_empty">Esta carpeta está vacía</string>
     <string name="dav_certificate_valid">Válido</string>
     <string name="dav_certificate_custom">No válido · requiere aprobación</string>

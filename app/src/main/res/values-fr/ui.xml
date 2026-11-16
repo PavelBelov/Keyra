@@ -5,7 +5,6 @@
     <string name="search_empty">Aucune entrée correspondante</string>
     <string name="search_empty_hint">Essayez un autre nom, identifiant ou site web.</string>
     <string name="dav_choose_file">Choisir le fichier de la base</string>
-    <string name="dav_parent">Dossier parent</string>
     <string name="dav_empty">Ce dossier est vide</string>
     <string name="dav_certificate_valid">Valide</string>
     <string name="dav_certificate_custom">Non valide · accord nécessaire</string>

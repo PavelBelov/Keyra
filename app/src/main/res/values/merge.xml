@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Prefer the local database</string>
     <string name="merge_priority_remote">Prefer the downloaded database</string>
     <string name="merge_manual">Choose each item manually</string>
-    <string name="merge_independent_changes">Fields are merged automatically using the common version, verified change times and history. Only ambiguous fields and properties need a choice. Priority affects those conflicts only. Original entries remain in history. Apply saves locally and resumes synchronization; upload approval may still be required.</string>
+    <string name="merge_independent_changes">Priority applies only to conflicts. Original entries are preserved in history.</string>
     <string name="merge_uncertain_write">The previous upload result is unknown. This form compares the saved remote snapshot. After applying, synchronization will check the current source again.</string>
     <string name="merge_no_object_conflicts">No conflicting items remain in these snapshots. Apply to keep the combined data and retry synchronization.</string>
     <string name="merge_local_database">Local database</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Use downloaded data</string>
     <string name="merge_apply">Apply</string>
     <string name="merge_applying">Applying…</string>
-    <string name="merge_choose_all">Choose a version for every unresolved field, property or object before applying.</string>
+    <string name="merge_choose_all">Choose a version for each conflict.</string>
     <string name="merge_review_changed">The database or source has changed. Reopen conflict resolution to review the current copies.</string>
     <string name="merge_added">Added</string>
     <string name="merge_deleted">Deleted</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Conflicting entry properties or location</string>
     <string name="merge_field_deleted">Field deleted</string>
     <string name="merge_field_absent">Field absent</string>
-    <string name="merge_field_value">Value</string>
     <string name="merge_field_changed_at">Field last changed</string>
     <string name="merge_field_time_unknown">Change time could not be determined reliably</string>
     <string name="merge_entry_icon">Entry icon</string>

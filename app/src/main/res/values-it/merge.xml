@@ -5,7 +5,7 @@
     <string name="merge_priority_local">Dai priorità al database locale</string>
     <string name="merge_priority_remote">Dai priorità al database scaricato</string>
     <string name="merge_manual">Scegli ogni elemento manualmente</string>
-    <string name="merge_independent_changes">I campi vengono uniti automaticamente usando la versione comune, le date di modifica attendibili e la cronologia. Solo i campi e le proprietà ambigui richiedono una scelta. La priorità riguarda solo questi conflitti. Le voci originali restano nella cronologia. Applica salva localmente e riprende la sincronizzazione; l’invio potrebbe richiedere conferma.</string>
+    <string name="merge_independent_changes">La priorità si applica solo ai conflitti. Le voci originali vengono conservate nella cronologia.</string>
     <string name="merge_uncertain_write">L’esito dell’invio precedente è sconosciuto. Qui viene confrontata la copia remota salvata. Dopo l’applicazione, la sincronizzazione controllerà di nuovo la fonte attuale.</string>
     <string name="merge_no_object_conflicts">Non ci sono più elementi in conflitto in queste copie. Premi Applica per mantenere i dati uniti e riprovare la sincronizzazione.</string>
     <string name="merge_local_database">Database locale</string>
@@ -15,7 +15,7 @@
     <string name="merge_use_remote">Usa i dati scaricati</string>
     <string name="merge_apply">Applica</string>
     <string name="merge_applying">Applicazione…</string>
-    <string name="merge_choose_all">Scegli una versione per ogni campo, proprietà o oggetto non risolto prima di applicare.</string>
+    <string name="merge_choose_all">Scegli una versione per ogni conflitto.</string>
     <string name="merge_review_changed">Il database o la fonte sono cambiati. Riapri la risoluzione dei conflitti per esaminare le copie attuali.</string>
     <string name="merge_added">Aggiunto</string>
     <string name="merge_deleted">Eliminato</string>
@@ -59,7 +59,6 @@
     <string name="merge_entry_properties_conflict">Conflitto di proprietà o posizione della voce</string>
     <string name="merge_field_deleted">Campo eliminato</string>
     <string name="merge_field_absent">Campo assente</string>
-    <string name="merge_field_value">Valore</string>
     <string name="merge_field_changed_at">Ultima modifica del campo</string>
     <string name="merge_field_time_unknown">Impossibile determinare con certezza la data della modifica</string>
     <string name="merge_entry_icon">Icona della voce</string>

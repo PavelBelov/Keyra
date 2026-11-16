@@ -5,7 +5,6 @@
     <string name="search_empty">Keine passenden Einträge</string>
     <string name="search_empty_hint">Versuche einen anderen Namen, Benutzernamen oder eine Website.</string>
     <string name="dav_choose_file">Datenbankdatei auswählen</string>
-    <string name="dav_parent">Übergeordneter Ordner</string>
     <string name="dav_empty">Dieser Ordner ist leer</string>
     <string name="dav_certificate_valid">Gültig</string>
     <string name="dav_certificate_custom">Ungültig · Bestätigung erforderlich</string>

@@ -1,5 +1,4 @@
 <resources>
-    <string name="ui_unlock_keyra_0">Разблокировать Keyra</string>
     <string name="ui_new_tag_1">Новый тег</string>
     <string name="ui_tags_2">Теги</string>
     <string name="ui_add_tag_3">Добавить тег</string>
@@ -97,7 +96,6 @@
     <string name="ui_sync_108">Синхронизация</string>
     <string name="ui_no_file_selected_109">Файл не выбран</string>
     <string name="ui_getting_file_path_110">Получение пути…</string>
-    <string name="ui_choose_a_database_on_your_device_or_in_cloud_storage_such_as_goog_111">Можно выбрать базу на устройстве или в облачном хранилище, например Google Drive, если его приложение установлено и хранилище доступно в системном выборе файлов.</string>
     <string name="field_login">Логин</string>
     <string name="ui_configure_the_selected_source_to_enable_sync_113">Настройте выбранный источник для синхронизации</string>
     <string name="ui_sync_now_114">Синхронизировать</string>
@@ -108,10 +106,6 @@
     <string name="ui_upload_database_119">Отправить базу?</string>
     <string name="ui_this_storage_provider_does_not_guarantee_conditional_writes_uploa_120">Хранилище не гарантирует условную запись. Отправка перезапишет внешний файл. Одновременная запись другого клиента может вызвать конфликт.</string>
     <string name="ui_upload_121">Отправить</string>
-    <string name="ui_upload_result_unknown_122">Неопределённый результат отправки</string>
-    <string name="ui_keep_local_versions_of_conflicting_items_123">В конфликтующих объектах выбрать локальные версии</string>
-    <string name="ui_keep_remote_versions_of_conflicting_items_124">В конфликтующих объектах выбрать внешние версии</string>
-    <string name="ui_independent_changes_are_merged_choose_which_versions_to_keep_for__125">Независимые изменения объединяются. Выберите версии для разрешения конфликта.</string>
     <string name="ui_the_certificate_differs_from_the_one_previously_accepted_the_serv_126">Сертификат отличается от ранее принятого. Это может быть замена сертификата или подмена сервера.</string>
     <string name="ui_the_server_certificate_is_not_verified_by_a_trusted_certificate_a_127">Сертификат сервера не подтверждён доверенным центром сертификации.</string>
     <string name="ui_webdav_certificate_changed_128">Сертификат WebDAV изменился</string>
@@ -142,18 +136,13 @@
     <string name="ui_lock_after_leaving_seconds_153">Блокировка после ухода, секунд</string>
     <string name="ui_integration_154">Интеграция</string>
     <string name="ui_android_autofill_155">Автозаполнение Android</string>
-    <string name="ui_fill_passwords_in_apps_and_websites_156">Заполнение паролей в приложениях и на сайтах</string>
     <string name="ui_quick_unlock_157">Быстрая разблокировка</string>
     <string name="ui_biometrics_or_device_screen_lock_158">Биометрия или код блокировки устройства</string>
-    <string name="ui_merge_entries_from_a_kdbx_file_159">Объединить записи из файла KDBX</string>
     <string name="ui_export_160">Экспорт</string>
-    <string name="ui_save_the_database_as_a_kdbx_file_161">Сохранить базу в файл KDBX</string>
     <string name="ui_export_key_162">Экспорт ключа</string>
-    <string name="ui_save_the_access_key_to_a_file_163">Сохранить ключ доступа в файл</string>
     <string name="ui_change_the_database_password_164">Изменить пароль доступа к базе</string>
     <string name="ui_password_changed_reconnect_the_source_using_the_new_password_165">Пароль изменён. Подключите источник с новым паролем заново.</string>
     <string name="ui_could_not_change_the_database_password_166">Не удалось изменить мастер-пароль</string>
-    <string name="ui_entry_and_folder_changes_and_sync_results_167">Изменения записей, папок и результаты синхронизации</string>
     <string name="ui_immediately_after_leaving_168">Сразу после ухода</string>
     <string name="ui_after_s_169">Через %1$s сек.</string>
     <string name="ui_s_170">%1$s сек.</string>
@@ -164,15 +153,6 @@
     <string name="ui_trust_this_browser_177">Доверять браузеру?</string>
     <string name="ui_certificate_this_app_reports_the_website_address_allow_only_brows_178">%1$s\nСертификат: %2$s\n\nЭто приложение сообщает адрес сайта %3$s. Разрешайте только известному вам браузеру.</string>
     <string name="ui_trust_this_certificate_179">Доверять этому сертификату</string>
-    <string name="ui_app_180">Приложение: %1$s</string>
-    <string name="ui_website_181">Сайт: %1$s</string>
-    <string name="ui_link_an_entry_to_this_app_182">Привязать запись к этому приложению</string>
-    <string name="ui_allow_autofill_in_183">Разрешить заполнение в %1$s</string>
-    <string name="ui_link_this_entry_184">Привязать запись?</string>
-    <string name="ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185">%1$s\nСертификат: %2$s\nДоступ получит только приложение с этим сертификатом.</string>
-    <string name="ui_allow_186">Разрешить</string>
-    <string name="ui_no_entries_exactly_match_this_domain_set_the_website_address_in_t_187">Нет записей с точным совпадением домена. Укажите адрес сайта в поле URL записи.</string>
-    <string name="ui_autofill_188">Автозаполнение</string>
     <string name="ui_could_not_import_the_database_check_the_file_password_and_key_189">Не удалось импортировать базу. Проверьте файл, пароль и ключ.</string>
     <string name="ui_lowercase_letters_a_z_190">Строчные буквы a-z</string>
     <string name="ui_uppercase_letters_a_z_191">Заглавные буквы A-Z</string>
@@ -207,9 +187,6 @@
     <string name="ui_http_or_https_226">HTTP или HTTPS</string>
     <string name="ui_connection_227">Подключение</string>
     <string name="ui_certificate_228">Сертификат</string>
-    <string name="ui_approval_required_sha_256_229">Требуется подтверждение\nSHA-256: %1$s</string>
-    <string name="ui_http_no_certificate_is_used_230">HTTP · сертификат не используется</string>
-    <string name="ui_the_https_certificate_is_checked_when_connecting_231">Сертификат HTTPS проверяется при подключении</string>
     <string name="ui_enter_an_http_or_https_address_for_the_database_file_232">Укажите HTTP- или HTTPS-адрес файла базы</string>
     <string name="ui_could_not_connect_233">Не удалось подключиться</string>
     <string name="ui_continue_234">ПРОДОЛЖИТЬ</string>
@@ -296,9 +273,6 @@
     <string name="chrome_autofill_unknown">Статус недоступен — проверьте настройку в Chrome</string>
     <string name="chrome_not_installed">Chrome не установлен</string>
     <string name="chrome_autofill_manual">Откройте Chrome → Настройки → Автозаполнение и пароли → Настройки автозаполнения → Автозаполнение с помощью другого сервиса.</string>
-    <string name="chrome_autofill_help">Выберите Keyra в Android и включите автозаполнение с помощью другого сервиса в Chrome. Если потребуется, перезапустите Chrome. Записи подбираются по точному домену сайта; в поле email подставляется значение поля «Логин» записи.</string>
-    <string name="autofill_more_entries">Другие записи…</string>
-    <string name="autofill_select">Выбор</string>
     <string name="autofill_select_for_website">Выберите запись для %1$s. URL сайта в записи будет заменён этим адресом.</string>
     <string name="autofill_select_entry">Выбор записи</string>
     <string name="autofill_select_for_app">Выберите запись для входа в %1$s. Откройте папку или воспользуйтесь поиском по базе.</string>

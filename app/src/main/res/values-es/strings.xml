@@ -1,5 +1,4 @@
 <resources>
-    <string name="ui_unlock_keyra_0">Desbloquear Keyra</string>
     <string name="ui_new_tag_1">Nueva etiqueta</string>
     <string name="ui_tags_2">Etiquetas</string>
     <string name="ui_add_tag_3">Añadir etiqueta</string>
@@ -97,7 +96,6 @@
     <string name="ui_sync_108">Sincronización</string>
     <string name="ui_no_file_selected_109">Ningún archivo seleccionado</string>
     <string name="ui_getting_file_path_110">Obteniendo la ruta…</string>
-    <string name="ui_choose_a_database_on_your_device_or_in_cloud_storage_such_as_goog_111">Elige una base en el dispositivo o en un almacenamiento en la nube, como Google Drive, si su aplicación está instalada y el proveedor aparece en el selector de archivos del sistema.</string>
     <string name="field_login">Usuario</string>
     <string name="ui_configure_the_selected_source_to_enable_sync_113">Configura el origen seleccionado para sincronizar</string>
     <string name="ui_sync_now_114">Sincronizar</string>
@@ -108,10 +106,6 @@
     <string name="ui_upload_database_119">¿Enviar la base?</string>
     <string name="ui_this_storage_provider_does_not_guarantee_conditional_writes_uploa_120">Este proveedor no garantiza escrituras condicionales. El envío sobrescribirá el archivo remoto. Si otro cliente escribe al mismo tiempo, puede producirse un conflicto.</string>
     <string name="ui_upload_121">Enviar</string>
-    <string name="ui_upload_result_unknown_122">Resultado del envío desconocido</string>
-    <string name="ui_keep_local_versions_of_conflicting_items_123">Conservar las versiones locales de los elementos en conflicto</string>
-    <string name="ui_keep_remote_versions_of_conflicting_items_124">Conservar las versiones remotas de los elementos en conflicto</string>
-    <string name="ui_independent_changes_are_merged_choose_which_versions_to_keep_for__125">Los cambios independientes se combinan. Elige qué versiones conservar para resolver los conflictos.</string>
     <string name="ui_the_certificate_differs_from_the_one_previously_accepted_the_serv_126">El certificado difiere del aceptado anteriormente. Puede haberse sustituido o alguien podría estar suplantando al servidor.</string>
     <string name="ui_the_server_certificate_is_not_verified_by_a_trusted_certificate_a_127">El certificado del servidor no está validado por una autoridad de certificación de confianza.</string>
     <string name="ui_webdav_certificate_changed_128">Certificado WebDAV cambiado</string>
@@ -142,18 +136,13 @@
     <string name="ui_lock_after_leaving_seconds_153">Bloquear al salir, segundos</string>
     <string name="ui_integration_154">Integración</string>
     <string name="ui_android_autofill_155">Autorrelleno de Android</string>
-    <string name="ui_fill_passwords_in_apps_and_websites_156">Rellenar contraseñas en aplicaciones y sitios web</string>
     <string name="ui_quick_unlock_157">Desbloqueo rápido</string>
     <string name="ui_biometrics_or_device_screen_lock_158">Biometría o bloqueo de pantalla</string>
-    <string name="ui_merge_entries_from_a_kdbx_file_159">Combinar entradas de un archivo KDBX</string>
     <string name="ui_export_160">Exportar</string>
-    <string name="ui_save_the_database_as_a_kdbx_file_161">Guardar la base en un archivo KDBX</string>
     <string name="ui_export_key_162">Exportar clave</string>
-    <string name="ui_save_the_access_key_to_a_file_163">Guardar la clave de acceso en un archivo</string>
     <string name="ui_change_the_database_password_164">Cambiar la contraseña de la base</string>
     <string name="ui_password_changed_reconnect_the_source_using_the_new_password_165">Contraseña cambiada. Vuelve a conectar el origen con la nueva contraseña.</string>
     <string name="ui_could_not_change_the_database_password_166">No se pudo cambiar la contraseña de la base</string>
-    <string name="ui_entry_and_folder_changes_and_sync_results_167">Cambios en entradas y carpetas y resultados de sincronización</string>
     <string name="ui_immediately_after_leaving_168">Inmediatamente al salir</string>
     <string name="ui_after_s_169">Tras %1$s s</string>
     <string name="ui_s_170">%1$s s</string>
@@ -164,15 +153,6 @@
     <string name="ui_trust_this_browser_177">¿Confiar en este navegador?</string>
     <string name="ui_certificate_this_app_reports_the_website_address_allow_only_brows_178">%1$s\nCertificado: %2$s\n\nEsta aplicación indica la dirección web %3$s. Permite solo navegadores de confianza.</string>
     <string name="ui_trust_this_certificate_179">Confiar en este certificado</string>
-    <string name="ui_app_180">Aplicación: %1$s</string>
-    <string name="ui_website_181">Sitio web: %1$s</string>
-    <string name="ui_link_an_entry_to_this_app_182">Vincular una entrada a esta aplicación</string>
-    <string name="ui_allow_autofill_in_183">Permitir autorrelleno en %1$s</string>
-    <string name="ui_link_this_entry_184">¿Vincular esta entrada?</string>
-    <string name="ui_certificate_only_the_app_with_this_certificate_will_be_granted_ac_185">%1$s\nCertificado: %2$s\nSolo la aplicación con este certificado tendrá acceso.</string>
-    <string name="ui_allow_186">Permitir</string>
-    <string name="ui_no_entries_exactly_match_this_domain_set_the_website_address_in_t_187">Ninguna entrada coincide exactamente con este dominio. Introduce la dirección web en el campo URL de la entrada.</string>
-    <string name="ui_autofill_188">Autorrelleno</string>
     <string name="ui_could_not_import_the_database_check_the_file_password_and_key_189">No se pudo importar la base. Comprueba el archivo, la contraseña y la clave.</string>
     <string name="ui_lowercase_letters_a_z_190">Letras minúsculas a-z</string>
     <string name="ui_uppercase_letters_a_z_191">Letras mayúsculas A-Z</string>
@@ -207,9 +187,6 @@
     <string name="ui_http_or_https_226">HTTP o HTTPS</string>
     <string name="ui_connection_227">Conexión</string>
     <string name="ui_certificate_228">Certificado</string>
-    <string name="ui_approval_required_sha_256_229">Se requiere confirmación\nSHA-256: %1$s</string>
-    <string name="ui_http_no_certificate_is_used_230">HTTP · no se utiliza certificado</string>
-    <string name="ui_the_https_certificate_is_checked_when_connecting_231">El certificado HTTPS se verifica al conectar</string>
     <string name="ui_enter_an_http_or_https_address_for_the_database_file_232">Introduce una dirección HTTP o HTTPS para el archivo de base</string>
     <string name="ui_could_not_connect_233">No se pudo conectar</string>
     <string name="ui_continue_234">CONTINUAR</string>
@@ -296,8 +273,6 @@
     <string name="chrome_autofill_unknown">Estado no disponible — comprueba los ajustes de Chrome</string>
     <string name="chrome_not_installed">Chrome no está instalado</string>
     <string name="chrome_autofill_manual">Abre Chrome → Configuración → Autorrelleno y contraseñas → Ajustes de autorrelleno → Autorrelleno con otro servicio.</string>
-    <string name="chrome_autofill_help">Selecciona Keyra en Android y activa el autorrelleno con otro servicio en Chrome. Reinicia Chrome si se solicita. Las entradas coinciden con el dominio exacto; los campos de correo usan el nombre de usuario de la entrada.</string>
-    <string name="autofill_more_entries">Más entradas…</string>
     <string name="about_title">Acerca de</string>
     <string name="about_version">Versión</string>
     <string name="about_application_id">ID de la aplicación</string>
@@ -311,7 +286,6 @@
     <string name="about_licenses">Licencias y avisos</string>
     <string name="about_link_unavailable">No hay ninguna aplicación para abrir este enlace.</string>
     <string name="about_warranty">Se proporciona sin garantías. Consulte las condiciones en las licencias.</string>
-    <string name="autofill_select">Seleccionar</string>
     <string name="autofill_select_for_website">Selecciona una entrada para %1$s. Su URL se sustituirá por esta dirección.</string>
     <string name="autofill_select_entry">Seleccionar una entrada</string>
     <string name="autofill_select_for_app">Selecciona una entrada para iniciar sesión en %1$s. Abre una carpeta o busca en tu base de datos.</string>
