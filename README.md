@@ -10,10 +10,11 @@ Keyra features:
 
 - Database protection with a master password, a key file, or a combination of both.
 - Quick unlock using biometrics or your device's screen lock.
-- Autofill for usernames and passwords in Android apps and supported browsers.
+- Autofill for usernames and passwords in Android apps and browsers.
 - Synchronization with other devices.
 - Offline use.
 - Password generator, search, groups, tags, and entry change history.
+- TOTP (time-based one-time passwords).
 - Compatibility with desktop password managers that support the KDBX format, such as KeePass and KeePassXC.
 
 ## Security
